@@ -32,11 +32,11 @@ public class PRINCIPAL extends javax.swing.JFrame {
         
         // Evento para el botón de USUARIOS (jPanel7)
         jPanel7.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                // Asegúrate de tener creado tu JPanel form llamado "VistaUsuarios" o cambiale el nombre aquí
-                mostrarPanel(new VistaUsuarios()); 
-            }
+           @Override
+        public void mouseClicked(java.awt.event.MouseEvent evt) {
+            // Mandamos a llamar al nuevo JPanel usando el método de incrustación
+            mostrarPanel(new PanelUsuarios()); 
+        }
         });
         
         // Aquí podrás ir agregando los clics de los demás botones en el futuro. Por ejemplo:
@@ -96,12 +96,13 @@ public class PRINCIPAL extends javax.swing.JFrame {
         jPanel8 = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
-        jPanel9 = new javax.swing.JPanel();
-        Exit = new javax.swing.JButton();
+        jLabel13 = new javax.swing.JLabel();
+        panelVistas = new javax.swing.JPanel();
+        jLabel14 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        panelContenido.setBackground(new java.awt.Color(249, 250, 255));
+        panelContenido.setBackground(new java.awt.Color(255, 255, 255));
         panelContenido.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel3.setBackground(new java.awt.Color(31, 34, 111));
@@ -117,7 +118,7 @@ public class PRINCIPAL extends javax.swing.JFrame {
         jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/PuntoDeVenta.png"))); // NOI18N
         jPanel2.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, -1, -1));
 
-        jPanel3.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 120, 270, 50));
+        jPanel3.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 150, 270, 50));
 
         jPanel4.setBackground(new java.awt.Color(206, 208, 225));
         jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -129,7 +130,7 @@ public class PRINCIPAL extends javax.swing.JFrame {
         jLabel8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/ControlDeInventarios.png"))); // NOI18N
         jPanel4.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, -1, -1));
 
-        jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 180, 270, 50));
+        jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 210, 270, 50));
 
         jPanel5.setBackground(new java.awt.Color(206, 208, 225));
         jPanel5.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -141,7 +142,7 @@ public class PRINCIPAL extends javax.swing.JFrame {
         jLabel9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/finanzas.png"))); // NOI18N
         jPanel5.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, -1, -1));
 
-        jPanel3.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 240, 270, 50));
+        jPanel3.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 270, 270, 50));
 
         jPanel6.setBackground(new java.awt.Color(206, 208, 225));
         jPanel6.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -153,7 +154,7 @@ public class PRINCIPAL extends javax.swing.JFrame {
         jLabel10.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/Compras.png"))); // NOI18N
         jPanel6.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, -1, -1));
 
-        jPanel3.add(jPanel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 300, 270, 50));
+        jPanel3.add(jPanel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 330, 270, 50));
 
         jPanel7.setBackground(new java.awt.Color(206, 208, 225));
         jPanel7.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -165,7 +166,7 @@ public class PRINCIPAL extends javax.swing.JFrame {
         jLabel11.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/Usuarios.png"))); // NOI18N
         jPanel7.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, -1, -1));
 
-        jPanel3.add(jPanel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 360, 270, 50));
+        jPanel3.add(jPanel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 390, 270, 50));
 
         jPanel8.setBackground(new java.awt.Color(206, 208, 225));
         jPanel8.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -177,26 +178,34 @@ public class PRINCIPAL extends javax.swing.JFrame {
         jLabel12.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/Soporte.png"))); // NOI18N
         jPanel8.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, -1, -1));
 
-        jPanel3.add(jPanel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 420, 270, 50));
+        jPanel3.add(jPanel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 450, 270, 50));
 
-        panelContenido.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 270, 590));
+        jLabel13.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/LOGOTIPO LUMMEL ICONO_1.png"))); // NOI18N
+        jPanel3.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 0, -1, -1));
 
-        jPanel9.setBackground(new java.awt.Color(31, 34, 111));
-        jPanel9.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        panelContenido.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 270, 720));
 
-        Exit.setBackground(new java.awt.Color(31, 34, 111));
-        Exit.setFont(new java.awt.Font("Malgun Gothic Semilight", 0, 24)); // NOI18N
-        Exit.setForeground(new java.awt.Color(255, 255, 255));
-        Exit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/letra-x.png"))); // NOI18N
-        Exit.setBorder(null);
-        Exit.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ExitActionPerformed(evt);
-            }
-        });
-        jPanel9.add(Exit, new org.netbeans.lib.awtextra.AbsoluteConstraints(733, 0, 50, -1));
+        panelVistas.setBackground(new java.awt.Color(255, 255, 255));
 
-        panelContenido.add(jPanel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 0, 780, 120));
+        jLabel14.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/LOGOTIPO EMPRESA.png"))); // NOI18N
+
+        javax.swing.GroupLayout panelVistasLayout = new javax.swing.GroupLayout(panelVistas);
+        panelVistas.setLayout(panelVistasLayout);
+        panelVistasLayout.setHorizontalGroup(
+            panelVistasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelVistasLayout.createSequentialGroup()
+                .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 791, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
+        panelVistasLayout.setVerticalGroup(
+            panelVistasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelVistasLayout.createSequentialGroup()
+                .addGap(38, 38, 38)
+                .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, 556, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        panelContenido.add(panelVistas, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 0, 780, 600));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -206,31 +215,38 @@ public class PRINCIPAL extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(panelContenido, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(panelContenido, javax.swing.GroupLayout.PREFERRED_SIZE, 651, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void ExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExitActionPerformed
-        // TODO add your handling code here:
-        System.exit(0);
-    }//GEN-LAST:event_ExitActionPerformed
     // Método para mostrar paneles dinámicos en la vista principal
     private void mostrarPanel(JPanel p) {
-      // 1. Le damos el tamaño exacto del recuadro blanco de la derecha
-        p.setSize(780, 480);
+        // Le damos el tamaño del hueco que tenemos (780 de ancho x 470 de alto)
+        p.setSize(780, 470);
         p.setLocation(0, 0);
 
-        // 2. ¡ATENCIÓN AQUÍ! Limpiamos SOLO el jPanel1 (el espacio blanco), NO panelContenido
-        panelContenido.removeAll();
+        // Limpiamos SOLO el contenedor de las vistas, dejando el menú intacto
+        panelVistas.removeAll();
         
-        // 3. Agregamos tu vista de Usuarios al jPanel1
-        panelContenido.add(p, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 780, 480));
+        // Agregamos la vista que seleccionaste
+        panelVistas.add(p, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
         
-        // 4. Refrescamos el panel para que muestre los gráficos nuevos
-        panelContenido.revalidate();
-        panelContenido.repaint();
+        // Refrescamos para mostrar los cambios
+        panelVistas.revalidate();
+        panelVistas.repaint();
+    }
+    // Método para regresar a la vista del logo principal
+    public void restaurarVistaLogo() {
+        // Limpiamos el panel de vistas (quitamos el panel de usuarios)
+        panelVistas.removeAll();
+        
+        // Volvemos a agregar el JLabel que contiene tu imagen de Grupo Gira
+        panelVistas.add(jLabel14);
+        
+        // Refrescamos la pantalla para mostrar los cambios
+        panelVistas.revalidate();
+        panelVistas.repaint();
     }
     /**
      * @param args the command line arguments
@@ -268,11 +284,12 @@ public class PRINCIPAL extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton Exit;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -288,7 +305,7 @@ public class PRINCIPAL extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
-    private javax.swing.JPanel jPanel9;
     private javax.swing.JPanel panelContenido;
+    private javax.swing.JPanel panelVistas;
     // End of variables declaration//GEN-END:variables
 }
