@@ -8,46 +8,13 @@ package VISTA;
  *
  * @author Luis Angel
  */
-public class PanelUsuarios extends javax.swing.JPanel {
+public class COMPRAS extends javax.swing.JPanel {
 
-  
     /**
-     * Creates new form PanelUsuarios
+     * Creates new form COMPRAS
      */
-    public PanelUsuarios() {
+    public COMPRAS() {
         initComponents();
-        // 1. Diseño exacto del encabezado de la tabla
-        jTable1.getTableHeader().setOpaque(false);
-        jTable1.getTableHeader().setBackground(new java.awt.Color(16, 34, 100)); // Fondo Azul Oscuro
-        jTable1.getTableHeader().setForeground(java.awt.Color.WHITE); // Letra Blanca
-        jTable1.getTableHeader().setFont(new java.awt.Font("Roboto", java.awt.Font.BOLD, 12));
-        jTable1.setRowHeight(30); // Filas más anchas para que luzca profesional
-
-        // 2. Renderizador para filas alternadas y selección azul claro
-        jTable1.setDefaultRenderer(Object.class, new javax.swing.table.DefaultTableCellRenderer() {
-            @Override
-            public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                java.awt.Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                
-                // Si la fila está seleccionada, pintarla de azul claro
-                if (isSelected) {
-                    c.setBackground(new java.awt.Color(173, 216, 230)); // Azul clarito
-                    c.setForeground(java.awt.Color.BLACK);
-                } else {
-                    // Si no está seleccionada, alternar colores (Blanco y Beige muy suave)
-                    if (row % 2 == 0) {
-                        c.setBackground(java.awt.Color.WHITE);
-                    } else {
-                        c.setBackground(new java.awt.Color(234, 224, 207)); // Beige de tu paleta
-                    }
-                    c.setForeground(java.awt.Color.BLACK);
-                }
-                
-                // Centrar el texto en todas las celdas
-                setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-                return c;
-            }
-        });
     }
 
     /**
@@ -59,14 +26,14 @@ public class PanelUsuarios extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
@@ -75,24 +42,45 @@ public class PanelUsuarios extends javax.swing.JPanel {
         jLabel8 = new javax.swing.JLabel();
         jPanel7 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
-        jLabel9 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
 
-        setBackground(new java.awt.Color(255, 255, 255));
         setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jPanel1.setBackground(new java.awt.Color(249, 250, 255));
-        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 817, -1));
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null}
+            },
+            new String [] {
+                "ID ORDEN", "FECHA ORDEN", "PROVEEDOR", "ESTADO ORDEN", "TOTAL ORDEN ($)", "ENTREGA PREVISTA"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        jScrollPane1.setViewportView(jTable1);
+
+        add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 190, 750, 400));
 
         jPanel2.setBackground(new java.awt.Color(31, 34, 111));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel4.setFont(new java.awt.Font("Roboto", 1, 24)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel4.setText("ADMINISTRACION DE USUARIOS");
+        jLabel4.setText("GESTION DE COMPRAS");
         jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 30, -1, -1));
 
         jButton1.setBackground(new java.awt.Color(31, 34, 111));
@@ -114,23 +102,20 @@ public class PanelUsuarios extends javax.swing.JPanel {
         jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel3.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
-        jLabel3.setText("Usuario Nuevo");
-        jPanel4.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 40, -1, -1));
+        jLabel3.setText("Nueva Transaccion");
+        jPanel4.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 140, -1));
 
-        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/avatar.png"))); // NOI18N
-        jPanel4.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(33, 6, -1, -1));
-
-        jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 120, 70));
+        jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 130, 70));
 
         jPanel5.setBackground(new java.awt.Color(227, 240, 248));
         jPanel5.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
         jLabel1.setText("Modificar");
-        jPanel5.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 40, -1, -1));
+        jPanel5.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 40, -1, -1));
 
         jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/lapiz.png"))); // NOI18N
-        jPanel5.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(32, 6, -1, -1));
+        jPanel5.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 10, -1, -1));
 
         jPanel3.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 0, 100, 70));
 
@@ -150,11 +135,8 @@ public class PanelUsuarios extends javax.swing.JPanel {
         jPanel7.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel5.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
-        jLabel5.setText("Cambiar Contraseña");
+        jLabel5.setText("Ver Reportes");
         jPanel7.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 40, -1, 11));
-
-        jLabel9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/llave contrasena.png"))); // NOI18N
-        jPanel7.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(47, 6, -1, -1));
 
         jPanel3.add(jPanel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 0, 150, 70));
 
@@ -169,41 +151,12 @@ public class PanelUsuarios extends javax.swing.JPanel {
         jPanel3.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 10, 220, 40));
 
         add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 100, 780, 70));
-
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
-            },
-            new String [] {
-                "ID", "NOMBRE COMPLETO", "USUARIO", "ROL", "ESTADO", "ULTIMO ACCESO"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-        });
-        jScrollPane1.setViewportView(jTable1);
-
-        add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 180, 760, 450));
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-      // Buscamos la ventana principal que contiene a este panel
+        // Buscamos la ventana principal que contiene a este panel
         java.awt.Window ventana = javax.swing.SwingUtilities.getWindowAncestor(this);
-        
+
         // Verificamos que la ventana sea tu clase PRINCIPAL
         if (ventana instanceof PRINCIPAL) {
             // Le pedimos a la ventana principal que ejecute el método para restaurar el logo
@@ -223,11 +176,8 @@ public class PanelUsuarios extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;

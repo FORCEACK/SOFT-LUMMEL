@@ -38,7 +38,27 @@ public class PRINCIPAL extends javax.swing.JFrame {
             mostrarPanel(new PanelUsuarios()); 
         }
         });
-        
+        jPanel5.addMouseListener(new java.awt.event.MouseAdapter() {
+           @Override
+        public void mouseClicked(java.awt.event.MouseEvent evt) {
+            // Mandamos a llamar al nuevo JPanel usando el método de incrustación
+            mostrarPanel(new FINANZAS()); 
+        }
+        });
+        jPanel6.addMouseListener(new java.awt.event.MouseAdapter() {
+           @Override
+        public void mouseClicked(java.awt.event.MouseEvent evt) {
+            // Mandamos a llamar al nuevo JPanel usando el método de incrustación
+            mostrarPanel(new COMPRAS()); 
+        }
+        });
+        jPanel8.addMouseListener(new java.awt.event.MouseAdapter() {
+           @Override
+        public void mouseClicked(java.awt.event.MouseEvent evt) {
+            // Mandamos a llamar al nuevo JPanel usando el método de incrustación
+            mostrarPanel(new SOPORTE()); 
+        }
+        });
         // Aquí podrás ir agregando los clics de los demás botones en el futuro. Por ejemplo:
         /*
         jPanel2.addMouseListener(new java.awt.event.MouseAdapter() {
