@@ -4,18 +4,21 @@
  */
 package VISTA;
 
+import java.awt.Color;
+import javax.swing.JPanel;
+
 /**
  *
  * @author Luis Angel
  */
 public class PanelUsuarios extends javax.swing.JPanel {
 
-  
-    /**
+  /**
      * Creates new form PanelUsuarios
      */
     public PanelUsuarios() {
         initComponents();
+        configurarAnimaciones(); // Agregamos la llamada aquí
         // 1. Diseño exacto del encabezado de la tabla
         jTable1.getTableHeader().setOpaque(false);
         jTable1.getTableHeader().setBackground(new java.awt.Color(16, 34, 100)); // Fondo Azul Oscuro
@@ -46,6 +49,37 @@ public class PanelUsuarios extends javax.swing.JPanel {
                 // Centrar el texto en todas las celdas
                 setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
                 return c;
+            }
+        });
+
+        // ---> AQUÍ DEBES PEGAR EL PASO 4 <---
+        // Esto asegura que al cargar la pantalla por primera vez, 
+        // se traigan los datos actualizados de la base de datos.
+        refrescarTabla(); 
+    }
+     private void configurarAnimaciones() {
+        // Usamos el color azul medio/claro de tu paleta (RGB: 114, 136, 174)
+        Color colorHover = new Color(114, 136, 174); 
+
+        // Aplicamos el hover a los paneles que son "opciones" del menú
+        configurarHover(jPanel4, colorHover); // Control de Inventarios
+        configurarHover(jPanel5, colorHover); // Finanzas
+        configurarHover(jPanel6, colorHover); // Compras
+        configurarHover(jPanel7, colorHover); // Usuarios
+       
+     }
+      private void configurarHover(JPanel panel, Color colorHover) {
+        // Guarda el color original (el gris claro que tienen por defecto)
+        Color original = panel.getBackground();
+        
+        panel.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                panel.setBackground(colorHover); // Cambia al pasar el mouse
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                panel.setBackground(original); // Regresa al color original al salir
             }
         });
     }
@@ -80,12 +114,8 @@ public class PanelUsuarios extends javax.swing.JPanel {
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
 
-        setBackground(new java.awt.Color(255, 255, 255));
-        setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
         jPanel1.setBackground(new java.awt.Color(249, 250, 255));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 817, -1));
 
         jPanel2.setBackground(new java.awt.Color(31, 34, 111));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -105,12 +135,13 @@ public class PanelUsuarios extends javax.swing.JPanel {
         });
         jPanel2.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 10, 40, 40));
 
-        add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 780, 100));
-
-        jPanel3.setBackground(new java.awt.Color(238, 238, 238));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jPanel4.setBackground(new java.awt.Color(227, 240, 248));
+        jPanel4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jPanel4MouseClicked(evt);
+            }
+        });
         jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel3.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
@@ -122,7 +153,11 @@ public class PanelUsuarios extends javax.swing.JPanel {
 
         jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 120, 70));
 
-        jPanel5.setBackground(new java.awt.Color(227, 240, 248));
+        jPanel5.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jPanel5MouseClicked(evt);
+            }
+        });
         jPanel5.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
@@ -134,7 +169,11 @@ public class PanelUsuarios extends javax.swing.JPanel {
 
         jPanel3.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 0, 100, 70));
 
-        jPanel6.setBackground(new java.awt.Color(227, 240, 248));
+        jPanel6.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jPanel6MouseClicked(evt);
+            }
+        });
         jPanel6.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel2.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
@@ -146,7 +185,6 @@ public class PanelUsuarios extends javax.swing.JPanel {
 
         jPanel3.add(jPanel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 0, 110, 70));
 
-        jPanel7.setBackground(new java.awt.Color(227, 240, 248));
         jPanel7.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel5.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
@@ -168,18 +206,8 @@ public class PanelUsuarios extends javax.swing.JPanel {
         });
         jPanel3.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 10, 220, 40));
 
-        add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 100, 780, 70));
-
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
                 {null, null, null, null, null, null},
                 {null, null, null, null, null, null}
             },
@@ -188,7 +216,7 @@ public class PanelUsuarios extends javax.swing.JPanel {
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class
+                java.lang.Object.class, java.lang.String.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class, java.lang.Object.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -197,7 +225,30 @@ public class PanelUsuarios extends javax.swing.JPanel {
         });
         jScrollPane1.setViewportView(jTable1);
 
-        add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 180, 760, 450));
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 817, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jScrollPane1)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
+                .addGap(235, 235, 235))
+        );
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -205,9 +256,9 @@ public class PanelUsuarios extends javax.swing.JPanel {
         java.awt.Window ventana = javax.swing.SwingUtilities.getWindowAncestor(this);
         
         // Verificamos que la ventana sea tu clase PRINCIPAL
-        if (ventana instanceof PRINCIPAL) {
+        if (ventana instanceof PRINCIPAL principal) {
             // Le pedimos a la ventana principal que ejecute el método para restaurar el logo
-            ((PRINCIPAL) ventana).restaurarVistaLogo();
+            principal.restaurarVistaLogo();
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -215,6 +266,92 @@ public class PanelUsuarios extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField1ActionPerformed
 
+    private void jPanel4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel4MouseClicked
+         // 1. Instanciamos tu nueva ventana
+    VISTA.FrmNuevoUsuario ventanaNuevo = new VISTA.FrmNuevoUsuario();
+    ventanaNuevo.setLocationRelativeTo(null); 
+
+    // 2. ¡El Escuchador! Vigila cuándo se cierra la ventana flotante
+    ventanaNuevo.addWindowListener(new java.awt.event.WindowAdapter() {
+        @Override
+        public void windowClosed(java.awt.event.WindowEvent e) {
+            // Cuando detecta que se cerró (dispose), recarga la tabla sola
+            refrescarTabla(); 
+        }
+    });
+
+    // 3. Finalmente, la mostramos en pantalla
+    ventanaNuevo.setVisible(true);
+    }//GEN-LAST:event_jPanel4MouseClicked
+
+    private void jPanel5MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel5MouseClicked
+        // TODO add your handling code here:
+        // 1. Pedimos el ID con una ventanita emergente
+    String idIngresado = javax.swing.JOptionPane.showInputDialog(this, "Ingresa el ID del usuario a modificar:", "Modificar Usuario", javax.swing.JOptionPane.QUESTION_MESSAGE);
+    
+    // 2. Si el usuario escribió algo y no le dio a cancelar...
+    if (idIngresado != null && !idIngresado.trim().isEmpty()) {
+        try {
+            int idBuscar = Integer.parseInt(idIngresado.trim()); // Convertimos a número
+            
+            // 3. Llamamos al controlador para que lo busque en la BD
+            CONTROLADOR.ControladorModificarUsuario controlador = new CONTROLADOR.ControladorModificarUsuario();
+            String[] datosUsuario = controlador.buscarUsuario(idBuscar);
+            
+            if (datosUsuario != null) {
+                // 4. ¡Sí lo encontró! Abrimos la ventana y le inyectamos los datos
+                VISTA.FrmModificarUsuario ventanaModificar = new VISTA.FrmModificarUsuario();
+                ventanaModificar.cargarDatos(datosUsuario);
+                
+                // Hacemos el "truco" para que la tabla se recargue sola al cerrar
+                ventanaModificar.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosed(java.awt.event.WindowEvent e) {
+                        refrescarTabla(); 
+                    }
+                });
+                
+                ventanaModificar.setLocationRelativeTo(null);
+                ventanaModificar.setVisible(true);
+            } else {
+                javax.swing.JOptionPane.showMessageDialog(this, "No se encontró ningún usuario con el ID " + idBuscar, "Usuario no encontrado", javax.swing.JOptionPane.WARNING_MESSAGE);
+            }
+            
+        } catch (NumberFormatException e) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Por favor ingresa un número de ID válido (Solo números).", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    }//GEN-LAST:event_jPanel5MouseClicked
+
+    private void jPanel6MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel6MouseClicked
+        // TODO add your handling code here:
+        // 1. Pedimos el ID con una ventanita
+    String idIngresado = javax.swing.JOptionPane.showInputDialog(this, "Ingresa el ID del usuario a ELIMINAR:", "Eliminar Usuario", javax.swing.JOptionPane.QUESTION_MESSAGE);
+    
+    // 2. Si escribió algo y no canceló
+    if (idIngresado != null && !idIngresado.trim().isEmpty()) {
+        try {
+            int idBuscar = Integer.parseInt(idIngresado.trim()); 
+            
+            // 3. Llamamos al controlador de eliminación
+            CONTROLADOR.ControladorEliminarUsuario controlador = new CONTROLADOR.ControladorEliminarUsuario();
+            boolean seElimino = controlador.procesarEliminacion(idBuscar, this);
+            
+            // 4. Si el controlador dice que sí se borró, actualizamos la tabla solita
+            if (seElimino) {
+                refrescarTabla(); 
+            }
+            
+        } catch (NumberFormatException e) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Por favor ingresa un número de ID válido.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    }//GEN-LAST:event_jPanel6MouseClicked
+    // Método para recargar la tabla cuando queramos
+    public void refrescarTabla() {
+        CONTROLADOR.ControladorPanelUsuarios controlador = new CONTROLADOR.ControladorPanelUsuarios();
+        controlador.llenarTabla(jTable1);
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;

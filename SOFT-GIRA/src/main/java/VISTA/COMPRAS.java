@@ -15,6 +15,11 @@ public class COMPRAS extends javax.swing.JPanel {
      */
     public COMPRAS() {
         initComponents();
+        // --- NUEVO: Limpiamos las filas en blanco que deja NetBeans por defecto ---
+        javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) tablaDetalleCompra.getModel();
+        modelo.setRowCount(0);
+        // --- NUEVO: Llenamos el menú desplegable dinámicamente ---
+        cargarProveedores();
     }
 
     /**
@@ -30,50 +35,57 @@ public class COMPRAS extends javax.swing.JPanel {
         jTable1 = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tablaDetalleCompra = new javax.swing.JTable();
         jPanel3 = new javax.swing.JPanel();
-        jPanel4 = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
-        jPanel5 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
-        jPanel6 = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
+        lblSubtotal = new javax.swing.JLabel();
+        lblDescuento = new javax.swing.JLabel();
+        lblIva = new javax.swing.JLabel();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel6 = new javax.swing.JLabel();
+        lblTotal = new javax.swing.JLabel();
+        jPanel5 = new javax.swing.JPanel();
         jLabel8 = new javax.swing.JLabel();
-        jPanel7 = new javax.swing.JPanel();
-        jLabel5 = new javax.swing.JLabel();
+        jDateChooser1 = new com.toedter.calendar.JDateChooser();
+        jLabel9 = new javax.swing.JLabel();
+        jComboBox1 = new javax.swing.JComboBox<>();
+        jLabel10 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
-
-        setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        jPanel6 = new javax.swing.JPanel();
+        jLabel7 = new javax.swing.JLabel();
+        txtBuscarProducto = new javax.swing.JTextField();
+        jLabel11 = new javax.swing.JLabel();
+        jLabel12 = new javax.swing.JLabel();
+        jLabel13 = new javax.swing.JLabel();
+        jLabel14 = new javax.swing.JLabel();
+        txtSKU = new javax.swing.JTextField();
+        txtDescripcion = new javax.swing.JTextField();
+        txtCantidad = new javax.swing.JTextField();
+        txtPrecio = new javax.swing.JTextField();
+        btnAgregarDetalle = new javax.swing.JButton();
+        btnQuitarArticulo = new javax.swing.JButton();
+        btnLimpiarCampos = new javax.swing.JButton();
+        btnConfirmarCompra = new javax.swing.JButton();
+        btnCancelarCompra = new javax.swing.JButton();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
             },
             new String [] {
-                "ID ORDEN", "FECHA ORDEN", "PROVEEDOR", "ESTADO ORDEN", "TOTAL ORDEN ($)", "ENTREGA PREVISTA"
+                "ID Orden", "Proveedor", "Fecha", "Estado", "Total"
             }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-        });
+        ));
         jScrollPane1.setViewportView(jTable1);
 
-        add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 190, 750, 400));
+        setMinimumSize(new java.awt.Dimension(1050, 720));
 
         jPanel2.setBackground(new java.awt.Color(31, 34, 111));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -81,111 +93,569 @@ public class COMPRAS extends javax.swing.JPanel {
         jLabel4.setFont(new java.awt.Font("Roboto", 1, 24)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(255, 255, 255));
         jLabel4.setText("GESTION DE COMPRAS");
-        jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 30, -1, -1));
+        jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 20, 280, -1));
 
-        jButton1.setBackground(new java.awt.Color(31, 34, 111));
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/exit.png"))); // NOI18N
-        jButton1.setBorder(null);
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Detalle de compra", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Roboto", 0, 16))); // NOI18N
+        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        tablaDetalleCompra.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null}
+            },
+            new String [] {
+                "Codigo", "Producto", "Cantidad", "Precio Unitario", "Subtotal", "Total"
+            }
+        ));
+        tablaDetalleCompra.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaDetalleCompraMouseClicked(evt);
             }
         });
-        jPanel2.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 10, 40, 40));
+        jScrollPane2.setViewportView(tablaDetalleCompra);
 
-        add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 780, 100));
+        jPanel1.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 990, 210));
 
-        jPanel3.setBackground(new java.awt.Color(238, 238, 238));
+        jPanel3.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Resumen de Totales", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Roboto", 0, 16))); // NOI18N
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jPanel4.setBackground(new java.awt.Color(227, 240, 248));
-        jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        jLabel1.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        jLabel1.setText("Descuento:");
+        jPanel3.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, -1, -1));
 
         jLabel3.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
-        jLabel3.setText("Nueva Transaccion");
-        jPanel4.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 140, -1));
-
-        jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 130, 70));
-
-        jPanel5.setBackground(new java.awt.Color(227, 240, 248));
-        jPanel5.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel1.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
-        jLabel1.setText("Modificar");
-        jPanel5.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 40, -1, -1));
-
-        jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/lapiz.png"))); // NOI18N
-        jPanel5.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 10, -1, -1));
-
-        jPanel3.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 0, 100, 70));
-
-        jPanel6.setBackground(new java.awt.Color(227, 240, 248));
-        jPanel6.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        jLabel3.setText("IVA (16%):");
+        jPanel3.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, -1, -1));
 
         jLabel2.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
-        jLabel2.setText("Eliminar");
-        jPanel6.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, -1, -1));
+        jLabel2.setText("SubTotal:");
+        jPanel3.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 30, -1, -1));
 
-        jLabel8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/basura.png"))); // NOI18N
-        jPanel6.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(35, 6, -1, -1));
+        lblSubtotal.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        lblSubtotal.setText("$0.00");
+        jPanel3.add(lblSubtotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 30, -1, -1));
 
-        jPanel3.add(jPanel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 0, 110, 70));
+        lblDescuento.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        lblDescuento.setText("$0.00");
+        jPanel3.add(lblDescuento, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 60, -1, -1));
 
-        jPanel7.setBackground(new java.awt.Color(227, 240, 248));
-        jPanel7.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        lblIva.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        lblIva.setText("$0.00");
+        jPanel3.add(lblIva, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 90, -1, -1));
 
-        jLabel5.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
-        jLabel5.setText("Ver Reportes");
-        jPanel7.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 40, -1, 11));
+        jPanel4.setBackground(new java.awt.Color(224, 239, 255));
+        jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jPanel3.add(jPanel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 0, 150, 70));
+        jLabel6.setFont(new java.awt.Font("Roboto", 1, 20)); // NOI18N
+        jLabel6.setText("Total:");
+        jPanel4.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
+
+        lblTotal.setFont(new java.awt.Font("Roboto", 1, 20)); // NOI18N
+        lblTotal.setText("$0.00");
+        jPanel4.add(lblTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 10, -1, -1));
+
+        jPanel3.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 110, 240, 40));
+
+        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Informacion General de la Compra", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Roboto", 0, 16))); // NOI18N
+        jPanel5.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel8.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        jLabel8.setText("Fecha");
+        jPanel5.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, -1, -1));
+
+        jDateChooser1.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                jDateChooser1PropertyChange(evt);
+            }
+        });
+        jPanel5.add(jDateChooser1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 40, 210, 30));
+
+        jLabel9.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        jLabel9.setText("Proveedor");
+        jPanel5.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 20, -1, -1));
+
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jPanel5.add(jComboBox1, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 40, 240, 30));
+
+        jLabel10.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        jLabel10.setText("Numero de Factura");
+        jPanel5.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 20, -1, -1));
 
         jTextField1.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
         jTextField1.setForeground(new java.awt.Color(204, 204, 204));
-        jTextField1.setText("Buscar");
         jTextField1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextField1ActionPerformed(evt);
             }
         });
-        jPanel3.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 10, 220, 40));
+        jPanel5.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 40, 230, 30));
 
-        add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 100, 780, 70));
+        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Buscador de Productos e Ingreso de Datos", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Roboto", 0, 16))); // NOI18N
+        jPanel6.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel7.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        jLabel7.setText("Buscar Producto");
+        jPanel6.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, -1, -1));
+
+        txtBuscarProducto.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        txtBuscarProducto.setForeground(new java.awt.Color(204, 204, 204));
+        txtBuscarProducto.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtBuscarProductoActionPerformed(evt);
+            }
+        });
+        jPanel6.add(txtBuscarProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 20, 230, 30));
+
+        jLabel11.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        jLabel11.setText("SKU");
+        jPanel6.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 60, -1, -1));
+
+        jLabel12.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        jLabel12.setText("Descripcion");
+        jPanel6.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 60, -1, -1));
+
+        jLabel13.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        jLabel13.setText("Cantidad a Comprar");
+        jPanel6.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 60, -1, -1));
+
+        jLabel14.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        jLabel14.setText("Precio Unitario Actualizado");
+        jPanel6.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 60, -1, -1));
+        jPanel6.add(txtSKU, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 90, 180, 30));
+        jPanel6.add(txtDescripcion, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 90, 180, 30));
+        jPanel6.add(txtCantidad, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 90, 150, 30));
+        jPanel6.add(txtPrecio, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 90, 170, 30));
+
+        btnAgregarDetalle.setBackground(new java.awt.Color(224, 239, 255));
+        btnAgregarDetalle.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        btnAgregarDetalle.setText("AGREGAR A DETALLE(+)");
+        btnAgregarDetalle.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAgregarDetalleActionPerformed(evt);
+            }
+        });
+        jPanel6.add(btnAgregarDetalle, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 140, 210, 30));
+
+        btnQuitarArticulo.setBackground(new java.awt.Color(224, 239, 255));
+        btnQuitarArticulo.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        btnQuitarArticulo.setText("Quitar Articulo(s) (-)");
+        btnQuitarArticulo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnQuitarArticuloActionPerformed(evt);
+            }
+        });
+        jPanel6.add(btnQuitarArticulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 140, 160, 30));
+
+        btnLimpiarCampos.setBackground(new java.awt.Color(224, 239, 255));
+        btnLimpiarCampos.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        btnLimpiarCampos.setText("Limpiar Campos (x)");
+        btnLimpiarCampos.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLimpiarCamposActionPerformed(evt);
+            }
+        });
+        jPanel6.add(btnLimpiarCampos, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 140, 180, 30));
+
+        btnConfirmarCompra.setBackground(new java.awt.Color(224, 239, 255));
+        btnConfirmarCompra.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        btnConfirmarCompra.setText("CONFIRMAR COMPRA Y ACTUALIZAR STOCK");
+        btnConfirmarCompra.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnConfirmarCompraActionPerformed(evt);
+            }
+        });
+
+        btnCancelarCompra.setBackground(new java.awt.Color(224, 239, 255));
+        btnCancelarCompra.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        btnCancelarCompra.setText("CANCELAR COMPRA/LIMPIAR FORMULARIO");
+        btnCancelarCompra.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelarCompraActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(30, 30, 30)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnConfirmarCompra, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnCancelarCompra, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 360, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 1016, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addGap(20, 20, 20)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, 1016, Short.MAX_VALUE)
+                            .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addContainerGap(14, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(20, 20, 20)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(28, 28, 28)
+                        .addComponent(btnConfirmarCompra, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(20, 20, 20)
+                        .addComponent(btnCancelarCompra, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
+        );
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // Buscamos la ventana principal que contiene a este panel
-        java.awt.Window ventana = javax.swing.SwingUtilities.getWindowAncestor(this);
-
-        // Verificamos que la ventana sea tu clase PRINCIPAL
-        if (ventana instanceof PRINCIPAL) {
-            // Le pedimos a la ventana principal que ejecute el método para restaurar el logo
-            ((PRINCIPAL) ventana).restaurarVistaLogo();
-        }
-    }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField1ActionPerformed
 
+    private void tablaDetalleCompraMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaDetalleCompraMouseClicked
+       // 1. Obtenemos la fila que el usuario seleccionó
+        int fila = tablaDetalleCompra.getSelectedRow();
+
+        // Validamos que se haya seleccionado una fila real
+        if (fila >= 0) {
+            try {
+                // 2. Extraemos el subtotal de la columna 4 (que ya viene calculado desde la BD)
+                double subtotal = Double.parseDouble(tablaDetalleCompra.getValueAt(fila, 4).toString());
+                
+                // 3. Calculamos los impuestos (16% de IVA) y el Total
+                double iva = subtotal * 0.16;
+                double total = subtotal + iva;
+                
+                // 4. Mandamos el resultado a los Labels de la esquina inferior derecha
+                lblSubtotal.setText(String.format("$%.2f", subtotal));
+                lblIva.setText(String.format("$%.2f", iva));
+                lblTotal.setText(String.format("$%.2f", total));
+                
+            } catch (Exception e) {
+                System.err.println("Error al calcular totales: " + e.getMessage());
+            }
+        }
+    }//GEN-LAST:event_tablaDetalleCompraMouseClicked
+
+    private void jDateChooser1PropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jDateChooser1PropertyChange
+        // TODO add your handling code here:
+        // Este evento se dispara si cambia CUALQUIER propiedad, así que validamos que sea la fecha
+        if ("date".equals(evt.getPropertyName())) {
+            java.util.Date fechaElegida = (java.util.Date) evt.getNewValue();
+            
+            if (fechaElegida != null) {
+                // Obtenemos el modelo visual de la tabla
+                javax.swing.table.DefaultTableModel modeloTabla = (javax.swing.table.DefaultTableModel) tablaDetalleCompra.getModel();
+                
+                // Llamamos a nuestro modelo de BD para que haga la consulta con la nueva fecha
+                MODELO.ConsultasCompras modelo = new MODELO.ConsultasCompras();
+                modelo.mostrarComprasPorFecha(modeloTabla, fechaElegida);
+                
+                // Limpiamos los totales de abajo porque la tabla acaba de cambiar
+                lblSubtotal.setText("$0.00");
+                lblIva.setText("$0.00");
+                lblTotal.setText("$0.00");
+            }
+        }
+    }//GEN-LAST:event_jDateChooser1PropertyChange
+
+    private void txtBuscarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBuscarProductoActionPerformed
+        // 1. Obtenemos el texto que el usuario escribió
+        String idBuscar = txtBuscarProducto.getText().trim();
+        
+        if (!idBuscar.isEmpty()) {
+            // 2. Llamamos al modelo que acabamos de crear
+            MODELO.ConsultasCompras modelo = new MODELO.ConsultasCompras();
+            String[] articuloEncontrado = modelo.buscarArticuloPorID(idBuscar);
+            
+            // 3. Si encontró el artículo, llenamos los campos
+            if (articuloEncontrado != null) {
+                txtSKU.setText(articuloEncontrado[0]);
+                txtDescripcion.setText(articuloEncontrado[1]);
+                txtPrecio.setText(articuloEncontrado[2]);
+                
+                // Pasamos el cursor automáticamente a "Cantidad" para agilizar la compra
+                txtCantidad.requestFocus(); 
+            } else {
+                // Si no lo encuentra, avisamos y limpiamos los campos
+                javax.swing.JOptionPane.showMessageDialog(this, 
+                    "No se encontró ningún artículo con ese ID.", 
+                    "Artículo no encontrado", 
+                    javax.swing.JOptionPane.WARNING_MESSAGE);
+                
+                txtSKU.setText("");
+                txtDescripcion.setText("");
+                txtPrecio.setText("");
+            }
+        }
+    }                                                 
+
+    // Método auxiliar para sumar la tabla y actualizar las etiquetas inferiores
+    private void calcularTotales() {
+        double subtotalGeneral = 0.0;
+        double iva = 0.0;
+        double total = 0.0;
+        double descuento = 0.0; // Puedes programar esto más adelante si manejas descuentos
+
+        javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) tablaDetalleCompra.getModel();
+        int totalFilas = modelo.getRowCount();
+
+        for (int i = 0; i < totalFilas; i++) {
+            // Obtenemos el subtotal de cada fila (columna 4)
+            double subtotalFila = Double.parseDouble(modelo.getValueAt(i, 4).toString());
+            subtotalGeneral += subtotalFila;
+        }
+
+        // Calculamos los impuestos (16% de IVA)
+        iva = subtotalGeneral * 0.16;
+        total = subtotalGeneral + iva - descuento;
+
+        // Mandamos el resultado a los Labels formateados como moneda
+        lblSubtotal.setText(String.format("$%.2f", subtotalGeneral));
+        lblIva.setText(String.format("$%.2f", iva));
+        lblDescuento.setText(String.format("$%.2f", descuento));
+        lblTotal.setText(String.format("$%.2f", total));
+    
+    }//GEN-LAST:event_txtBuscarProductoActionPerformed
+    // Método auxiliar para llenar el JComboBox de proveedores
+    private void cargarProveedores() {
+        // 1. Llamamos a nuestro modelo
+        MODELO.ConsultasCompras modelo = new MODELO.ConsultasCompras();
+        java.util.ArrayList<String> proveedores = modelo.obtenerProveedores();
+        
+        // 2. Limpiamos el ComboBox para borrar los "Item 1, Item 2..."
+        jComboBox1.removeAllItems();
+        
+        // 3. Agregamos una opción por defecto
+        jComboBox1.addItem("Seleccione un proveedor...");
+        
+        // 4. Llenamos el menú con los datos que llegaron de la base de datos
+        for (String proveedor : proveedores) {
+            jComboBox1.addItem(proveedor);
+        }
+    }
+    private void btnAgregarDetalleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarDetalleActionPerformed
+      // 1. Validamos que haya un producto cargado y una cantidad escrita
+        if (txtSKU.getText().isEmpty() || txtCantidad.getText().isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Por favor, busca un producto e ingresa la cantidad a comprar.", 
+                "Faltan datos", 
+                javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            // 2. Extraemos los datos de los campos de texto
+            String codigo = txtSKU.getText();
+            String producto = txtDescripcion.getText();
+            int cantidad = Integer.parseInt(txtCantidad.getText());
+            double precioUnitario = Double.parseDouble(txtPrecio.getText());
+            
+            // 3. Calculamos el subtotal de esta fila
+            double subtotal = cantidad * precioUnitario;
+            
+            // Nota: En tu tabla tienes una columna "Total" al final (columna 5). 
+            // Para compras, suele ser igual al subtotal por fila (el IVA va al final).
+            double totalFila = subtotal; 
+
+            // 4. Preparamos la fila para la tabla
+            Object[] filaNueva = new Object[6];
+            filaNueva[0] = codigo;
+            filaNueva[1] = producto;
+            filaNueva[2] = cantidad;
+            filaNueva[3] = precioUnitario;
+            filaNueva[4] = subtotal;
+            filaNueva[5] = totalFila;
+
+            // 5. Agregamos la fila al modelo visual de la tabla
+            javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) tablaDetalleCompra.getModel();
+            modelo.addRow(filaNueva);
+
+            // 6. Actualizamos los totales de la esquina inferior derecha
+            calcularTotales();
+
+            // 7. Limpiamos los campos para buscar el siguiente producto
+            txtBuscarProducto.setText("");
+            txtSKU.setText("");
+            txtDescripcion.setText("");
+            txtCantidad.setText("");
+            txtPrecio.setText("");
+            
+            // Regresamos el cursor al buscador
+            txtBuscarProducto.requestFocus();
+
+        } catch (NumberFormatException e) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "La cantidad y el precio deben ser valores numéricos.", 
+                "Error de formato", 
+                javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnAgregarDetalleActionPerformed
+
+    private void btnLimpiarCamposActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarCamposActionPerformed
+        // TODO add your handling code here:
+        // Vaciamos los cuadros de texto
+        txtBuscarProducto.setText("");
+        txtSKU.setText("");
+        txtDescripcion.setText("");
+        txtCantidad.setText("");
+        txtPrecio.setText("");
+        
+        // Regresamos el cursor al inicio
+        txtBuscarProducto.requestFocus();
+    }//GEN-LAST:event_btnLimpiarCamposActionPerformed
+
+    private void btnQuitarArticuloActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnQuitarArticuloActionPerformed
+        // TODO add your handling code here:
+        // 1. Obtenemos qué fila seleccionó el usuario
+        int filaSeleccionada = tablaDetalleCompra.getSelectedRow();
+        
+        // 2. Si hay una fila seleccionada (es mayor o igual a 0)
+        if (filaSeleccionada >= 0) {
+            javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) tablaDetalleCompra.getModel();
+            
+            // La borramos del modelo
+            modelo.removeRow(filaSeleccionada);
+            
+            // Volvemos a calcular los totales con las filas que quedaron
+            calcularTotales(); 
+        } else {
+            // Si le dio al botón sin seleccionar nada, le avisamos
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Por favor, selecciona un artículo de la tabla para quitarlo.", 
+                "Aviso", 
+                javax.swing.JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_btnQuitarArticuloActionPerformed
+
+    private void btnCancelarCompraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarCompraActionPerformed
+        // TODO add your handling code here:
+        // 1. Pedimos confirmación por seguridad
+        int confirmacion = javax.swing.JOptionPane.showConfirmDialog(this, 
+                "¿Estás seguro de cancelar toda la compra y limpiar los datos?", 
+                "Confirmar", 
+                javax.swing.JOptionPane.YES_NO_OPTION);
+                
+        // 2. Si dice que sí...
+        if (confirmacion == javax.swing.JOptionPane.YES_OPTION) {
+            
+            // Limpiamos la tabla
+            javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) tablaDetalleCompra.getModel();
+            modelo.setRowCount(0);
+            
+            // Limpiamos los totales
+            lblSubtotal.setText("$0.00");
+            lblIva.setText("$0.00");
+            lblDescuento.setText("$0.00");
+            lblTotal.setText("$0.00");
+            
+            // Limpiamos los campos de texto
+            txtBuscarProducto.setText("");
+            txtSKU.setText("");
+            txtDescripcion.setText("");
+            txtCantidad.setText("");
+            txtPrecio.setText("");
+            jTextField1.setText(""); // Campo de Número de Factura
+            
+            // Opcional: Reiniciamos la fecha
+            jDateChooser1.setDate(null);
+        }
+    }//GEN-LAST:event_btnCancelarCompraActionPerformed
+
+    private void btnConfirmarCompraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConfirmarCompraActionPerformed
+        // TODO add your handling code here:
+        // 1. Validar que la tabla tenga al menos un producto
+        if (tablaDetalleCompra.getRowCount() == 0) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "La tabla está vacía. Agrega productos antes de confirmar.", 
+                "Aviso", 
+                javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // 2. Validar que haya fecha de compra
+        if (jDateChooser1.getDate() == null) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Por favor, selecciona la fecha de la compra.", 
+                "Aviso", 
+                javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // 3. Confirmación final
+        int confirmacion = javax.swing.JOptionPane.showConfirmDialog(this, 
+                "¿Deseas procesar esta compra y actualizar el inventario?", 
+                "Confirmar Compra", 
+                javax.swing.JOptionPane.YES_NO_OPTION);
+        
+        if (confirmacion == javax.swing.JOptionPane.YES_OPTION) {
+            // ¡AQUÍ ENTRARÁ EL CÓDIGO DE BASE DE DATOS!
+            
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Validación exitosa. ¡Listo para conectar el SQL!", 
+                "En construcción", 
+                javax.swing.JOptionPane.INFORMATION_MESSAGE);
+        }
+    }//GEN-LAST:event_btnConfirmarCompraActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton btnAgregarDetalle;
+    private javax.swing.JButton btnCancelarCompra;
+    private javax.swing.JButton btnConfirmarCompra;
+    private javax.swing.JButton btnLimpiarCampos;
+    private javax.swing.JButton btnQuitarArticulo;
+    private javax.swing.JComboBox<String> jComboBox1;
+    private com.toedter.calendar.JDateChooser jDateChooser1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
-    private javax.swing.JPanel jPanel7;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable1;
     private javax.swing.JTextField jTextField1;
+    private javax.swing.JLabel lblDescuento;
+    private javax.swing.JLabel lblIva;
+    private javax.swing.JLabel lblSubtotal;
+    private javax.swing.JLabel lblTotal;
+    public javax.swing.JTable tablaDetalleCompra;
+    private javax.swing.JTextField txtBuscarProducto;
+    private javax.swing.JTextField txtCantidad;
+    private javax.swing.JTextField txtDescripcion;
+    private javax.swing.JTextField txtPrecio;
+    private javax.swing.JTextField txtSKU;
     // End of variables declaration//GEN-END:variables
 }

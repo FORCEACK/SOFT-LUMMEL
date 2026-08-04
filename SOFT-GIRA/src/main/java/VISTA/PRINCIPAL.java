@@ -7,20 +7,51 @@ package VISTA;
 /**** @author Luis Angel*/
 import java.awt.Color;
 import javax.swing.JPanel;
+import MODELO.ConsultasCompras;
+import CONTROLADOR.ControladorCompras;
 public class PRINCIPAL extends javax.swing.JFrame {
-
     /**
      * Creates new form PRINCIPAL
      */
     public PRINCIPAL() {
-        initComponents();
-        configurarAnimaciones(); // Agregamos la llamada aquí
+       initComponents();
+        configurarAnimaciones(); 
+        
+        // Esta línea hace que la ventana inicie maximizada automáticamente
+        this.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH); 
+
+        // --- NUEVO CÓDIGO PARA AUTO-AJUSTAR LA IMAGEN ---
+        
+        // 1. Aseguramos que el panel blanco use todo el espacio para la imagen
+        panelVistas.setLayout(new java.awt.BorderLayout());
+        panelVistas.add(jLabel15, java.awt.BorderLayout.CENTER);
+        
+        // 2. Cargamos la imagen original (Ojo: revisa que la ruta coincida con la tuya)
+        java.awt.Image logoOriginal = new javax.swing.ImageIcon(getClass().getResource("/iconos/LOGOTIPO EMPRESA.png")).getImage();
+        
+        // 3. Le agregamos un "escuchador" a la etiqueta para detectar cada vez que la pantalla cambia de tamaño
+        jLabel15.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                // Obtenemos el nuevo ancho y alto del espacio blanco
+                int ancho = jLabel15.getWidth();
+                int alto = jLabel15.getHeight();
+                
+                // Validamos que haya espacio para evitar errores
+                if (ancho > 0 && alto > 0) {
+                    // Escala la imagen al tamaño exacto de la pantalla (SCALE_SMOOTH mantiene buena calidad)
+                    java.awt.Image logoEscalado = logoOriginal.getScaledInstance(ancho, alto, java.awt.Image.SCALE_SMOOTH);
+                    jLabel15.setIcon(new javax.swing.ImageIcon(logoEscalado));
+                }
+            }
+        });
     }
     private void configurarAnimaciones() {
         // Usamos el color azul medio/claro de tu paleta (RGB: 114, 136, 174)
         Color colorHover = new Color(114, 136, 174); 
 
         // Aplicamos el hover a los paneles que son "opciones" del menú
+        configurarHover(jPanel1, colorHover); // Cerrar Sesion
         configurarHover(jPanel2, colorHover); // Punto de Venta
         configurarHover(jPanel4, colorHover); // Control de Inventarios
         configurarHover(jPanel5, colorHover); // Finanzas
@@ -29,13 +60,55 @@ public class PRINCIPAL extends javax.swing.JFrame {
         configurarHover(jPanel8, colorHover); // Soporte
         
         // --- EVENTOS DE CLIC PARA CAMBIAR DE VENTANA ---
+       
         
-        // Evento para el botón de USUARIOS (jPanel7)
-        jPanel7.addMouseListener(new java.awt.event.MouseAdapter() {
+ jPanel7.addMouseListener(new java.awt.event.MouseAdapter() {
+           @Override
+        public void mouseClicked(java.awt.event.MouseEvent evt) {
+            // Si el panel está habilitado, entonces sí mostramos la pantalla
+            if (jPanel7.isEnabled()) {
+                mostrarPanel(new PanelUsuarios()); 
+            }
+        }
+        });
+        // Evento para el botón de CERRAR SESIÓN (jPanel1)
+        jPanel1.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                // 1. Preguntar al usuario si realmente quiere salir
+                int confirmacion = javax.swing.JOptionPane.showConfirmDialog(null, 
+                        "¿Estás seguro que deseas cerrar sesión?", 
+                        "Confirmar Cierre de Sesión", 
+                        javax.swing.JOptionPane.YES_NO_OPTION,
+                        javax.swing.JOptionPane.QUESTION_MESSAGE);
+                
+                // 2. Si dice que SÍ (YES_OPTION)
+                if (confirmacion == javax.swing.JOptionPane.YES_OPTION) {
+                    
+                    // --- LO QUE AGREGÓ TU COMPAÑERO: Actualizar el estatus a 0 en la BD y limpiar sesión ---
+                    if (!MODELO.SesionActual.usuarioLogueado.isEmpty()) {
+                        MODELO.ConsultasUsuario modeloUsuario = new MODELO.ConsultasUsuario();
+                        modeloUsuario.actualizarEstadoSesion(MODELO.SesionActual.usuarioLogueado, 0);
+                        
+                        // Limpiamos la variable global para que quede vacía
+                        MODELO.SesionActual.usuarioLogueado = "";
+                    }
+                    
+                    // Cierra esta ventana (PRINCIPAL)
+                    dispose(); 
+                    
+                    // Abre tu ventana de Login 
+                    VISTA.USUARIO ventanaLogin = new VISTA.USUARIO();
+                    ventanaLogin.setVisible(true);
+                    ventanaLogin.setLocationRelativeTo(null); // La centra en la pantalla
+                }
+            }
+        });
+        jPanel4.addMouseListener(new java.awt.event.MouseAdapter() {
            @Override
         public void mouseClicked(java.awt.event.MouseEvent evt) {
             // Mandamos a llamar al nuevo JPanel usando el método de incrustación
-            mostrarPanel(new PanelUsuarios()); 
+            
         }
         });
         jPanel5.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -50,15 +123,23 @@ public class PRINCIPAL extends javax.swing.JFrame {
         public void mouseClicked(java.awt.event.MouseEvent evt) {
             // Mandamos a llamar al nuevo JPanel usando el método de incrustación
             mostrarPanel(new COMPRAS()); 
+            // Dentro del evento de clic de tu botón COMPRAS en PRINCIPAL.java
+        COMPRAS vista = new COMPRAS();
+        ConsultasCompras modelo = new ConsultasCompras(); 
+        ControladorCompras controlador = new ControladorCompras(vista, modelo);
+
+        controlador.iniciarVista();
+        // Y aquí ya muestras tu panel en la interfaz...
         }
         });
         jPanel8.addMouseListener(new java.awt.event.MouseAdapter() {
            @Override
         public void mouseClicked(java.awt.event.MouseEvent evt) {
             // Mandamos a llamar al nuevo JPanel usando el método de incrustación
-            mostrarPanel(new SOPORTE()); 
+           
         }
         });
+        
         // Aquí podrás ir agregando los clics de los demás botones en el futuro. Por ejemplo:
         /*
         jPanel2.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -117,13 +198,17 @@ public class PRINCIPAL extends javax.swing.JFrame {
         jLabel6 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
-        panelVistas = new javax.swing.JPanel();
         jLabel14 = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel16 = new javax.swing.JLabel();
+        jLabel17 = new javax.swing.JLabel();
+        panelVistas = new javax.swing.JPanel();
+        jLabel15 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         panelContenido.setBackground(new java.awt.Color(255, 255, 255));
-        panelContenido.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        panelContenido.setLayout(new java.awt.BorderLayout());
 
         jPanel3.setBackground(new java.awt.Color(31, 34, 111));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -203,68 +288,93 @@ public class PRINCIPAL extends javax.swing.JFrame {
         jLabel13.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/LOGOTIPO LUMMEL ICONO_1.png"))); // NOI18N
         jPanel3.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 0, -1, -1));
 
-        panelContenido.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 270, 720));
+        jLabel14.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/LOGOTIPO LUMMEL ICONO_1.png"))); // NOI18N
+        jPanel3.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 600, -1, -1));
+
+        jPanel1.setBackground(new java.awt.Color(206, 208, 225));
+
+        jLabel16.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        jLabel16.setText("CERRAR SESION");
+
+        jLabel17.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/cerrar-sesion.png"))); // NOI18N
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(19, Short.MAX_VALUE)
+                .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(66, 66, 66))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(16, 16, 16)
+                        .addComponent(jLabel16))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel17)))
+                .addContainerGap(9, Short.MAX_VALUE))
+        );
+
+        jPanel3.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 520, 270, 50));
+
+        panelContenido.add(jPanel3, java.awt.BorderLayout.WEST);
 
         panelVistas.setBackground(new java.awt.Color(255, 255, 255));
+        panelVistas.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel14.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/LOGOTIPO EMPRESA.png"))); // NOI18N
+        jLabel15.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/LOGOTIPO EMPRESA.png"))); // NOI18N
+        panelVistas.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 6, 780, 459));
 
-        javax.swing.GroupLayout panelVistasLayout = new javax.swing.GroupLayout(panelVistas);
-        panelVistas.setLayout(panelVistasLayout);
-        panelVistasLayout.setHorizontalGroup(
-            panelVistasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelVistasLayout.createSequentialGroup()
-                .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 791, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
-        panelVistasLayout.setVerticalGroup(
-            panelVistasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelVistasLayout.createSequentialGroup()
-                .addGap(38, 38, 38)
-                .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, 556, Short.MAX_VALUE)
-                .addContainerGap())
-        );
+        panelContenido.add(panelVistas, java.awt.BorderLayout.CENTER);
 
-        panelContenido.add(panelVistas, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 0, 780, 600));
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(panelContenido, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(panelContenido, javax.swing.GroupLayout.PREFERRED_SIZE, 651, javax.swing.GroupLayout.PREFERRED_SIZE)
-        );
+        getContentPane().add(panelContenido, java.awt.BorderLayout.CENTER);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-    // Método para mostrar paneles dinámicos en la vista principal
+    // Método para mostrar paneles dinámicos en la vista principal a pantalla completa
+    // Método para mostrar paneles dinámicos en la vista principal a pantalla completa
     private void mostrarPanel(JPanel p) {
-        // Le damos el tamaño del hueco que tenemos (780 de ancho x 470 de alto)
-        p.setSize(780, 470);
-        p.setLocation(0, 0);
-
-        // Limpiamos SOLO el contenedor de las vistas, dejando el menú intacto
+        // 1. Limpiamos el contenedor
         panelVistas.removeAll();
         
-        // Agregamos la vista que seleccionaste
-        panelVistas.add(p, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+        // 2. Le asignamos un BorderLayout para que fuerce al panel a ocupar el 100% del espacio
+        panelVistas.setLayout(new java.awt.BorderLayout());
         
-        // Refrescamos para mostrar los cambios
+        // 3. ENVOLVEMOS EL PANEL EN UN SCROLL PANE (Esto soluciona el corte inferior)
+        javax.swing.JScrollPane scroll = new javax.swing.JScrollPane(p);
+        scroll.setBorder(null); // Quitamos los bordes para que luzca limpio
+        
+        // 4. Agregamos el Scroll en el CENTRO en lugar del panel directamente
+        panelVistas.add(scroll, java.awt.BorderLayout.CENTER);
+        
+        // 5. Refrescamos para mostrar los cambios
         panelVistas.revalidate();
         panelVistas.repaint();
     }
+    
+
     // Método para regresar a la vista del logo principal
     public void restaurarVistaLogo() {
-        // Limpiamos el panel de vistas (quitamos el panel de usuarios)
+        // 1. Limpiamos el panel de vistas
         panelVistas.removeAll();
         
-        // Volvemos a agregar el JLabel que contiene tu imagen de Grupo Gira
-        panelVistas.add(jLabel14);
+        // 2. Mantenemos el BorderLayout
+        panelVistas.setLayout(new java.awt.BorderLayout());
         
-        // Refrescamos la pantalla para mostrar los cambios
+        // 3. Centramos el logo para que luzca bien en el espacio
+        jLabel15.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        
+        // 4. Volvemos a agregar el JLabel que contiene tu imagen de Grupo Gira
+        panelVistas.add(jLabel15, java.awt.BorderLayout.CENTER);
+        
+        // 5. Refrescamos la pantalla
         panelVistas.revalidate();
         panelVistas.repaint();
     }
@@ -310,6 +420,9 @@ public class PRINCIPAL extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -318,6 +431,7 @@ public class PRINCIPAL extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;

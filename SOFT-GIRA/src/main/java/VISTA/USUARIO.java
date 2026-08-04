@@ -30,7 +30,7 @@ public class USUARIO extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -49,9 +49,8 @@ public class USUARIO extends javax.swing.JFrame {
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/LUMMEL icono.png"))); // NOI18N
-        jLabel1.setText("jLabel1");
-        jPanel2.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 130, 150, 140));
+        jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/LUMMEL icono.png"))); // NOI18N
+        jPanel2.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 140, -1, -1));
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 170, 460));
 
@@ -87,6 +86,11 @@ public class USUARIO extends javax.swing.JFrame {
             }
             public void focusLost(java.awt.event.FocusEvent evt) {
                 txtUsuarioFocusLost(evt);
+            }
+        });
+        txtUsuario.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtUsuarioActionPerformed(evt);
             }
         });
         txtUsuario.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -141,22 +145,35 @@ public class USUARIO extends javax.swing.JFrame {
     }//GEN-LAST:event_passContraseniaActionPerformed
 
     private void IniciarSesionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IniciarSesionActionPerformed
-        // TODO add your handling code here:
-        String user = txtUsuario.getText();
-    String pass = new String(passContrasenia.getPassword());
-    // Si las credenciales son correctas
-    if(user.equals("ADMIN") && pass.equals("12345")){ 
-        // 1. Cierra la ventana de Login
-        this.dispose(); 
-        // 2. Muestra el mensaje
-        // 3. ABRE LA NUEVA VENTANA (Cambia 'VistaPrincipal' por el nombre real de tu JFrame)
-        PRINCIPAL menu = new PRINCIPAL();
-        menu.setVisible(true); // Hace visible la ventana
-        menu.setLocationRelativeTo(null); // Centra la ventana en la pantalla
-        
-    } else {
-        JOptionPane.showMessageDialog(null, "ACCESO DENEGADO: Ingrese Usuario o contraseña correcto", "Acceso Denegado", JOptionPane.INFORMATION_MESSAGE);
+        // 1. Extraemos los textos de la interfaz
+        String user = txtUsuario.getText().trim();
+        String passStr = new String(passContrasenia.getPassword());
+
+        // 2. Le pasamos el "paquete" al Controlador para que él se encargue de todo
+        CONTROLADOR.ControladorLogin controlador = new CONTROLADOR.ControladorLogin();
+        controlador.procesarLogin(user, passStr, this); // 'this' envía la ventana actual
     }
+
+    // =========================================================================
+    // NUEVO MÉTODO: Función para encriptar texto a SHA-256 nativo de Java
+    // =========================================================================
+    private String hashPassword(String password) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (Exception ex) {
+            throw new RuntimeException("Error al encriptar la contraseña", ex);
+        }
 
     }//GEN-LAST:event_IniciarSesionActionPerformed
 
@@ -211,6 +228,10 @@ public class USUARIO extends javax.swing.JFrame {
     }
     }//GEN-LAST:event_passContraseniaFocusLost
 
+    private void txtUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtUsuarioActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtUsuarioActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -248,12 +269,12 @@ public class USUARIO extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton IniciarSesion;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPasswordField passContrasenia;
