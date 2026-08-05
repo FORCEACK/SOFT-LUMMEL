@@ -34,11 +34,11 @@ public class USUARIO extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         txtUsuario = new javax.swing.JTextField();
         passContrasenia = new javax.swing.JPasswordField();
         IniciarSesion = new javax.swing.JButton();
+        jLabel5 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -71,10 +71,7 @@ public class USUARIO extends javax.swing.JFrame {
         jLabel4.setText("CONTRASEÑA");
         jPanel1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 320, -1, -1));
 
-        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/Usuario.png"))); // NOI18N
-        jPanel1.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 160, -1, -1));
-
-        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/contrasena.png"))); // NOI18N
+        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/contrasena_1.png"))); // NOI18N
         jPanel1.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 270, -1, -1));
 
         txtUsuario.setBackground(new java.awt.Color(0, 0, 0));
@@ -130,6 +127,10 @@ public class USUARIO extends javax.swing.JFrame {
         });
         jPanel1.add(IniciarSesion, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 380, -1, -1));
 
+        // CORREGIDO: Apunta correctamente a la carpeta /iconos/
+        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/suario.png"))); // NOI18N
+        jPanel1.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 180, -1, -1));
+
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 530, 460));
 
         pack();
@@ -137,111 +138,75 @@ public class USUARIO extends javax.swing.JFrame {
 
     private void passContraseniaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passContraseniaActionPerformed
         // TODO add your handling code here:
-        
     }//GEN-LAST:event_passContraseniaActionPerformed
 
     private void IniciarSesionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IniciarSesionActionPerformed
         // TODO add your handling code here:
         String user = txtUsuario.getText();
-    String pass = new String(passContrasenia.getPassword());
-    // Si las credenciales son correctas
-    if(user.equals("ADMIN") && pass.equals("12345")){ 
-        // 1. Cierra la ventana de Login
-        this.dispose(); 
-        // 2. Muestra el mensaje
-        // 3. ABRE LA NUEVA VENTANA (Cambia 'VistaPrincipal' por el nombre real de tu JFrame)
-        PRINCIPAL menu = new PRINCIPAL();
-        menu.setVisible(true); // Hace visible la ventana
-        menu.setLocationRelativeTo(null); // Centra la ventana en la pantalla
-        
-    } else {
-        JOptionPane.showMessageDialog(null, "ACCESO DENEGADO: Ingrese Usuario o contraseña correcto", "Acceso Denegado", JOptionPane.INFORMATION_MESSAGE);
-    }
-
+        String pass = new String(passContrasenia.getPassword());
+        if(user.equals("ADMIN") && pass.equals("12345")){
+            this.dispose();
+            PRINCIPAL menu = new PRINCIPAL();
+            menu.setVisible(true);
+            menu.setLocationRelativeTo(null);
+        } else {
+            JOptionPane.showMessageDialog(null, "ACCESO DENEGADO: Ingrese Usuario o contraseña correcto", "Acceso Denegado", JOptionPane.INFORMATION_MESSAGE);
+        }
     }//GEN-LAST:event_IniciarSesionActionPerformed
 
     private void txtUsuarioKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtUsuarioKeyReleased
-        // TODO add your handling code here:
         txtUsuario.setText(txtUsuario.getText().toUpperCase());
     }//GEN-LAST:event_txtUsuarioKeyReleased
 
     private void txtUsuarioKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtUsuarioKeyTyped
-        // TODO add your handling code here:
         if(txtUsuario.getText().length()>15) {
-    evt.consume();
-}
-                                       
+            evt.consume();
+        }
     }//GEN-LAST:event_txtUsuarioKeyTyped
 
     private void txtUsuarioFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtUsuarioFocusGained
-        // TODO add your handling code here:
         if(txtUsuario.getText().equals("Ingresar Usuario") || txtUsuario.getText().equals("INGRESAR USUARIO")){
-        txtUsuario.setText("");
-        txtUsuario.setForeground(new java.awt.Color(255, 255, 255)); // Cambia el color a blanco para escribir
-    }
+            txtUsuario.setText("");
+            txtUsuario.setForeground(new java.awt.Color(255, 255, 255));
+        }
     }//GEN-LAST:event_txtUsuarioFocusGained
 
     private void txtUsuarioFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtUsuarioFocusLost
-        // TODO add your handling code here:
         if(txtUsuario.getText().isEmpty()){
-        txtUsuario.setText("Ingresar Usuario");
-        txtUsuario.setForeground(new java.awt.Color(204, 204, 204)); // Color grisáceo original
-    }
+            txtUsuario.setText("Ingresar Usuario");
+            txtUsuario.setForeground(new java.awt.Color(204, 204, 204));
+        }
     }//GEN-LAST:event_txtUsuarioFocusLost
 
     private void passContraseniaFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_passContraseniaFocusGained
-        // TODO add your handling code here:
         String pass = new String(passContrasenia.getPassword());
-    
-    // Si tiene el texto por defecto (cambia los asteriscos por el texto exacto que le hayas puesto en Properties)
-    if(pass.equals("    jPasswordField1") || pass.equals("****************")){
-        passContrasenia.setText("");
-        passContrasenia.setForeground(new java.awt.Color(255, 255, 255));
-    }
+        if(pass.equals("    jPasswordField1") || pass.equals("****************")){
+            passContrasenia.setText("");
+            passContrasenia.setForeground(new java.awt.Color(255, 255, 255));
+        }
     }//GEN-LAST:event_passContraseniaFocusGained
 
     private void passContraseniaFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_passContraseniaFocusLost
-        // TODO add your handling code here:
         String pass = new String(passContrasenia.getPassword());
-    
-    if(pass.isEmpty()){
-        // Pon aquí los asteriscos o el texto por defecto que tenías
-        passContrasenia.setText("****************"); 
-        passContrasenia.setForeground(new java.awt.Color(204, 204, 204));
-    }
+        if(pass.isEmpty()){
+            passContrasenia.setText("****************");
+            passContrasenia.setForeground(new java.awt.Color(204, 204, 204));
+        }
     }//GEN-LAST:event_passContraseniaFocusLost
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(USUARIO.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(USUARIO.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(USUARIO.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(USUARIO.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+        System.out.println(">>> INICIANDO LA APLICACION...");
 
-        /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new USUARIO().setVisible(true);
+                try {
+                    System.out.println(">>> Creando la ventana USUARIO...");
+                    USUARIO ventana = new USUARIO();
+                    ventana.setVisible(true);
+                    System.out.println(">>> Ventana mostrada con exito.");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
