@@ -6,22 +6,13 @@ import java.sql.SQLException;
 import javax.swing.JOptionPane;
 
 public class ConexionBD {
-<<<<<<< HEAD
-    // Centralizamos las credenciales aquí (Variables globales y privadas)
+
+    // Centralizamos las credenciales aquí (Variables globales, privadas y estáticas)
     private static final String url = "jdbc:mysql://26.91.85.79:3306/lummel_db";
     private static final String user = "robot";
     private static final String pass = "basededatos12345"; 
 
     // Método ESTÁTICO que permite ser llamado directamente como ConexionBD.conectar()
-=======
-
-    // Al agregar 'static' aquí, las variables pertenecen a la clase
-    private static final String url = "jdbc:mysql://26.91.85.79:3306/lummel_db";
-    private static final String user = "robot";
-    private static final String pass = "basededatos12345"; 
-    
-    // Al agregar 'static' aquí, puedes llamarlo sin hacer un 'new ConexionBD()'
->>>>>>> companero/main
     public static Connection conectar() {
         Connection con = null;
         try {
@@ -31,9 +22,8 @@ public class ConexionBD {
         }
         return con;
     }
-<<<<<<< HEAD
 
-    // Método de prueba rápida
+    // Método de prueba rápida opcional
     public static void main(String[] args) {
         Connection con = conectar();
         if (con != null) {
@@ -53,6 +43,4 @@ public class ConexionBD {
                 JOptionPane.ERROR_MESSAGE);
         }
     }
-=======
->>>>>>> companero/main
 }

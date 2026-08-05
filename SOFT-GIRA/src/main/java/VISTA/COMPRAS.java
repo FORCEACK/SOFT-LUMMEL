@@ -237,7 +237,7 @@ public class COMPRAS extends javax.swing.JPanel {
                 btnAgregarDetalleActionPerformed(evt);
             }
         });
-        jPanel6.add(btnAgregarDetalle, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 140, 210, 30));
+        jPanel6.add(btnAgregarDetalle, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 130, 210, 30));
 
         btnQuitarArticulo.setBackground(new java.awt.Color(224, 239, 255));
         btnQuitarArticulo.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
@@ -247,7 +247,7 @@ public class COMPRAS extends javax.swing.JPanel {
                 btnQuitarArticuloActionPerformed(evt);
             }
         });
-        jPanel6.add(btnQuitarArticulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 140, 160, 30));
+        jPanel6.add(btnQuitarArticulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 130, 160, 30));
 
         btnLimpiarCampos.setBackground(new java.awt.Color(224, 239, 255));
         btnLimpiarCampos.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
@@ -257,7 +257,7 @@ public class COMPRAS extends javax.swing.JPanel {
                 btnLimpiarCamposActionPerformed(evt);
             }
         });
-        jPanel6.add(btnLimpiarCampos, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 140, 180, 30));
+        jPanel6.add(btnLimpiarCampos, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 130, 180, 30));
 
         btnConfirmarCompra.setBackground(new java.awt.Color(224, 239, 255));
         btnConfirmarCompra.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
@@ -298,8 +298,8 @@ public class COMPRAS extends javax.swing.JPanel {
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addGap(20, 20, 20)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, 1016, Short.MAX_VALUE)
-                            .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 1016, Short.MAX_VALUE)
+                            .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap(14, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -309,8 +309,8 @@ public class COMPRAS extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(20, 20, 20)
+                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()

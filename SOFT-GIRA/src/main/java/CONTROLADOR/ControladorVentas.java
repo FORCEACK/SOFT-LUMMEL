@@ -57,7 +57,7 @@ public class ControladorVentas {
             }
 
             // Buscar corte abierto para este usuario específico
-            int idCorte = ControladorCorte.obtenerCorteAbierto(idUsuario);
+           int idCorte = ControladorCorte.obtenerCorteAbierto();
 
             if (idCorte == -1) {
                 JOptionPane.showMessageDialog(

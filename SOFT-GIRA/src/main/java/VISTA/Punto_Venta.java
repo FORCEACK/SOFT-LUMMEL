@@ -345,32 +345,44 @@ public class Punto_Venta extends javax.swing.JPanel {
             cambio = 0.0;
         }
 
-       int idUsuarioActual = 1; // <-- Cámbialo de 2 a 1 para que coincida con el usuario del corte abierto
-int idDocumentoGenerado = CONTROLADOR.ControladorVentas.registrarVentaCompleta(jTable1, totalVenta, pagoEfectivo, cambio, tipoPagoSeleccionado, idUsuarioActual);
+   
+// 5. Validar si existe un corte de caja abierto de forma general
+    int idCorteAbierto = CONTROLADOR.ControladorCorte.obtenerCorteAbierto(); // Sin parámetros
 
-        // 6. Validar si se guardó con éxito, imprimir ticket y limpiar carrito
-        if (idDocumentoGenerado != -1) {
+    if (idCorteAbierto == -1) {
+        javax.swing.JOptionPane.showMessageDialog(this, "No existe un corte de caja abierto en el sistema.", "Venta no permitida", javax.swing.JOptionPane.WARNING_MESSAGE);
+        return;
+    }
 
-            // Llamada al método auxiliar para imprimir el ticket de venta
-            cobrarYGenerarTicket(jTable1, null, totalVenta, tipoPagoSeleccionado, pagoEfectivo, cambio, idDocumentoGenerado);
+    // Definimos el usuario actual (puedes ajustarlo según tu lógica de sesión)
+    int idUsuarioActual = 1; 
 
-            // Limpiar la tabla del carrito
-            modeloCarrito.setRowCount(0);
+    // Registramos la venta completa
+    int idDocumentoGenerado = CONTROLADOR.ControladorVentas.registrarVentaCompleta(jTable1, totalVenta, pagoEfectivo, cambio, tipoPagoSeleccionado, idUsuarioActual);
 
-            // Miniventana final con el resumen de la venta
-            javax.swing.JOptionPane.showMessageDialog(
-                this,
-                "¡Venta realizada con éxito!\n\n" +
-                "N° Ticket: " + idDocumentoGenerado + "\n" +
-                "Método de Pago: " + tipoPagoSeleccionado + "\n" +
-                "Total: $" + String.format("%.2f", totalVenta) + "\n" +
-                (tipoPagoSeleccionado.equalsIgnoreCase("Efectivo") ?
-                    "Efectivo recibido: $" + String.format("%.2f", pagoEfectivo) + "\nSu cambio: $" + String.format("%.2f", cambio)
-                    : "Pago con Tarjeta procesado"),
-                "Venta Exitosa",
-                javax.swing.JOptionPane.INFORMATION_MESSAGE
-            );
-        }
+    // 6. Validar si se guardó con éxito, imprimir ticket y limpiar carrito
+    if (idDocumentoGenerado != -1) {
+
+        // Llamada al método auxiliar para imprimir el ticket de venta
+        cobrarYGenerarTicket(jTable1, null, totalVenta, tipoPagoSeleccionado, pagoEfectivo, cambio, idDocumentoGenerado);
+
+        // Limpiar la tabla del carrito
+        modeloCarrito.setRowCount(0);
+
+        // Miniventana final con el resumen de la venta
+        javax.swing.JOptionPane.showMessageDialog(
+            this,
+            "¡Venta realizada con éxito!\n\n" +
+            "N° Ticket: " + idDocumentoGenerado + "\n" +
+            "Método de Pago: " + tipoPagoSeleccionado + "\n" +
+            "Total: $" + String.format("%.2f", totalVenta) + "\n" +
+            (tipoPagoSeleccionado.equalsIgnoreCase("Efectivo") ?
+                "Efectivo recibido: $" + String.format("%.2f", pagoEfectivo) + "\nSu cambio: $" + String.format("%.2f", cambio)
+                : "Pago con Tarjeta procesado"),
+            "Venta Exitosa",
+            javax.swing.JOptionPane.INFORMATION_MESSAGE
+        );
+    }
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void txtBuscadorKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscadorKeyPressed

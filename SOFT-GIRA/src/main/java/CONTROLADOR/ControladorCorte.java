@@ -11,9 +11,7 @@ public class ControladorCorte {
     /**
      * Busca el corte abierto de un usuario.
      */
- public static int obtenerCorteAbierto(int idUsuario) {
-
-    // Quitamos la línea de WHERE id_Usuario = ? para que tome cualquier caja abierta
+public static int obtenerCorteAbierto() {
     String sql = """
         SELECT id_Corte
         FROM cortecaja
@@ -23,27 +21,18 @@ public class ControladorCorte {
         """;
 
     try (Connection con = ConexionBD.conectar()) {
-
         if (con == null) {
             return -1;
         }
-
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-
-            // Ya NO debe ir la línea ps.setInt(1, idUsuario); porque no hay parámetros '?'
-
-            try (ResultSet rs = ps.executeQuery()) {
-
-                if (rs.next()) {
-                    return rs.getInt("id_Corte");
-                }
+        try (PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("id_Corte");
             }
         }
-
     } catch (SQLException e) {
         System.out.println("Error al obtener corte abierto: " + e.getMessage());
     }
-
     return -1;
 }
 }

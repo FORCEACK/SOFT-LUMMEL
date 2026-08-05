@@ -145,28 +145,21 @@ public class USUARIO extends javax.swing.JFrame {
     }//GEN-LAST:event_passContraseniaActionPerformed
 
     private void IniciarSesionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IniciarSesionActionPerformed
-<<<<<<< HEAD
-        // TODO add your handling code here:
-        String user = txtUsuario.getText();
-        String pass = new String(passContrasenia.getPassword());
-        if(user.equals("ADMIN") && pass.equals("12345")){
-            this.dispose();
-            PRINCIPAL menu = new PRINCIPAL();
-            menu.setVisible(true);
-            menu.setLocationRelativeTo(null);
-        } else {
-            JOptionPane.showMessageDialog(null, "ACCESO DENEGADO: Ingrese Usuario o contraseña correcto", "Acceso Denegado", JOptionPane.INFORMATION_MESSAGE);
-        }
-=======
-        // 1. Extraemos los textos de la interfaz
-        String user = txtUsuario.getText().trim();
-        String passStr = new String(passContrasenia.getPassword());
 
-        // 2. Le pasamos el "paquete" al Controlador para que él se encargue de todo
-        CONTROLADOR.ControladorLogin controlador = new CONTROLADOR.ControladorLogin();
-        controlador.procesarLogin(user, passStr, this); // 'this' envía la ventana actual
+       // 1. Extraemos y limpiamos los textos de la interfaz
+    String user = txtUsuario.getText().trim();
+    String passStr = new String(passContrasenia.getPassword()).trim();
+    
+    // ESTO TE DIRÁ EXACTAMENTE QUÉ FALLA:
+    System.out.println("----------------_");
+    System.out.println("Usuario enviado a validar: [" + user + "]");
+    System.out.println("Contraseña enviada a validar: [" + passStr + "]");
+    System.out.println("----------------_");
+
+    // 2. Le pasamos el paquete al Controlador
+    CONTROLADOR.ControladorLogin controlador = new CONTROLADOR.ControladorLogin();
+    controlador.procesarLogin(user, passStr, this); 
     }
-
     // =========================================================================
     // NUEVO MÉTODO: Función para encriptar texto a SHA-256 nativo de Java
     // =========================================================================
@@ -188,7 +181,8 @@ public class USUARIO extends javax.swing.JFrame {
             throw new RuntimeException("Error al encriptar la contraseña", ex);
         }
 
->>>>>>> companero/main
+  
+
     }//GEN-LAST:event_IniciarSesionActionPerformed
 
     private void txtUsuarioKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtUsuarioKeyReleased
@@ -231,8 +225,7 @@ public class USUARIO extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_passContraseniaFocusLost
 
-<<<<<<< HEAD
-=======
+
     private void txtUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtUsuarioActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtUsuarioActionPerformed
@@ -240,7 +233,7 @@ public class USUARIO extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
->>>>>>> companero/main
+
     public static void main(String args[]) {
         System.out.println(">>> INICIANDO LA APLICACION...");
 
