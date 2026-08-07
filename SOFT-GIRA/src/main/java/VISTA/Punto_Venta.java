@@ -570,95 +570,125 @@ private void actualizarVistaPreviaTicket() {
         return sb.toString();
     }
 
-    private void cobrarYGenerarTicket(JTable jTable1, java.awt.Checkbox chkImprimir, double totalCompra, String tipoPago, double efectivo, double cambio, int idVenta) {
-        if (chkImprimir != null && !chkImprimir.getState()) {
+   private void cobrarYGenerarTicket(JTable jTable1, java.awt.Checkbox chkImprimir, double totalCompra, String tipoPago, double efectivo, double cambio, int idVenta) {
+    if (chkImprimir != null && !chkImprimir.getState()) {
+        return;
+    }
+
+    try {
+        // 1. Detectar sistema operativo
+        String os = System.getProperty("os.name").toLowerCase();
+        boolean esWindows = os.contains("win");
+
+        // 2. Ejecutar limpieza de cola de impresión solo si es Linux / Unix
+        if (!esWindows) {
+            try {
+                Runtime.getRuntime().exec(new String[]{"cancel", "-a", "Ticketera"});
+            } catch (Exception ex) {
+                // Silenciar error si el comando cancel no está disponible
+            }
+        }
+
+        // Comandos ESC/POS para la impresora térmica (funcionan igual en Linux y Windows)
+        byte[] initPrinter = new byte[]{0x1B, 0x40};          // Inicializar impresora
+        byte[] cutPaper = new byte[]{0x1D, 0x56, 0x42, 0x00}; // Corte automático de papel
+
+        DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
+        int rowCount = modelo.getRowCount();
+
+        StringBuilder ticket = new StringBuilder();
+
+        ticket.append("\n");
+        ticket.append("================================\n");
+        ticket.append("   LUMMEL SYSTEM INTEGRATION    \n");
+        ticket.append("      PUNTO DE VENTA CAJA       \n");
+        ticket.append("================================\n");
+        ticket.append("Folio: ").append(idVenta).append("\n");
+        ticket.append("Fecha: ").append(java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\n");
+
+        String cajeroActual = (MODELO.SesionActual.usuarioLogueado != null && !MODELO.SesionActual.usuarioLogueado.isEmpty()) 
+                ? MODELO.SesionActual.usuarioLogueado 
+                : "Administrador";
+        ticket.append("Cajero: ").append(cajeroActual).append("\n");
+        ticket.append("--------------------------------\n");
+        ticket.append(String.format("%-16s %4s %8s\n", "PRODUCTO", "CANT", "SUBTOTAL"));
+        ticket.append("--------------------------------\n");
+
+        for (int i = 0; i < rowCount; i++) {
+            Object descObj = modelo.getValueAt(i, 1);
+            Object cantObj = modelo.getValueAt(i, 2);
+            Object subObj = modelo.getValueAt(i, 4);
+
+            if (descObj != null && cantObj != null && subObj != null) {
+                String descripcion = descObj.toString();
+                double cantidad = Double.parseDouble(cantObj.toString().trim());
+                double subtotal = Double.parseDouble(subObj.toString().trim());
+
+                if (descripcion.length() > 16) {
+                    descripcion = descripcion.substring(0, 16);
+                }
+
+                ticket.append(String.format("%-16s %4.0f $%7.2f\n", descripcion, cantidad, subtotal));
+            }
+        }
+
+        ticket.append("--------------------------------\n");
+        ticket.append(String.format("TOTAL A PAGAR:     $%7.2f\n", totalCompra));
+
+        if (tipoPago.equalsIgnoreCase("Efectivo")) {
+            ticket.append(String.format("EFECTIVO RECIBIDO: $%7.2f\n", efectivo));
+            ticket.append(String.format("CAMBIO:            $%7.2f\n", cambio));
+        } else {
+            ticket.append("METODO DE PAGO:    TARJETA\n");
+        }
+
+        ticket.append("================================\n");
+        ticket.append("    ¡GRACIAS POR SU COMPRA!     \n");
+        ticket.append("\n\n\n\n"); // Margen de avance de papel antes de cortar
+
+        // 3. Búsqueda de impresora (Compatibilidad total)
+        javax.print.PrintService[] servicios = javax.print.PrintServiceLookup.lookupPrintServices(null, null);
+        javax.print.PrintService impresoraTicketera = null;
+
+        // Prioridad 1: Coincidencia exacta o parcial por nombre
+        for (javax.print.PrintService servicio : servicios) {
+            String nombre = servicio.getName().toLowerCase();
+            if (nombre.contains("ticketera") || nombre.contains("pos")) {
+                impresoraTicketera = servicio;
+                break;
+            }
+        }
+
+        // Prioridad 2: Impresora predeterminada del sistema
+        if (impresoraTicketera == null) {
+            impresoraTicketera = javax.print.PrintServiceLookup.lookupDefaultPrintService();
+        }
+
+        if (impresoraTicketera == null) {
+            JOptionPane.showMessageDialog(this, "No se encontró la impresora 'Ticketera' ni una predeterminada.", "Error de Impresora", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        try {
-            try {
-                Runtime.getRuntime().exec("cancel -a Ticketera");
-            } catch (Exception ex) {
-            }
+        // 4. Codificación según el S.O. (CP850 en Windows para acentos y Ñ, ISO-8859-1 en Linux)
+        String encoding = esWindows ? "CP850" : "ISO-8859-1";
+        byte[] bytesTexto = ticket.toString().getBytes(encoding);
 
-            DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
-            int rowCount = modelo.getRowCount();
+        // Concatenación del flujo binario RAW (Inicio + Texto + Corte)
+        java.io.ByteArrayOutputStream streamFinal = new java.io.ByteArrayOutputStream();
+        streamFinal.write(initPrinter);
+        streamFinal.write(bytesTexto);
+        streamFinal.write(cutPaper);
 
-            StringBuilder ticket = new StringBuilder();
+        // Envío directo del trabajo de impresión
+        javax.print.DocPrintJob trabajo = impresoraTicketera.createPrintJob();
+        javax.print.Doc doc = new javax.print.SimpleDoc(streamFinal.toByteArray(), javax.print.DocFlavor.BYTE_ARRAY.AUTOSENSE, null);
 
-            ticket.append("\n");
-            ticket.append("================================\n");
-            ticket.append("   LUMMEL SYSTEM INTEGRATION    \n");
-            ticket.append("     PUNTO DE VENTA CAJA        \n");
-            ticket.append("================================\n");
-            ticket.append("Folio: ").append(idVenta).append("\n");
-            ticket.append("Fecha: ").append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\n");
-            
-            String cajeroActual = (MODELO.SesionActual.usuarioLogueado != null && !MODELO.SesionActual.usuarioLogueado.isEmpty()) 
-                    ? MODELO.SesionActual.usuarioLogueado 
-                    : "Administrador";
-            ticket.append("Cajero: ").append(cajeroActual).append("\n");
-            ticket.append("--------------------------------\n");
-            ticket.append(String.format("%-16s %4s %8s\n", "PRODUCTO", "CANT", "SUBTOTAL"));
-            ticket.append("--------------------------------\n");
+        trabajo.print(doc, null);
 
-            for (int i = 0; i < rowCount; i++) {
-                Object descObj = modelo.getValueAt(i, 1);
-                Object cantObj = modelo.getValueAt(i, 2);
-                Object subObj = modelo.getValueAt(i, 4);
-
-                if (descObj != null && cantObj != null && subObj != null) {
-                    String descripcion = descObj.toString();
-                    double cantidad = Double.parseDouble(cantObj.toString().trim());
-                    double subtotal = Double.parseDouble(subObj.toString().trim());
-
-                    if (descripcion.length() > 16) {
-                        descripcion = descripcion.substring(0, 16);
-                    }
-
-                    ticket.append(String.format("%-16s %4.0f $%7.2f\n", descripcion, cantidad, subtotal));
-                }
-            }
-
-            ticket.append("--------------------------------\n");
-            ticket.append(String.format("TOTAL A PAGAR:     $%7.2f\n", totalCompra));
-
-            if (tipoPago.equalsIgnoreCase("Efectivo")) {
-                ticket.append(String.format("EFECTIVO RECIBIDO: $%7.2f\n", efectivo));
-                ticket.append(String.format("CAMBIO:            $%7.2f\n", cambio));
-            } else {
-                ticket.append("METODO DE PAGO:    TARJETA\n");
-            }
-
-            ticket.append("================================\n");
-            ticket.append("    ¡GRACIAS POR SU COMPRA!     \n");
-            ticket.append("\n\n\n\n");
-
-            javax.print.PrintService[] servicios = javax.print.PrintServiceLookup.lookupPrintServices(null, null);
-            javax.print.PrintService impresoraTicketera = null;
-
-            for (javax.print.PrintService servicio : servicios) {
-                if (servicio.getName().equalsIgnoreCase("Ticketera")) {
-                    impresoraTicketera = servicio;
-                    break;
-                }
-            }
-
-            if (impresoraTicketera == null) {
-                JOptionPane.showMessageDialog(this, "No se encontró la impresora 'Ticketera'.", "Impresora no configurada", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            javax.print.DocPrintJob trabajo = impresoraTicketera.createPrintJob();
-            byte[] bytesTicket = ticket.toString().getBytes("ISO-8859-1");
-            javax.print.Doc doc = new javax.print.SimpleDoc(bytesTicket, javax.print.DocFlavor.BYTE_ARRAY.AUTOSENSE, null);
-
-            trabajo.print(doc, null);
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al imprimir el ticket: " + e.getMessage(), "Error de Impresión", JOptionPane.ERROR_MESSAGE);
-        }
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error al imprimir el ticket: " + e.getMessage(), "Error de Impresión", JOptionPane.ERROR_MESSAGE);
     }
+}
     
     private int seleccionarClientePorNombre() {
     final int[] idClienteSeleccionado = {1}; // 1 = ID predeterminado (Público en General)
