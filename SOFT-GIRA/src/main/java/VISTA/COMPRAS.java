@@ -53,8 +53,7 @@ public class COMPRAS extends javax.swing.JPanel {
         jDateChooser1 = new com.toedter.calendar.JDateChooser();
         jLabel9 = new javax.swing.JLabel();
         jComboBox1 = new javax.swing.JComboBox<>();
-        jLabel10 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        jButton1 = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
         txtBuscarProducto = new javax.swing.JTextField();
@@ -180,18 +179,15 @@ public class COMPRAS extends javax.swing.JPanel {
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         jPanel5.add(jComboBox1, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 40, 240, 30));
 
-        jLabel10.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
-        jLabel10.setText("Numero de Factura");
-        jPanel5.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 20, -1, -1));
-
-        jTextField1.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
-        jTextField1.setForeground(new java.awt.Color(204, 204, 204));
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+        jButton1.setBackground(new java.awt.Color(224, 239, 255));
+        jButton1.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        jButton1.setText("Exportar Tabla");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
+                jButton1ActionPerformed(evt);
             }
         });
-        jPanel5.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 40, 230, 30));
+        jPanel5.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 40, 180, 30));
 
         jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Buscador de Productos e Ingreso de Datos", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Roboto", 0, 16))); // NOI18N
         jPanel6.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -324,10 +320,6 @@ public class COMPRAS extends javax.swing.JPanel {
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField1ActionPerformed
 
     private void tablaDetalleCompraMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaDetalleCompraMouseClicked
        // 1. Obtenemos la fila que el usuario seleccionó
@@ -571,9 +563,7 @@ public class COMPRAS extends javax.swing.JPanel {
             txtSKU.setText("");
             txtDescripcion.setText("");
             txtCantidad.setText("");
-            txtPrecio.setText("");
-            jTextField1.setText(""); // Campo de Número de Factura
-            
+            txtPrecio.setText(""); 
             // Opcional: Reiniciamos la fecha
             jDateChooser1.setDate(null);
         }
@@ -608,13 +598,151 @@ public class COMPRAS extends javax.swing.JPanel {
         if (confirmacion == javax.swing.JOptionPane.YES_OPTION) {
             // ¡AQUÍ ENTRARÁ EL CÓDIGO DE BASE DE DATOS!
             
+            // --- INICIO DE LA LÓGICA DE CONEXIÓN ---
+        
+        // A) Extraemos los datos generales
+        java.util.Date fecha = jDateChooser1.getDate();
+        String proveedor = jComboBox1.getSelectedItem().toString();
+        
+        // Limpiamos el signo de pesos y comas del total para convertirlo a número
+        String textoTotal = lblTotal.getText().replace("$", "").replace(",", "").trim();
+        double totalCompra = Double.parseDouble(textoTotal);
+        
+        // B) Obtenemos la tabla con todos los artículos
+        javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) tablaDetalleCompra.getModel();
+        
+        // C) Instanciamos el modelo y procesamos
+        MODELO.ConsultasCompras modeloConsultas = new MODELO.ConsultasCompras();
+        boolean exito = modeloConsultas.registrarCompraYActualizarStock(proveedor, fecha, totalCompra, modelo);
+        
+        // D) Evaluamos el resultado
+        if (exito) {
             javax.swing.JOptionPane.showMessageDialog(this, 
-                "Validación exitosa. ¡Listo para conectar el SQL!", 
-                "En construcción", 
+                "¡Compra registrada exitosamente! El stock ha sido actualizado.", 
+                "Éxito", 
                 javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                
+            // Limpiamos el formulario reutilizando el método de tu botón de cancelar
+            btnCancelarCompraActionPerformed(null); 
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Hubo un error al guardar la compra en la base de datos.", 
+                "Error", 
+                javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
         }
     }//GEN-LAST:event_btnConfirmarCompraActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        // Validamos que haya datos en la tabla para exportar
+    if (tablaDetalleCompra.getRowCount() == 0) {
+        javax.swing.JOptionPane.showMessageDialog(this, "La tabla está vacía. No hay datos para exportar.", "Advertencia", javax.swing.JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    // Opciones para el usuario
+    String[] opciones = {"Exportar a Excel", "Exportar a PDF"};
+    int eleccion = javax.swing.JOptionPane.showOptionDialog(this, 
+            "¿En qué formato deseas exportar las compras?", 
+            "Exportar Datos", 
+            javax.swing.JOptionPane.DEFAULT_OPTION, 
+            javax.swing.JOptionPane.QUESTION_MESSAGE, 
+            null, opciones, opciones[0]);
+
+    if (eleccion == 0 || eleccion == 1) {
+        // Configuramos el selector de archivos para guardar
+        javax.swing.JFileChooser selector = new javax.swing.JFileChooser();
+        selector.setDialogTitle("Guardar reporte como...");
+        
+        String nombrePorDefecto = (eleccion == 0) ? "ReporteCompras.xlsx" : "ReporteCompras.pdf";
+        selector.setSelectedFile(new java.io.File(nombrePorDefecto));
+
+        int respuesta = selector.showSaveDialog(this);
+        
+        if (respuesta == javax.swing.JFileChooser.APPROVE_OPTION) {
+            java.io.File archivoGuardar = selector.getSelectedFile();
+            
+            if (eleccion == 0) {
+                exportarExcel(tablaDetalleCompra, archivoGuardar);
+            } else {
+                exportarPDF(tablaDetalleCompra, archivoGuardar);
+            }
+        }
+    }
+    }//GEN-LAST:event_jButton1ActionPerformed
+    private void exportarExcel(javax.swing.JTable tabla, java.io.File archivo) {
+    try (org.apache.poi.ss.usermodel.Workbook libro = new org.apache.poi.xssf.usermodel.XSSFWorkbook()) {
+        org.apache.poi.ss.usermodel.Sheet hoja = libro.createSheet("Compras");
+        javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) tabla.getModel();
+        
+        // Escribir los encabezados de la tabla
+        org.apache.poi.ss.usermodel.Row filaEncabezado = hoja.createRow(0);
+        for (int i = 0; i < modelo.getColumnCount(); i++) {
+            filaEncabezado.createCell(i).setCellValue(modelo.getColumnName(i));
+        }
+        
+        // Escribir los datos fila por fila
+        for (int f = 0; f < modelo.getRowCount(); f++) {
+            org.apache.poi.ss.usermodel.Row filaActual = hoja.createRow(f + 1);
+            for (int c = 0; c < modelo.getColumnCount(); c++) {
+                Object valor = modelo.getValueAt(f, c);
+                filaActual.createCell(c).setCellValue(valor != null ? valor.toString() : "");
+            }
+        }
+        
+        // Guardar el archivo
+        try (java.io.FileOutputStream salida = new java.io.FileOutputStream(archivo)) {
+            libro.write(salida);
+        }
+        javax.swing.JOptionPane.showMessageDialog(this, "¡Archivo Excel generado con éxito!");
+        
+    } catch (Exception e) {
+        javax.swing.JOptionPane.showMessageDialog(this, "Error al generar Excel: " + e.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+    }
+}
+    private void exportarPDF(javax.swing.JTable tabla, java.io.File archivo) {
+    try {
+        com.itextpdf.text.Document documento = new com.itextpdf.text.Document();
+        com.itextpdf.text.pdf.PdfWriter.getInstance(documento, new java.io.FileOutputStream(archivo));
+        
+        documento.open();
+        
+        // Título del PDF
+        com.itextpdf.text.Paragraph titulo = new com.itextpdf.text.Paragraph("Reporte de Compras del Día\n\n");
+        titulo.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+        documento.add(titulo);
+        
+        javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) tabla.getModel();
+        
+        // Crear tabla en PDF con el mismo número de columnas
+        com.itextpdf.text.pdf.PdfPTable tablaPdf = new com.itextpdf.text.pdf.PdfPTable(modelo.getColumnCount());
+        tablaPdf.setWidthPercentage(100);
+        
+        // Escribir encabezados
+        for (int i = 0; i < modelo.getColumnCount(); i++) {
+            com.itextpdf.text.pdf.PdfPCell celda = new com.itextpdf.text.pdf.PdfPCell(new com.itextpdf.text.Phrase(modelo.getColumnName(i)));
+            celda.setBackgroundColor(com.itextpdf.text.BaseColor.LIGHT_GRAY);
+            tablaPdf.addCell(celda);
+        }
+        
+        // Escribir datos
+        for (int f = 0; f < modelo.getRowCount(); f++) {
+            for (int c = 0; c < modelo.getColumnCount(); c++) {
+                Object valor = modelo.getValueAt(f, c);
+                tablaPdf.addCell(valor != null ? valor.toString() : "");
+            }
+        }
+        
+        documento.add(tablaPdf);
+        documento.close();
+        
+        javax.swing.JOptionPane.showMessageDialog(this, "¡Archivo PDF generado con éxito!");
+        
+    } catch (Exception e) {
+        javax.swing.JOptionPane.showMessageDialog(this, "Error al generar PDF: " + e.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+    }
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAgregarDetalle;
@@ -622,10 +750,10 @@ public class COMPRAS extends javax.swing.JPanel {
     private javax.swing.JButton btnConfirmarCompra;
     private javax.swing.JButton btnLimpiarCampos;
     private javax.swing.JButton btnQuitarArticulo;
+    private javax.swing.JButton jButton1;
     private javax.swing.JComboBox<String> jComboBox1;
     private com.toedter.calendar.JDateChooser jDateChooser1;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
@@ -646,7 +774,6 @@ public class COMPRAS extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
     private javax.swing.JLabel lblDescuento;
     private javax.swing.JLabel lblIva;
     private javax.swing.JLabel lblSubtotal;

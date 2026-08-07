@@ -185,6 +185,11 @@ public class PanelUsuarios extends javax.swing.JPanel {
 
         jPanel3.add(jPanel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 0, 110, 70));
 
+        jPanel7.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jPanel7MouseClicked(evt);
+            }
+        });
         jPanel7.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel5.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
@@ -199,9 +204,22 @@ public class PanelUsuarios extends javax.swing.JPanel {
         jTextField1.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
         jTextField1.setForeground(new java.awt.Color(204, 204, 204));
         jTextField1.setText("Buscar");
+        jTextField1.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jTextField1FocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jTextField1FocusLost(evt);
+            }
+        });
         jTextField1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextField1ActionPerformed(evt);
+            }
+        });
+        jTextField1.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jTextField1KeyReleased(evt);
             }
         });
         jPanel3.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 10, 220, 40));
@@ -347,6 +365,97 @@ public class PanelUsuarios extends javax.swing.JPanel {
         }
     }
     }//GEN-LAST:event_jPanel6MouseClicked
+
+    private void jPanel7MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel7MouseClicked
+        // TODO add your handling code here:
+        // 1. Pedimos el ID del usuario con una ventana emergente
+    String idIngresado = javax.swing.JOptionPane.showInputDialog(this, 
+            "Ingrese el ID del usuario que desea cambiar su contraseña:", 
+            "Cambiar Contraseña", 
+            javax.swing.JOptionPane.QUESTION_MESSAGE);
+    
+    // 2. Si el usuario escribió algo y no le dio a cancelar...
+    if (idIngresado != null && !idIngresado.trim().isEmpty()) {
+        try {
+            int idBuscar = Integer.parseInt(idIngresado.trim()); // Convertimos a número
+            
+            // 3. Pedimos la nueva contraseña usando un JPasswordField para que los caracteres se oculten (***)
+            javax.swing.JPasswordField txtNuevaContrasena = new javax.swing.JPasswordField();
+            Object[] mensaje = {
+                "Ingrese la nueva contraseña para el usuario con ID " + idBuscar + ":", txtNuevaContrasena
+            };
+            
+            int opcion = javax.swing.JOptionPane.showConfirmDialog(this, mensaje, "Nueva Contraseña", javax.swing.JOptionPane.OK_CANCEL_OPTION);
+            
+            // Si le dio a OK en la ventana de la nueva contraseña
+            if (opcion == javax.swing.JOptionPane.OK_OPTION) {
+                String nuevaPass = new String(txtNuevaContrasena.getPassword());
+                
+                if (!nuevaPass.trim().isEmpty()) {
+                    // 4. Llamamos al controlador para que actualice la base de datos
+                    CONTROLADOR.ControladorCambiarContrasena controlador = new CONTROLADOR.ControladorCambiarContrasena();
+                    boolean exito = controlador.procesarCambioContrasena(idBuscar, nuevaPass);
+                    
+                    if (exito) {
+                        javax.swing.JOptionPane.showMessageDialog(this, "Contraseña actualizada correctamente.", "Éxito", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        javax.swing.JOptionPane.showMessageDialog(this, "Error al actualizar. Verifica que el ID exista en la base de datos.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    javax.swing.JOptionPane.showMessageDialog(this, "La contraseña no puede estar vacía.", "Advertencia", javax.swing.JOptionPane.WARNING_MESSAGE);
+                }
+            }
+            
+        } catch (NumberFormatException e) {
+            // Si el usuario metió letras en vez de un número para el ID
+            javax.swing.JOptionPane.showMessageDialog(this, "Por favor ingresa un número de ID válido (Solo números).", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    }//GEN-LAST:event_jPanel7MouseClicked
+
+    private void jTextField1KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField1KeyReleased
+        // TODO add your handling code here:
+        // 1. Obtenemos el texto que el usuario está escribiendo
+    String textoBusqueda = jTextField1.getText();
+    
+    // Si el texto es el placeholder por defecto "Buscar", no filtramos nada
+    if (textoBusqueda.equals("Buscar")) {
+        textoBusqueda = "";
+    }
+
+    // 2. Obtenemos el modelo actual de la tabla
+    javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) jTable1.getModel();
+    
+    // 3. Creamos el ordenador/filtro (TableRowSorter) y se lo asignamos a la tabla
+    javax.swing.table.TableRowSorter<javax.swing.table.DefaultTableModel> trs = new javax.swing.table.TableRowSorter<>(modelo);
+    jTable1.setRowSorter(trs);
+    
+    // 4. Aplicamos el filtro
+    if (textoBusqueda.trim().length() == 0) {
+        trs.setRowFilter(null); // Si no hay texto, mostramos toda la tabla
+    } else {
+        // "(?i)" hace que la búsqueda ignore mayúsculas y minúsculas.
+        // El ", 1" indica que solo buscará coincidencias en la columna "NOMBRE COMPLETO" (índice 1).
+        // Si quieres que busque en TODAS las columnas (ID, Usuario, Rol, etc.), simplemente borra el ", 1".
+        trs.setRowFilter(javax.swing.RowFilter.regexFilter("(?i)" + textoBusqueda, 1));
+    }
+    }//GEN-LAST:event_jTextField1KeyReleased
+
+    private void jTextField1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextField1FocusGained
+        // TODO add your handling code here:
+        if (jTextField1.getText().equals("Buscar")) {
+        jTextField1.setText("");
+        jTextField1.setForeground(new java.awt.Color(0, 0, 0)); // Cambia la letra a negro al escribir
+        }
+    }//GEN-LAST:event_jTextField1FocusGained
+
+    private void jTextField1FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextField1FocusLost
+        // TODO add your handling code here:
+        if (jTextField1.getText().isEmpty()) {
+        jTextField1.setText("Buscar");
+        jTextField1.setForeground(new java.awt.Color(204, 204, 204)); // Vuelve al color gris
+    }
+    }//GEN-LAST:event_jTextField1FocusLost
     // Método para recargar la tabla cuando queramos
     public void refrescarTabla() {
         CONTROLADOR.ControladorPanelUsuarios controlador = new CONTROLADOR.ControladorPanelUsuarios();

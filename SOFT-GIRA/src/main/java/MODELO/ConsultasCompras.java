@@ -83,6 +83,60 @@ public class ConsultasCompras extends ConexionBD {
             System.err.println("Error al cargar por fecha: " + e.getMessage());
         }
     }
+    // =========================================================================
+    // MÉTODO PARA CONFIRMAR COMPRA Y ACTUALIZAR STOCK (TRANSACCIÓN EN LOTE)
+    // =========================================================================
+    public boolean registrarCompraYActualizarStock(String proveedor, java.util.Date fecha, double total, javax.swing.table.DefaultTableModel modeloTabla) {
+        java.sql.Connection con = null;
+        
+        try {
+            con = MODELO.ConexionBD.conectar();
+            con.setAutoCommit(false); // Apagamos el autoguardado para iniciar la transacción
+
+            // 1. (OPCIONAL) Aquí puedes hacer el INSERT a tu tabla de "Compras" generales
+            // String sqlCompra = "INSERT INTO Compras (proveedor, fecha, total) VALUES (?, ?, ?)";
+            // ... (Lógica del insert) ...
+
+            // 2. Preparar el UPDATE para sumar el stock al inventario
+            // Usamos "stock = stock + ?" para que tome el valor actual de la BD y le sume lo nuevo
+            String sqlUpdateStock = "UPDATE Articulo SET stock = stock + ? WHERE articulo_id = ?";
+            
+            try (java.sql.PreparedStatement psStock = con.prepareStatement(sqlUpdateStock)) {
+                
+                // Recorremos todas las filas de la tabla de la vista
+                for (int i = 0; i < modeloTabla.getRowCount(); i++) {
+                    // Extraemos el ID (Columna 0) y la Cantidad comprada (Columna 2)
+                    int idArticulo = Integer.parseInt(modeloTabla.getValueAt(i, 0).toString()); 
+                    double cantidadComprada = Double.parseDouble(modeloTabla.getValueAt(i, 2).toString()); 
+
+                    psStock.setDouble(1, cantidadComprada);
+                    psStock.setInt(2, idArticulo);
+                    
+                    // addBatch() agrupa las sentencias para enviarlas todas juntas a la base de datos
+                    psStock.addBatch(); 
+                    
+                    // (OPCIONAL) Aquí podrías hacer también un INSERT a tu tabla "DetalleCompra"
+                }
+                
+                // Ejecutamos todas las actualizaciones de stock de un solo golpe
+                psStock.executeBatch(); 
+            }
+
+            con.commit(); // Si todo salió bien, guardamos los cambios definitivamente
+            return true;
+
+        } catch (Exception e) {
+            if (con != null) {
+                try { con.rollback(); } catch (Exception ex) {} // Deshacemos si hay error
+            }
+            System.err.println("Error al procesar compra y stock: " + e.getMessage());
+            return false;
+        } finally {
+            if (con != null) {
+                try { con.setAutoCommit(true); con.close(); } catch (Exception e) {}
+            }
+        }
+    }
 
     // -------------------------------------------------------------------------
     // ---> AQUÍ EMPIEZA EL CÓDIGO NUEVO DEL PASO 1 (Buscador de Productos) <---
