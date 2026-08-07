@@ -1,6 +1,3 @@
-package CONTROLADOR;
-
-import MODELO.ConexionBD;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,59 +5,8 @@ import java.sql.SQLException;
 
 public class CorteCajaDao {
 
-    // =========================================================================
-    // MÉTODOS CONVENIENTES (Conexión automática para llamadas desde la Vista)
-    // =========================================================================
-
-    public boolean hayCorteAbierto(int idUsuario) {
-        ConexionBD conexion = new ConexionBD();
-        try (Connection con = conexion.conectar()) {
-            return hayCorteAbierto(idUsuario, con);
-        } catch (SQLException e) {
-            System.err.println("Error al verificar corte abierto: " + e.getMessage());
-            return false;
-        }
-    }
-
-    public boolean hayCorteAbierto(int idUsuario, Connection conexion) {
-        return obtenerIdCorteAbierto(idUsuario, conexion) != -1;
-    }
-
-    public boolean abrirCorte(int idUsuario, double fondoInicial) {
-        ConexionBD conexion = new ConexionBD();
-        try (Connection con = conexion.conectar()) {
-            return abrirCaja(idUsuario, fondoInicial, con);
-        } catch (SQLException e) {
-            System.err.println("Error al abrir corte: " + e.getMessage());
-            return false;
-        }
-    }
-
-    public int obtenerIdCorteAbierto(int idUsuario) {
-        ConexionBD conexion = new ConexionBD();
-        try (Connection con = conexion.conectar()) {
-            return obtenerIdCorteAbierto(idUsuario, con);
-        } catch (SQLException e) {
-            System.err.println("Error al obtener ID de corte abierto: " + e.getMessage());
-            return -1;
-        }
-    }
-
-    public boolean cerrarCaja(int idCorte, int idUsuario, double efectivoEnCajaFisico) {
-        ConexionBD conexion = new ConexionBD();
-        try (Connection con = conexion.conectar()) {
-            return cerrarCaja(idCorte, idUsuario, efectivoEnCajaFisico, con);
-        } catch (SQLException e) {
-            System.err.println("Error al cerrar caja: " + e.getMessage());
-            return false;
-        }
-    }
-
-    // =========================================================================
-    // MÉTODOS ORIGINALES (Reciben la Connection de manera explícita)
-    // =========================================================================
-
-    // 1. OBTENER CORTE ABIERTO
+    // 1. OBTENER CORTE ABIERTO (Corregido y unificado)
+    // Siempre debemos buscar por idUsuario para evitar cruzar cajas de distintos cajeros.
     public int obtenerIdCorteAbierto(int idUsuario, Connection conexion) {
         String sql = "SELECT id_Corte FROM cortecaja WHERE id_Usuario = ? AND estatus = 'ABIERTO' ORDER BY id_Corte DESC LIMIT 1";
         
@@ -74,11 +20,12 @@ public class CorteCajaDao {
         } catch (SQLException e) {
             System.err.println("Error al buscar caja abierta: " + e.getMessage());
         }
-        return -1;
+        return -1; // Usamos -1 para indicar que no hay caja, es una práctica más estándar que 0
     }
 
     // 2. ABRIR CAJA
     public boolean abrirCaja(int idUsuario, double fondoInicial, Connection conexion) {
+        // Validar si ya tiene una abierta usando el método unificado
         if (obtenerIdCorteAbierto(idUsuario, conexion) != -1) {
             System.out.println("El usuario ya tiene un corte abierto.");
             return false; 

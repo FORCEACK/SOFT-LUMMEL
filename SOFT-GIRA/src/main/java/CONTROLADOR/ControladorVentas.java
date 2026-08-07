@@ -11,13 +11,39 @@ import javax.swing.table.DefaultTableModel;
 
 public class ControladorVentas {
 
+    // Sobrecarga 1: 6 parámetros (mantiene compatibilidad)
     public static int registrarVentaCompleta(
             JTable tabla,
             double total,
             double efectivo,
             double cambio,
             String tipoPago,
-            int idUsuario) { // <-- Ahora recibe el idUsuario de forma dinámica
+            int idUsuario) {
+        return registrarVentaCompleta(tabla, total, efectivo, cambio, tipoPago, idUsuario, -1, 1);
+    }
+
+    // Sobrecarga 2: 7 parámetros (mantiene compatibilidad si no se envía cliente)
+    public static int registrarVentaCompleta(
+            JTable tabla,
+            double total,
+            double efectivo,
+            double cambio,
+            String tipoPago,
+            int idUsuario,
+            int idCorte) {
+        return registrarVentaCompleta(tabla, total, efectivo, cambio, tipoPago, idUsuario, idCorte, 1);
+    }
+
+    // Método principal: 8 parámetros (acepta idCorte e idCliente)
+    public static int registrarVentaCompleta(
+            JTable tabla,
+            double total,
+            double efectivo,
+            double cambio,
+            String tipoPago,
+            int idUsuario,
+            int idCorte,
+            int idCliente) {
 
         String sqlVenta = """
             INSERT INTO DocumentoVenta
@@ -41,14 +67,7 @@ public class ControladorVentas {
             VALUES (?, ?, ?, ?)
             """;
 
-        String sqlStock = """
-            UPDATE Articulo
-            SET stock = stock - ?
-            WHERE articulo_id = ?
-            """;
-
         int idVentaGenerado = -1;
-        int idCliente = 1; // Puedes cambiarlo si manejas clientes dinámicos
 
         try (Connection conexion = MODELO.ConexionBD.conectar()) {
 
@@ -56,10 +75,13 @@ public class ControladorVentas {
                 return -1;
             }
 
-            // Buscar corte abierto para este usuario específico
-           int idCorte = ControladorCorte.obtenerCorteAbierto();
+            // Si no se proporcionó idCorte, buscar el abierto para el usuario
+            if (idCorte <= 0) {
+                CorteCajaDao corteDao = new CorteCajaDao();
+                idCorte = corteDao.obtenerIdCorteAbierto(idUsuario, conexion);
+            }
 
-            if (idCorte == -1) {
+            if (idCorte <= 0) {
                 JOptionPane.showMessageDialog(
                     null,
                     "No existe un corte de caja abierto para el usuario actual.",
@@ -69,95 +91,104 @@ public class ControladorVentas {
                 return -1;
             }
 
+            // Iniciamos la transacción manual
             conexion.setAutoCommit(false);
 
-            // ==========================================
-            // 1. GUARDAR CABECERA
-            // ==========================================
-            try (PreparedStatement pstVenta = conexion.prepareStatement(sqlVenta, Statement.RETURN_GENERATED_KEYS)) {
+            try {
+                // ==========================================
+                // 1. GUARDAR CABECERA (DocumentoVenta)
+                // ==========================================
+                try (PreparedStatement pstVenta = conexion.prepareStatement(sqlVenta, Statement.RETURN_GENERATED_KEYS)) {
 
-                pstVenta.setInt(1, idCliente);
-                pstVenta.setInt(2, idUsuario);
-                pstVenta.setInt(3, idCorte);
-                pstVenta.setDouble(4, total);
+                    pstVenta.setInt(1, idCliente); // Recibe el ID de cliente dinámico
+                    pstVenta.setInt(2, idUsuario);
+                    pstVenta.setInt(3, idCorte);
+                    pstVenta.setDouble(4, 0.00); // Iniciamos en 0 para que el Trigger calcule el total real
 
-                if (tipoPago.equalsIgnoreCase("Efectivo")) {
-                    pstVenta.setDouble(5, total);
-                    pstVenta.setDouble(6, 0.00);
-                    pstVenta.setDouble(7, efectivo);
-                    pstVenta.setDouble(8, cambio);
-                } else {
-                    pstVenta.setDouble(5, 0.00);
-                    pstVenta.setDouble(6, total);
-                    pstVenta.setDouble(7, total);
-                    pstVenta.setDouble(8, 0.00);
-                }
-
-                pstVenta.executeUpdate();
-
-                try (ResultSet rs = pstVenta.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        idVentaGenerado = rs.getInt(1);
+                    if (tipoPago.equalsIgnoreCase("Efectivo")) {
+                        pstVenta.setDouble(5, total);
+                        pstVenta.setDouble(6, 0.00);
+                        pstVenta.setDouble(7, efectivo);
+                        pstVenta.setDouble(8, cambio);
                     } else {
-                        throw new SQLException("No se pudo obtener el ID de la venta.");
+                        pstVenta.setDouble(5, 0.00);
+                        pstVenta.setDouble(6, total);
+                        pstVenta.setDouble(7, total);
+                        pstVenta.setDouble(8, 0.00);
                     }
-                }
-            }
 
-            // ==========================================
-            // 2. DETALLE Y STOCK
-            // ==========================================
-            DefaultTableModel modelo = (DefaultTableModel) tabla.getModel();
+                    pstVenta.executeUpdate();
 
-            try (
-                PreparedStatement pstDetalle = conexion.prepareStatement(sqlDetalle);
-                PreparedStatement pstStock = conexion.prepareStatement(sqlStock)
-            ) {
-                for (int i = 0; i < modelo.getRowCount(); i++) {
-                    Object idArticuloObj = modelo.getValueAt(i, 0);
-                    Object cantObj = modelo.getValueAt(i, 2);
-                    Object precioObj = modelo.getValueAt(i, 3);
-
-                    if (idArticuloObj != null && cantObj != null && precioObj != null) {
-                        int articuloId = Integer.parseInt(idArticuloObj.toString().trim());
-                        double cantDouble = Double.parseDouble(cantObj.toString().trim());
-                        int cantidad = (int) Math.round(cantDouble);
-                        double precioUnitario = Double.parseDouble(precioObj.toString().trim());
-
-                        // Detalle
-                        pstDetalle.setInt(1, idVentaGenerado);
-                        pstDetalle.setInt(2, articuloId);
-                        pstDetalle.setInt(3, cantidad);
-                        pstDetalle.setDouble(4, precioUnitario);
-                        pstDetalle.addBatch();
-
-                        // Stock
-                        pstStock.setInt(1, cantidad);
-                        pstStock.setInt(2, articuloId);
-                        pstStock.addBatch();
+                    try (ResultSet rs = pstVenta.getGeneratedKeys()) {
+                        if (rs.next()) {
+                            idVentaGenerado = rs.getInt(1);
+                        } else {
+                            throw new SQLException("No se pudo obtener el ID de la venta.");
+                        }
                     }
                 }
 
-                pstDetalle.executeBatch();
-                pstStock.executeBatch();
-            }
+                // ==========================================
+                // 2. GUARDAR DETALLE (DetalleVenta)
+                // ==========================================
+                DefaultTableModel modelo = (DefaultTableModel) tabla.getModel();
 
-            // ==========================================
-            // 3. CONFIRMAR TODO
-            // ==========================================
-            conexion.commit();
+                try (PreparedStatement pstDetalle = conexion.prepareStatement(sqlDetalle)) {
+                    for (int i = 0; i < modelo.getRowCount(); i++) {
+                        Object idArticuloObj = modelo.getValueAt(i, 0);
+                        Object cantObj = modelo.getValueAt(i, 2);
+                        Object precioObj = modelo.getValueAt(i, 3);
 
-            if (tipoPago.equalsIgnoreCase("Efectivo")) {
-                VISTA.PRINCIPAL.ventasEfectivoDia += total;
-            } else if (tipoPago.equalsIgnoreCase("Tarjeta") || tipoPago.startsWith("Tarjeta")) {
-                VISTA.PRINCIPAL.ventasTarjetaDia += total;
+                        if (idArticuloObj != null && cantObj != null && precioObj != null) {
+                            int articuloId = Integer.parseInt(idArticuloObj.toString().trim());
+                            double cantDouble = Double.parseDouble(cantObj.toString().trim());
+                            int cantidad = (int) Math.round(cantDouble);
+                            double precioUnitario = Double.parseDouble(precioObj.toString().trim());
+
+                            pstDetalle.setInt(1, idVentaGenerado);
+                            pstDetalle.setInt(2, articuloId);
+                            pstDetalle.setInt(3, cantidad);
+                            pstDetalle.setDouble(4, precioUnitario);
+                            pstDetalle.addBatch();
+                        }
+                    }
+
+                    pstDetalle.executeBatch();
+                }
+
+                // ==========================================
+                // 3. CONFIRMAR TRANSACCIÓN
+                // ==========================================
+                conexion.commit();
+
+                // Actualizar acumuladores en la interfaz principal
+                if (tipoPago.equalsIgnoreCase("Efectivo")) {
+                    VISTA.PRINCIPAL.ventasEfectivoDia += total;
+                } else if (tipoPago.equalsIgnoreCase("Tarjeta") || tipoPago.startsWith("Tarjeta")) {
+                    VISTA.PRINCIPAL.ventasTarjetaDia += total;
+                }
+
+            } catch (SQLException ex) {
+                // Si ocurre un fallo, revertir transacción
+                conexion.rollback();
+                throw ex;
             }
 
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al registrar la venta:\n" + e.getMessage(), "Error de Base de Datos", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                null, 
+                "Error al registrar la venta:\n" + e.getMessage(), 
+                "Error de Base de Datos", 
+                JOptionPane.ERROR_MESSAGE
+            );
             idVentaGenerado = -1;
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(null, "Error de formato numérico:\n" + e.getMessage(), "Error de Datos", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                null, 
+                "Error en el formato numérico del carrito:\n" + e.getMessage(), 
+                "Error de Datos", 
+                JOptionPane.ERROR_MESSAGE
+            );
             idVentaGenerado = -1;
         }
 

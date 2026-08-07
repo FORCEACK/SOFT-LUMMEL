@@ -5,6 +5,9 @@
 package MODELO;
 
 public class SesionActual {
-    // Variable estática para saber quién está usando el sistema en todo momento
+    // Nombre del usuario logueado
     public static String usuarioLogueado = ""; 
+    
+    // ID numérico del usuario en la base de datos
+    public static int idUsuarioLogueado = -1;
 }

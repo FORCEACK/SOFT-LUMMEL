@@ -170,7 +170,7 @@ public static boolean cajaAbierta = false;
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-      panelContenido = new javax.swing.JPanel();
+        panelContenido = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
@@ -191,7 +191,6 @@ public static boolean cajaAbierta = false;
         jLabel6 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
-        jLabel14 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         jLabel16 = new javax.swing.JLabel();
         jLabel17 = new javax.swing.JLabel();
@@ -281,9 +280,6 @@ public static boolean cajaAbierta = false;
         jLabel13.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/LOGOTIPO LUMMEL ICONO_1.png"))); // NOI18N
         jPanel3.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 0, -1, -1));
 
-        jLabel14.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/LOGOTIPO LUMMEL ICONO_1.png"))); // NOI18N
-        jPanel3.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 600, -1, -1));
-
         jPanel1.setBackground(new java.awt.Color(206, 208, 225));
 
         jLabel16.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
@@ -323,14 +319,13 @@ public static boolean cajaAbierta = false;
         panelVistas.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel15.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/LOGOTIPO EMPRESA.png"))); // NOI18N
-        panelVistas.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 6, 780, 459));
+        panelVistas.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 160, 780, 459));
 
         panelContenido.add(panelVistas, java.awt.BorderLayout.CENTER);
 
         getContentPane().add(panelContenido, java.awt.BorderLayout.CENTER);
 
         pack();
-
     }// </editor-fold>//GEN-END:initComponents
 
     
@@ -375,13 +370,11 @@ public static boolean cajaAbierta = false;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel Mostrador;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
-    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
@@ -401,7 +394,6 @@ public static boolean cajaAbierta = false;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
-    private javax.swing.JPanel jPanelMenuLateral;
     private javax.swing.JPanel panelContenido;
     private javax.swing.JPanel panelVistas;
     // End of variables declaration//GEN-END:variables

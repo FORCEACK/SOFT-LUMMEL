@@ -567,254 +567,291 @@ public Corte_Caja(java.awt.Frame parent, boolean modal) {
     }//GEN-LAST:event_txtRetirosKeyReleased
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        try {
-            double fondo = parseDouble(jTextField1.getText());
-            if (fondo <= 0) {
-                JOptionPane.showMessageDialog(this, "Ingrese un fondo inicial válido.", "Aviso", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            VISTA.PRINCIPAL.fondoInicialGuardado = fondo;
-            VISTA.PRINCIPAL.cajaAbierta = true;
-
-            jTextField1.setEnabled(false);
-            jButton1.setEnabled(false);
-
-            JOptionPane.showMessageDialog(this, "Corte de caja iniciado correctamente.");
-            calcularTotalesCorte();
-
-           // --- AQUÍ ABRIMOS EL PUNTO DE VENTA USANDO EL MÉTODO DE PRINCIPAL ---
-        java.awt.Window ventanaPadre = javax.swing.SwingUtilities.getWindowAncestor(this);
-        if (ventanaPadre instanceof VISTA.PRINCIPAL) {
-            ((VISTA.PRINCIPAL) ventanaPadre).mostrarPanel(new VISTA.Punto_Venta());
-        }
-
-        // <--- PONLO JUSTO AQUÍ --->
-        this.dispose();
-
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "Error al iniciar el corte: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-    }
-    }//GEN-LAST:event_jButton1ActionPerformed
-
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
 try {
-        // 1. OBTENER LOS VALORES
-        double fondoInicial = parsearDoble(jTextField1.getText());
-        double ventasEfectivo = parsearDoble(lblVentasEfectivo.getText());
-        double ventasTarjeta = parsearDoble(lblVentasTarjetas.getText());
-        double totalVentasGeneral = ventasEfectivo + ventasTarjeta;
-        double retiros = parsearDoble(txtRetiros.getText());
-
-        double efectivoEsperado = fondoInicial + ventasEfectivo - retiros;
-        double efectivoEnCaja = parsearDoble(lblTotalContado.getText());
-        double diferencia = efectivoEnCaja - efectivoEsperado;
-
-        int idUsuario = 1; // Cambiar por el ID del usuario logueado actual
-
-        // 2. ACTUALIZAR EN MYSQL (CERRAR EL CORTE QUE ESTABA ABIERTO)
-        String sql = """
-            UPDATE CorteCaja 
-            SET fecha_cierre = NOW(), 
-                fondo_inicial = ?, 
-                total_ventas_efectivo = ?, 
-                total_ventas_tarjeta = ?, 
-                total_ventas_general = ?, 
-                total_efectivo_esperado = ?, 
-                efectivo_en_caja = ?, 
-                diferencia = ?, 
-                estatus = 'CERRADO' 
-            WHERE id_Usuario = ? AND estatus = 'ABIERTO'
-        """;
-
-        Connection con = MODELO.ConexionBD.conectar();
-        if (con == null) {
-            JOptionPane.showMessageDialog(this, "No se pudo conectar con MySQL.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        PreparedStatement ps = con.prepareStatement(sql);
-        ps.setDouble(1, fondoInicial);
-        ps.setDouble(2, ventasEfectivo);
-        ps.setDouble(3, ventasTarjeta);
-        ps.setDouble(4, totalVentasGeneral);
-        ps.setDouble(5, efectivoEsperado);
-        ps.setDouble(6, efectivoEnCaja);
-        ps.setDouble(7, diferencia);
-        ps.setInt(8, idUsuario);
-
-        int filasActualizadas = ps.executeUpdate();
-        ps.close();
-        con.close();
-
-        if (filasActualizadas == 0) {
-            JOptionPane.showMessageDialog(this, "No se encontró ningun corte abierto para este usuario.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        // 3. MENSAJE DE ÉXITO
-        JOptionPane.showMessageDialog(
-                this,
-                "¡Corte de caja guardado correctamente en MySQL!\n\n"
-                + "Total ventas: $" + String.format("%.2f", totalVentasGeneral)
-                + "\nEfectivo esperado: $" + String.format("%.2f", efectivoEsperado)
-                + "\nEfectivo contado: $" + String.format("%.2f", efectivoEnCaja)
-                + "\nDiferencia: $" + String.format("%.2f", diferencia),
-                "Corte Finalizado",
-                JOptionPane.INFORMATION_MESSAGE
-        );
-
-        // 4. LIMPIAR PANTALLA Y REINICIAR CAJA
-        jTextField1.setText("0");
-        txtRetiros.setText("0");
-        // ... (tus limpiezas de textfields de denominaciones continúan igual) ...
-
-        VISTA.PRINCIPAL.cajaAbierta = false;
-        VISTA.PRINCIPAL.fondoInicialGuardado = 0.0;
-
-    } catch (SQLException e) {
-        JOptionPane.showMessageDialog(this, "Error al actualizar el corte en MySQL:\n" + e.getMessage(), "Error SQL", JOptionPane.ERROR_MESSAGE);
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "Error al finalizar el corte:\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    // 1. Obtención y validación del monto inicial de forma segura
+    double fondo = parsearDobleSafe(jTextField1.getText());
+    if (fondo <= 0) {
+        JOptionPane.showMessageDialog(this, "Ingrese un fondo inicial válido.", "Aviso", JOptionPane.WARNING_MESSAGE);
+        return;
     }
 
-    }//GEN-LAST:event_jButton3ActionPerformed
+    // 2. Obtener el ID del usuario desde la sesión global
+    int idUsuario = MODELO.SesionActual.idUsuarioLogueado;
+    CONTROLADOR.CorteCajaDao corteDao = new CONTROLADOR.CorteCajaDao();
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-                                                
-    try {
-        // 1. Limpiar la cola de CUPS por seguridad ante trabajos atorados
-        try {
-            Runtime.getRuntime().exec("cancel -a Ticketera");
-        } catch (Exception ex) {
-            // Ignorar
-        }
+    // 3. Verificar si el usuario ya tiene un corte abierto en BD
+    if (corteDao.hayCorteAbierto(idUsuario)) {
+        JOptionPane.showMessageDialog(this, "Ya existe un corte de caja abierto para este usuario.", "Aviso", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
 
-        // 2. Leer y limpiar los valores de la pantalla para el ticket (quitando símbolos y comas)
-        double fondoInicial = Double.parseDouble(jTextField1.getText().replaceAll("[^0-9.-]", "").trim());
-        double ventasEfectivo = Double.parseDouble(lblVentasEfectivo.getText().replaceAll("[^0-9.-]", "").trim());
-        double ventasTarjeta = Double.parseDouble(lblVentasTarjetas.getText().replaceAll("[^0-9.-]", "").trim());
-        double retiros = Double.parseDouble(txtRetiros.getText().replaceAll("[^0-9.-]", "").trim());
-        double totalContado = Double.parseDouble(lblTotalContado.getText().replaceAll("[^0-9.-]", "").trim());
-        double diferencia = Double.parseDouble(lblDiferencia.getText().replaceAll("[^0-9.-]", "").trim());
+    // 4. Insertar el inicio de corte en la Base de Datos
+    boolean inicioCorrecto = corteDao.abrirCorte(idUsuario, fondo);
 
-        StringBuilder ticket = new StringBuilder();
-        
-        // Encabezado del Ticket de Corte
-        ticket.append("\n");
-        ticket.append("================================\n");
-        ticket.append("    LUMMEL SYSTEM INTEGRATION   \n");
-        ticket.append("      REPORTE DE CORTE DE CAJA  \n");
-        ticket.append("================================\n");
-        ticket.append("Fecha: ").append(java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\n");
-        ticket.append("Cajero: Administrador\n");
-        ticket.append("--------------------------------\n");
-        
-        // Detalle de valores del corte
-        ticket.append(String.format("Fondo Inicial:     $%10.2f\n", fondoInicial));
-        ticket.append(String.format("Ventas Efectivo:   $%10.2f\n", ventasEfectivo));
-        ticket.append(String.format("Ventas Tarjeta:    $%10.2f\n", ventasTarjeta));
-        ticket.append(String.format("Retiros / Entregas:$%10.2f\n", retiros));
-        ticket.append("--------------------------------\n");
-        
-        double totalEsperado = fondoInicial + ventasEfectivo - retiros;
-        ticket.append(String.format("Total Esperado:    $%10.2f\n", totalEsperado));
-        ticket.append(String.format("Total Contado:     $%10.2f\n", totalContado));
-        ticket.append("--------------------------------\n");
-        ticket.append(String.format("Diferencia:        $%10.2f\n", diferencia));
-        
-        ticket.append("================================\n");
-        ticket.append("   ¡CORTE GENERADO CON ÉXITO!   \n");
-        
-        // Espacios de cortesía y avance para el papel
-        ticket.append("\n\n\n\n");
+    if (inicioCorrecto) {
+        // Actualizamos estado en la interfaz
+        VISTA.PRINCIPAL.fondoInicialGuardado = fondo;
+        VISTA.PRINCIPAL.cajaAbierta = true;
 
-        // Buscar la impresora "Ticketera" en los servicios del sistema
-        javax.print.PrintService[] servicios = javax.print.PrintServiceLookup.lookupPrintServices(null, null);
-        javax.print.PrintService impresoraTicketera = null;
+        jTextField1.setEnabled(false);
+        jButton1.setEnabled(false);
 
-        for (javax.print.PrintService servicio : servicios) {
-            if (servicio.getName().equalsIgnoreCase("Ticketera")) {
-                impresoraTicketera = servicio;
+        JOptionPane.showMessageDialog(this, "Corte de caja iniciado correctamente.");
+        calcularTotalesCorte();
+
+        // =========================================================================
+        // 5. MSTRAR PUNTO DE VENTA EN LA VENTANA PRINCIPAL
+        // =========================================================================
+        for (java.awt.Frame frame : java.awt.Frame.getFrames()) {
+            if (frame instanceof VISTA.PRINCIPAL) {
+                ((VISTA.PRINCIPAL) frame).mostrarPanel(new VISTA.Punto_Venta());
                 break;
             }
         }
 
-        if (impresoraTicketera == null) {
-            javax.swing.JOptionPane.showMessageDialog(this, "No se encontró la impresora 'Ticketera'.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
-            return;
+        // =========================================================================
+        // 6. OCULTAR Y CERRAR LA VENTANA EMERGENTE (JDialog de Corte)
+        // =========================================================================
+        java.awt.Window ventanaFlotante = javax.swing.SwingUtilities.getWindowAncestor(this);
+
+        if (ventanaFlotante != null && !(ventanaFlotante instanceof VISTA.PRINCIPAL)) {
+            ventanaFlotante.setVisible(false); // Ocualta la ventana emergente de inmediato
+            ventanaFlotante.dispose();        // Libera los recursos de la ventana
         }
 
-        // Envío directo en modo RAW a la impresora
+    } else {
+        JOptionPane.showMessageDialog(this, "No se pudo registrar el inicio de caja en la base de datos.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+} catch (Exception e) {
+    JOptionPane.showMessageDialog(this, "Error al iniciar el corte: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+}
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+try {
+    // 1. OBTENER LOS VALORES DE LA VISTA
+    double fondoInicial = parsearDoble(jTextField1.getText());
+    double ventasEfectivo = parsearDoble(lblVentasEfectivo.getText());
+    double ventasTarjeta = parsearDoble(lblVentasTarjetas.getText());
+    double totalVentasGeneral = ventasEfectivo + ventasTarjeta;
+    double retiros = parsearDoble(txtRetiros.getText());
+
+    double efectivoEsperado = fondoInicial + ventasEfectivo - retiros;
+    double efectivoEnCaja = parsearDoble(lblTotalContado.getText());
+    double diferencia = efectivoEnCaja - efectivoEsperado;
+
+    // --- CAMBIO CLAVE 1: Obtener ID dinámico del usuario logueado ---
+    int idUsuario = MODELO.SesionActual.idUsuarioLogueado;
+
+    // 2. UTILIZAR EL DAO (usando los métodos unificados que gestionan la conexión automáticamante)
+    CONTROLADOR.CorteCajaDao corteDao = new CONTROLADOR.CorteCajaDao();
+    int idCorteAbierto = corteDao.obtenerIdCorteAbierto(idUsuario);
+
+    // Validar si realmente hay un corte abierto para cerrar
+    if (idCorteAbierto == -1) {
+        JOptionPane.showMessageDialog(this, "No se encontró ningún corte abierto para este usuario.", "Aviso", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    // Cerrar el corte en la base de datos
+    boolean cerradoConExito = corteDao.cerrarCaja(idCorteAbierto, idUsuario, efectivoEnCaja);
+
+    if (!cerradoConExito) {
+        JOptionPane.showMessageDialog(this, "Ocurrió un error al intentar cerrar el corte en la base de datos.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // 3. MENSAJE DE ÉXITO
+    JOptionPane.showMessageDialog(
+            this,
+            "¡Corte de caja guardado correctamente en MySQL!\n\n"
+            + "Total ventas: $" + String.format("%.2f", totalVentasGeneral)
+            + "\nEfectivo esperado: $" + String.format("%.2f", efectivoEsperado)
+            + "\nEfectivo contado: $" + String.format("%.2f", efectivoEnCaja)
+            + "\nDiferencia: $" + String.format("%.2f", diferencia),
+            "Corte Finalizado",
+            JOptionPane.INFORMATION_MESSAGE
+    );
+
+    // 4. LIMPIAR PANTALLA Y REINICIAR CAJA
+    jTextField1.setText("0");
+    txtRetiros.setText("0");
+    // ... (tus limpiezas de textfields adicionales) ...
+
+    VISTA.PRINCIPAL.cajaAbierta = false;
+    VISTA.PRINCIPAL.fondoInicialGuardado = 0.0;
+
+} catch (Exception e) {
+    JOptionPane.showMessageDialog(this, "Error al finalizar el corte:\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+}
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+try {
+    // =========================================================================
+    // 1. OBTENER Y SANITIZAR VALORES DE LA PANTALLA
+    // =========================================================================
+    double fondoInicial = parsearDobleSafe(jTextField1.getText());
+    double ventasEfectivo = parsearDobleSafe(lblVentasEfectivo.getText());
+    double ventasTarjeta = parsearDobleSafe(lblVentasTarjetas.getText());
+    double retiros = parsearDobleSafe(txtRetiros.getText());
+    double totalContado = parsearDobleSafe(lblTotalContado.getText());
+    double diferencia = parsearDobleSafe(lblDiferencia.getText());
+    double totalEsperado = fondoInicial + ventasEfectivo - retiros;
+
+    int idUsuario = MODELO.SesionActual.idUsuarioLogueado;
+
+    // =========================================================================
+    // 2. REGISTRAR CIERRE EN BASE DE DATOS (Primero la persistencia)
+    // =========================================================================
+    CONTROLADOR.CorteCajaDao corteDao = new CONTROLADOR.CorteCajaDao();
+    int idCorteAbierto = corteDao.obtenerIdCorteAbierto(idUsuario);
+
+    if (idCorteAbierto == -1) {
+        javax.swing.JOptionPane.showMessageDialog(this, 
+            "No se encontró ningún corte abierto en la base de datos para este usuario.", 
+            "Aviso", javax.swing.JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    boolean cerradoEnBD = corteDao.cerrarCaja(idCorteAbierto, idUsuario, totalContado);
+
+    if (!cerradoEnBD) {
+        javax.swing.JOptionPane.showMessageDialog(this, 
+            "Ocurrió un error al intentar guardar el cierre en la base de datos.", 
+            "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // =========================================================================
+    // 3. CONSTRUCCIÓN DEL TICKET E IMPRESIÓN
+    // =========================================================================
+    try {
+        Runtime.getRuntime().exec("cancel -a Ticketera");
+    } catch (Exception ex) {
+        // Ignorar si no existe el comando en el SO
+    }
+
+    StringBuilder ticket = new StringBuilder();
+    ticket.append("\n");
+    ticket.append("================================\n");
+    ticket.append("    LUMMEL SYSTEM INTEGRATION   \n");
+    ticket.append("      REPORTE DE CORTE DE CAJA  \n");
+    ticket.append("================================\n");
+    ticket.append("Fecha: ").append(java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\n");
+    ticket.append("Cajero ID: ").append(idUsuario).append("\n");
+    ticket.append("--------------------------------\n");
+    
+    ticket.append(String.format("Fondo Inicial:     $%10.2f\n", fondoInicial));
+    ticket.append(String.format("Ventas Efectivo:   $%10.2f\n", ventasEfectivo));
+    ticket.append(String.format("Ventas Tarjeta:    $%10.2f\n", ventasTarjeta));
+    ticket.append(String.format("Retiros / Entregas:$%10.2f\n", retiros));
+    ticket.append("--------------------------------\n");
+    ticket.append(String.format("Total Esperado:    $%10.2f\n", totalEsperado));
+    ticket.append(String.format("Total Contado:     $%10.2f\n", totalContado));
+    ticket.append("--------------------------------\n");
+    ticket.append(String.format("Diferencia:        $%10.2f\n", diferencia));
+    ticket.append("================================\n");
+    ticket.append("   ¡CORTE GENERADO CON ÉXITO!   \n");
+    ticket.append("\n\n\n\n");
+    
+    // Comando ESC/POS para corte de papel automático en térmicas (GS V 66 0)
+    ticket.append((char) 29).append((char) 86).append((char) 66).append((char) 0);
+
+    javax.print.PrintService[] servicios = javax.print.PrintServiceLookup.lookupPrintServices(null, null);
+    javax.print.PrintService impresoraTicketera = null;
+
+    for (javax.print.PrintService servicio : servicios) {
+        if (servicio.getName().equalsIgnoreCase("Ticketera")) {
+            impresoraTicketera = servicio;
+            break;
+        }
+    }
+
+    if (impresoraTicketera != null) {
         javax.print.DocPrintJob trabajo = impresoraTicketera.createPrintJob();
         byte[] bytesTicket = ticket.toString().getBytes("ISO-8859-1");
         javax.print.Doc doc = new javax.print.SimpleDoc(bytesTicket, javax.print.DocFlavor.BYTE_ARRAY.AUTOSENSE, null);
-        
         trabajo.print(doc, null);
-
-        // =========================================================================
-        // 3. REINICIAR Y LIMPIAR TODO AUTOMÁTICAMENTE TRAS IMPRIMIR
-        // =========================================================================
-        jTextField1.setText("0");
-        txtRetiros.setText("0");
-
-        jTextField2.setText("0");
-        jTextField3.setText("0");
-        jTextField4.setText("0");
-        jTextField5.setText("0");
-        jTextField6.setText("0");
-        jTextField7.setText("0");
-        jTextField8.setText("0");
-        jTextField9.setText("0");
-        jTextField10.setText("0");
-
-        lblVentasEfectivo.setText("0.00");
-        lblVentasTarjetas.setText("0.00");
-        lblTotalVentaDia.setText("0.00");
-        lblTotalContado.setText("0.00");
-        lblDiferencia.setText("0.00");
-
-        if (lblSub500 != null) lblSub500.setText("");
-        if (lblSub200 != null) lblSub200.setText("");
-        if (lblSub100 != null) lblSub100.setText("");
-        if (lblSub50 != null) lblSub50.setText("");
-        if (lblSub20 != null) lblSub20.setText("");
-        if (lblSub10 != null) lblSub10.setText("");
-        if (lblSub5 != null) lblSub5.setText("");
-        if (lblSub2 != null) lblSub2.setText("");
-        if (lblSub1 != null) lblSub1.setText("");
-
-        // Desbloquear fondo inicial y botón de inicio
-        jTextField1.setEnabled(true);
-        jTextField1.setEditable(true);
-        jButton1.setEnabled(true);
-
-        // Reiniciar variables globales de control
-        VISTA.PRINCIPAL.cajaAbierta = false;
-        VISTA.PRINCIPAL.fondoInicialGuardado = 0.0;
-
-       // Desbloquear el menú principal del sistema de forma segura
-        try {
-            java.awt.Window ventana = javax.swing.SwingUtilities.getWindowAncestor(this);
-            if (ventana instanceof VISTA.PRINCIPAL) {
-                ((VISTA.PRINCIPAL) ventana).bloquearMenuLateral(false);
-            }
-        } catch (Exception ex) {
-            // Si por algo no lo encuentra, evitamos que la aplicación se detenga
-        }
-
-        // Mensaje de éxito
-        javax.swing.JOptionPane.showMessageDialog(this,
-            "¡Ticket impreso y corte finalizado con éxito!",
-            "Corte Completo",
-            javax.swing.JOptionPane.INFORMATION_MESSAGE);
-
-        jTextField1.requestFocus();
-        jTextField1.selectAll();
-
-    } catch (Exception e) {
-        javax.swing.JOptionPane.showMessageDialog(this, "Error al imprimir el corte: " + e.getMessage(), "Error de Impresión", javax.swing.JOptionPane.ERROR_MESSAGE);
+    } else {
+        javax.swing.JOptionPane.showMessageDialog(this, 
+            "El corte se guardó en BD, pero no se encontró la impresora 'Ticketera'.", 
+            "Advertencia de Impresión", javax.swing.JOptionPane.WARNING_MESSAGE);
     }
+
+    // =========================================================================
+    // 4. REINICIAR Y LIMPIAR INTERFAZ
+    // =========================================================================
+    jTextField1.setText("0");
+    txtRetiros.setText("0");
+
+    jTextField2.setText("0");
+    jTextField3.setText("0");
+    jTextField4.setText("0");
+    jTextField5.setText("0");
+    jTextField6.setText("0");
+    jTextField7.setText("0");
+    jTextField8.setText("0");
+    jTextField9.setText("0");
+    jTextField10.setText("0");
+
+    lblVentasEfectivo.setText("0.00");
+    lblVentasTarjetas.setText("0.00");
+    lblTotalVentaDia.setText("0.00");
+    lblTotalContado.setText("0.00");
+    lblDiferencia.setText("0.00");
+
+    if (lblSub500 != null) lblSub500.setText("");
+    if (lblSub200 != null) lblSub200.setText("");
+    if (lblSub100 != null) lblSub100.setText("");
+    if (lblSub50 != null) lblSub50.setText("");
+    if (lblSub20 != null) lblSub20.setText("");
+    if (lblSub10 != null) lblSub10.setText("");
+    if (lblSub5 != null) lblSub5.setText("");
+    if (lblSub2 != null) lblSub2.setText("");
+    if (lblSub1 != null) lblSub1.setText("");
+
+    jTextField1.setEnabled(true);
+    jTextField1.setEditable(true);
+    jButton1.setEnabled(true);
+
+    VISTA.PRINCIPAL.cajaAbierta = false;
+    VISTA.PRINCIPAL.fondoInicialGuardado = 0.0;
+
+    try {
+        java.awt.Window ventana = javax.swing.SwingUtilities.getWindowAncestor(this);
+        if (ventana instanceof VISTA.PRINCIPAL) {
+            ((VISTA.PRINCIPAL) ventana).bloquearMenuLateral(false);
+        }
+    } catch (Exception ex) {
+        // Excepción de UI ignorada si aplica
+    }
+
+    javax.swing.JOptionPane.showMessageDialog(this,
+        "¡Corte guardado en Base de Datos y ticket finalizado correctamente!",
+        "Corte Completo",
+        javax.swing.JOptionPane.INFORMATION_MESSAGE);
+
+    jTextField1.requestFocus();
+    jTextField1.selectAll();
+
+} catch (Exception e) {
+    javax.swing.JOptionPane.showMessageDialog(this, 
+        "Error al finalizar el corte: " + e.getMessage(), 
+        "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+}
+    }
+private double parsearDobleSafe(String texto) {
+    if (texto == null) return 0.0;
+    String limpio = texto.replaceAll("[^0-9.-]", "").trim();
+    if (limpio.isEmpty() || limpio.equals("-")) return 0.0;
+    try {
+        return Double.parseDouble(limpio);
+    } catch (NumberFormatException e) {
+        return 0.0;
+    }
+
     }//GEN-LAST:event_jButton2ActionPerformed
 // --- MÉTODO PARA ESCUCHAR CUANDO EL USUARIO ESCRIBE ---
 // --- MÉTODO PARA CALCULAR LOS TOTALES DEL CORTE ---

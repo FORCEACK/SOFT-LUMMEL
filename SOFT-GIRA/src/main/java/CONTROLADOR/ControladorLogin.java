@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package CONTROLADOR;
 
 import MODELO.ConsultasUsuario;
@@ -11,7 +7,6 @@ import javax.swing.JOptionPane;
 
 public class ControladorLogin {
 
-    // ¡AQUÍ ESTÁ LA LÍNEA QUE FALTABA! El método que envuelve toda la lógica
     public void procesarLogin(String username, String password, USUARIO vistaLogin) {
         
         // 1. Filtro básico de seguridad (Validar vacíos)
@@ -27,9 +22,12 @@ public class ControladorLogin {
         // 3. Tomamos una decisión basada en la respuesta del Modelo
         if (accesoConcedido) {
             
-            // --- NUEVO: GUARDAR LA SESIÓN Y PONERLO ACTIVO (1) EN LA BD ---
-            // Guardamos globalmente quién entró al sistema (Código de tu compañero)
+            // --- GUARDAR LA SESIÓN DE USUARIO (NOMBRE E ID) ---
             MODELO.SesionActual.usuarioLogueado = username; 
+            
+            // Recuperación del ID dinámico para asociar Ventas y Cortes de Caja
+            int idObtenido = modelo.obtenerIdUsuario(username);
+            MODELO.SesionActual.idUsuarioLogueado = idObtenido;
             
             // Cambiamos el estado a 1 (Conectado) en la Base de Datos
             modelo.actualizarEstadoSesion(username, 1);
@@ -42,7 +40,7 @@ public class ControladorLogin {
             menu.setLocationRelativeTo(null);
             
         } else {
-            // Error: Mandamos la alerta (Código de tu compañero)
+            // Error: Mandamos la alerta
             JOptionPane.showMessageDialog(vistaLogin, "ACCESO DENEGADO...", "Acceso Denegado", JOptionPane.ERROR_MESSAGE);
         }        
     } // Fin del método procesarLogin

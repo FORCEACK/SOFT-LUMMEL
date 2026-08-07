@@ -28,42 +28,53 @@ public class Punto_Venta extends javax.swing.JPanel {
     private javax.swing.JList<String> listaSugerencias = new javax.swing.JList<>();
     private java.util.Vector<Integer> idsProductosEncontrados = new java.util.Vector<>();
 
-
-
     public Punto_Venta() {
-        initComponents(); // <-- Código generado por NetBeans (No modificar dentro)
-    // =========================================================================
-    // TODO EL CÓDIGO PERSONALIZADO VA AQUÍ ABAJO (FUERA DE LA ZONA PROTEGIDA):
-    // =========================================================================
+        initComponents(); // Código generado por NetBeans
 
-    // Configuración del JTextArea en el panel de Resumen de Pago
-    if (txtAreaTicketPreview == null) {
-        txtAreaTicketPreview = new javax.swing.JTextArea();
-    }
-    txtAreaTicketPreview.setEditable(false);
-    txtAreaTicketPreview.setFont(new java.awt.Font("Monospaced", 0, 11));
-    
-    // Vinculamos el área de texto al ScrollPane que hiciste en NetBeans 
-    // (Asegúrate de cambiar "jScrollPane2" si en tu navegador se llama distinto, ej. jScrollPane1)
-    if (jScrollPane2 != null) {
-        jScrollPane2.setViewportView(txtAreaTicketPreview);
-    }
-
-    // Configuración inicial del menú flotante de autocompletado
-    listaSugerencias.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-    popupSugerencias.add(new javax.swing.JScrollPane(listaSugerencias));
-    popupSugerencias.setFocusable(false);
-
-    listaSugerencias.addMouseListener(new java.awt.event.MouseAdapter() {
-        public void mouseClicked(java.awt.event.MouseEvent evt) {
-            if (evt.getClickCount() == 1 || evt.getClickCount() == 2) {
-               Punto_Venta.this.seleccionarProductoSugerido();
+       // --- ASIGNAR USUARIO LOGUEADO AL JLABEL ---
+        try {
+            if (MODELO.SesionActual.usuarioLogueado != null && !MODELO.SesionActual.usuarioLogueado.isEmpty()) {
+                usuario.setText("Usuario: " + MODELO.SesionActual.usuarioLogueado);
+            } else {
+                usuario.setText("Usuario ID: " + MODELO.SesionActual.idUsuarioLogueado);
             }
+        } catch (Exception e) {
+            usuario.setText("Usuario Activo");
         }
-    });
 
+        // 1. Limpiar las filas nulas por defecto que crea el diseñador de NetBeans
+        DefaultTableModel modeloTablaInicial = (DefaultTableModel) jTable1.getModel();
+        modeloTablaInicial.setRowCount(0);
 
-        // Listener para actualizar la vista previa del ticket en tiempo real (Corregido el formato)
+        // 2. Configuración del JTextArea en el panel de Resumen de Pago
+        if (txtAreaTicketPreview == null) {
+            txtAreaTicketPreview = new javax.swing.JTextArea();
+        }
+        txtAreaTicketPreview.setEditable(false);
+        txtAreaTicketPreview.setFont(new java.awt.Font("Monospaced", 0, 11));
+
+        if (jScrollPane2 != null) {
+            jScrollPane2.setViewportView(txtAreaTicketPreview);
+        }
+
+        // Renderizar vista previa inicial centrada
+        actualizarVistaPreviaTicket();
+
+        // 3. Configuración inicial del menú flotante de autocompletado
+        listaSugerencias.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        popupSugerencias.add(new javax.swing.JScrollPane(listaSugerencias));
+        popupSugerencias.setFocusable(false);
+
+        listaSugerencias.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (evt.getClickCount() == 1 || evt.getClickCount() == 2) {
+                    Punto_Venta.this.seleccionarProductoSugerido();
+                }
+            }
+        });
+
+        // 4. Listener para recalcular subtotales y actualizar la vista previa
         jTable1.getModel().addTableModelListener(new javax.swing.event.TableModelListener() {
             private boolean actualizando = false;
 
@@ -71,12 +82,11 @@ public class Punto_Venta extends javax.swing.JPanel {
             public void tableChanged(javax.swing.event.TableModelEvent e) {
                 if (actualizando) return;
 
-                javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) jTable1.getModel();
+                DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
                 int row = e.getFirstRow();
                 int column = e.getColumn();
                 int totalFilas = modelo.getRowCount();
 
-                // Si el evento indica una fila válida que realmente existe en el modelo actual
                 if (row >= 0 && row < totalFilas) {
                     if (column == 2 || column == 3) {
                         actualizando = true;
@@ -91,31 +101,12 @@ public class Punto_Venta extends javax.swing.JPanel {
                                 modelo.setValueAt(subtotal, row, 4);
                             }
                         } catch (NumberFormatException ex) {
-                            // Ignorar mientras el usuario escribe caracteres parciales
+                            // Ignorar caracteres parciales mientras el usuario edita
                         } finally {
                             actualizando = false;
                         }
                     }
                 }
-                
-                // 1. Forzar acción del botón de cobrar
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
-            }
-        });
-
-        // 2. Forzar acción de la tecla Enter en el buscador
-        txtBuscador.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                if (popupSugerencias.isVisible() && listaSugerencias.getModel().getSize() > 0) {
-                    listaSugerencias.setSelectedIndex(0);
-                    seleccionarProductoSugerido();
-                }
-            }
-        });
-        
-                // Actualizar la vista previa siempre de forma segura
                 actualizarVistaPreviaTicket();
             }
         });
@@ -127,13 +118,11 @@ public class Punto_Venta extends javax.swing.JPanel {
         jPanel4 = new javax.swing.JPanel();
         jPanelIzquierdoContenedor = new javax.swing.JPanel();
         jPanelNorteIzq = new javax.swing.JPanel();
-        jPanel5 = new javax.swing.JPanel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        txtAreaTicketPreview = new javax.swing.JTextArea();
         jPanelEncabezado = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
+        usuario = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         txtBuscador = new javax.swing.JTextField();
@@ -142,6 +131,8 @@ public class Punto_Venta extends javax.swing.JPanel {
         jTable1 = new javax.swing.JTable();
         jPanelDerechoGlobal = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        txtAreaTicketPreview = new javax.swing.JTextArea();
         jPanel3 = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
         jButton2 = new javax.swing.JButton();
@@ -155,40 +146,33 @@ public class Punto_Venta extends javax.swing.JPanel {
 
         jPanelNorteIzq.setLayout(new java.awt.BorderLayout());
 
-        jPanel5.setMinimumSize(new java.awt.Dimension(100, 10));
-
-        jScrollPane2.setPreferredSize(new java.awt.Dimension(260, 500));
-
-        txtAreaTicketPreview.setColumns(20);
-        txtAreaTicketPreview.setRows(5);
-        jScrollPane2.setViewportView(txtAreaTicketPreview);
-
-        jPanel5.add(jScrollPane2);
-
-        jPanelNorteIzq.add(jPanel5, java.awt.BorderLayout.CENTER);
-
         jPanelEncabezado.setBackground(new java.awt.Color(31, 34, 111));
+        jPanelEncabezado.setPreferredSize(new java.awt.Dimension(800, 75));
 
         jLabel1.setBackground(new java.awt.Color(255, 255, 255));
-        jLabel1.setFont(new java.awt.Font("sansserif", 1, 36)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("sansserif", 1, 40)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("PUNTO DE VENTA  |");
         jPanelEncabezado.add(jLabel1);
 
-        jLabel2.setFont(new java.awt.Font("sansserif", 1, 24)); // NOI18N
+        jLabel2.setFont(new java.awt.Font("sansserif", 1, 28)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setText("CAJA PRINCIPAL");
         jPanelEncabezado.add(jLabel2);
 
         jPanelNorteIzq.add(jPanelEncabezado, java.awt.BorderLayout.NORTH);
 
+        usuario.setText("jLabel3");
+        jPanel1.add(usuario);
+
         jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/lupa.png"))); // NOI18N
         jPanel1.add(jLabel7);
 
+        jLabel4.setFont(new java.awt.Font("sansserif", 1, 13)); // NOI18N
         jLabel4.setText("DESCRIPCION");
         jPanel1.add(jLabel4);
 
-        txtBuscador.setPreferredSize(new java.awt.Dimension(300, 25));
+        txtBuscador.setPreferredSize(new java.awt.Dimension(420, 32));
         txtBuscador.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 txtBuscadorKeyPressed(evt);
@@ -196,8 +180,12 @@ public class Punto_Venta extends javax.swing.JPanel {
         });
         jPanel1.add(txtBuscador);
 
+        jButton1.setBackground(new java.awt.Color(31, 34, 111));
+        jButton1.setFont(new java.awt.Font("sansserif", 1, 14)); // NOI18N
+        jButton1.setForeground(new java.awt.Color(255, 255, 255));
         jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/cajero-automatico.png"))); // NOI18N
         jButton1.setText("F_Corte");
+        jButton1.setPreferredSize(new java.awt.Dimension(200, 38));
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -227,8 +215,6 @@ public class Punto_Venta extends javax.swing.JPanel {
 
         jPanelIzquierdoContenedor.add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
-        jPanel4.add(jPanelIzquierdoContenedor, java.awt.BorderLayout.CENTER);
-
         jPanelDerechoGlobal.setPreferredSize(new java.awt.Dimension(350, 700));
         jPanelDerechoGlobal.setLayout(new java.awt.BorderLayout());
 
@@ -237,16 +223,28 @@ public class Punto_Venta extends javax.swing.JPanel {
         jLabel5.setText("RESUMEN DE PAGO");
         jPanelDerechoGlobal.add(jLabel5, java.awt.BorderLayout.PAGE_START);
 
+        jScrollPane2.setPreferredSize(new java.awt.Dimension(260, 500));
+
+        txtAreaTicketPreview.setColumns(20);
+        txtAreaTicketPreview.setRows(5);
+        jScrollPane2.setViewportView(txtAreaTicketPreview);
+
+        jPanelDerechoGlobal.add(jScrollPane2, java.awt.BorderLayout.CENTER);
+
         jPanel3.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel3.setPreferredSize(new java.awt.Dimension(350, 166));
+        jPanel3.setPreferredSize(new java.awt.Dimension(350, 180));
         jPanel3.setLayout(new java.awt.BorderLayout());
 
         jLabel6.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
         jLabel6.setText("Aplicacion de Descuento     (f12)");
         jPanel3.add(jLabel6, java.awt.BorderLayout.CENTER);
 
+        jButton2.setBackground(new java.awt.Color(31, 34, 111));
+        jButton2.setFont(new java.awt.Font("sansserif", 1, 18)); // NOI18N
+        jButton2.setForeground(new java.awt.Color(255, 255, 255));
         jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/metodo-de-pago.png"))); // NOI18N
         jButton2.setText("Pagar / Cobrar");
+        jButton2.setPreferredSize(new java.awt.Dimension(350, 60));
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
@@ -260,46 +258,71 @@ public class Punto_Venta extends javax.swing.JPanel {
 
         jPanelDerechoGlobal.add(jPanel3, java.awt.BorderLayout.SOUTH);
 
-        jPanel4.add(jPanelDerechoGlobal, java.awt.BorderLayout.EAST);
+        jPanelIzquierdoContenedor.add(jPanelDerechoGlobal, java.awt.BorderLayout.LINE_END);
+
+        jPanel4.add(jPanelIzquierdoContenedor, java.awt.BorderLayout.CENTER);
 
         add(jPanel4, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        javax.swing.table.DefaultTableModel modeloCarrito = (javax.swing.table.DefaultTableModel) jTable1.getModel();
+DefaultTableModel modeloCarrito = (DefaultTableModel) jTable1.getModel();
 
-        // 1. Validar que el carrito no esté vacío
+        // 1. Validar carrito
         if (modeloCarrito.getRowCount() == 0) {
-            javax.swing.JOptionPane.showMessageDialog(this, "El carrito de compras está vacío.", "Atención", javax.swing.JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "El carrito de compras está vacío.", "Atención", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // 2. Calcular el total de la venta recorriendo la tabla
+        // 2. Obtener id de usuario logueado y corte abierto
+        int idUsuarioActual = MODELO.SesionActual.idUsuarioLogueado;
+        CONTROLADOR.CorteCajaDao corteDao = new CONTROLADOR.CorteCajaDao();
+        int idCorteActual = corteDao.obtenerIdCorteAbierto(idUsuarioActual);
+
+        if (idCorteActual <= 0) {
+            JOptionPane.showMessageDialog(
+                this, 
+                "No hay un corte de caja abierto para este usuario.\nDebe iniciar corte de caja antes de realizar ventas.", 
+                "Caja Cerrada", 
+                JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        // 3. Seleccionar Cliente por Nombre con búsqueda en tiempo real
+        int idClienteFinal = seleccionarClientePorNombre();
+
+        // Si el usuario presiona "Cancelar" o cierra el diálogo, se aborta el proceso de cobranza
+        if (idClienteFinal == -1) {
+            return; 
+        }
+
+        // 4. Calcular el total acumulado
         double totalVenta = 0.0;
         for (int i = 0; i < modeloCarrito.getRowCount(); i++) {
-            Object subVal = modeloCarrito.getValueAt(i, 4); // Columna del subtotal
+            Object subVal = modeloCarrito.getValueAt(i, 4);
             if (subVal != null && !subVal.toString().trim().isEmpty()) {
                 try {
-                    totalVenta += Double.parseDouble(subVal.toString().trim());
+                    String subLimpio = subVal.toString().replaceAll("[^0-9.-]", "").trim();
+                    totalVenta += Double.parseDouble(subLimpio);
                 } catch (NumberFormatException e) {
-                    // Ignorar error individual
+                    // Ignorar subtotal inválido
                 }
             }
         }
 
-        // 3. Miniventana para seleccionar el método de pago (Efectivo o Tarjeta)
+        // 5. Seleccionar método de pago
         String[] opcionesPago = {"Efectivo", "Tarjeta"};
-        String tipoPagoSeleccionado = (String) javax.swing.JOptionPane.showInputDialog(
+        String tipoPagoSeleccionado = (String) JOptionPane.showInputDialog(
             this,
             "Total a pagar: $" + String.format("%.2f", totalVenta) + "\nSeleccione el método de pago:",
             "Método de Pago",
-            javax.swing.JOptionPane.QUESTION_MESSAGE,
+            JOptionPane.QUESTION_MESSAGE,
             null,
             opcionesPago,
             opcionesPago[0]
         );
 
-        // Si el usuario cancela, se detiene la venta
         if (tipoPagoSeleccionado == null) {
             return;
         }
@@ -307,14 +330,13 @@ public class Punto_Venta extends javax.swing.JPanel {
         double pagoEfectivo = 0.0;
         double cambio = 0.0;
 
-        // 4. Si es Efectivo, pedir monto; si es Tarjeta, pasar automático
+        // 6. Procesar pago según el método elegido
         if (tipoPagoSeleccionado.equalsIgnoreCase("Efectivo")) {
-
-            String inputEfectivo = javax.swing.JOptionPane.showInputDialog(
+            String inputEfectivo = JOptionPane.showInputDialog(
                 this,
                 "Total a pagar: $" + String.format("%.2f", totalVenta) + "\nIngrese con cuánto paga el cliente:",
                 "Cobrar en Efectivo",
-                javax.swing.JOptionPane.QUESTION_MESSAGE
+                JOptionPane.QUESTION_MESSAGE
             );
 
             if (inputEfectivo == null) {
@@ -322,19 +344,15 @@ public class Punto_Venta extends javax.swing.JPanel {
             }
 
             try {
-                if (!inputEfectivo.trim().isEmpty()) {
-                    pagoEfectivo = Double.parseDouble(inputEfectivo.trim());
-                } else {
-                    pagoEfectivo = totalVenta;
-                }
+                String textoLimpio = inputEfectivo.replaceAll("[^0-9.-]", "").trim();
+                pagoEfectivo = textoLimpio.isEmpty() ? totalVenta : Double.parseDouble(textoLimpio);
             } catch (NumberFormatException e) {
-                javax.swing.JOptionPane.showMessageDialog(this, "Debe ingresar un valor numérico válido.", "Error de formato", javax.swing.JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Debe ingresar un valor numérico válido.", "Error de formato", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Validar que el dinero cubra el total
             if (pagoEfectivo < totalVenta) {
-                javax.swing.JOptionPane.showMessageDialog(this, "El dinero entregado es menor al total de la venta.", "Fondos insuficientes", javax.swing.JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "El dinero entregado es menor al total de la venta.", "Fondos insuficientes", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
@@ -345,49 +363,42 @@ public class Punto_Venta extends javax.swing.JPanel {
             cambio = 0.0;
         }
 
-   
-// 5. Validar si existe un corte de caja abierto de forma general
-    int idCorteAbierto = CONTROLADOR.ControladorCorte.obtenerCorteAbierto(); // Sin parámetros
-
-    if (idCorteAbierto == -1) {
-        javax.swing.JOptionPane.showMessageDialog(this, "No existe un corte de caja abierto en el sistema.", "Venta no permitida", javax.swing.JOptionPane.WARNING_MESSAGE);
-        return;
-    }
-
-    // Definimos el usuario actual (puedes ajustarlo según tu lógica de sesión)
-    int idUsuarioActual = 1; 
-
-    // Registramos la venta completa
-    int idDocumentoGenerado = CONTROLADOR.ControladorVentas.registrarVentaCompleta(jTable1, totalVenta, pagoEfectivo, cambio, tipoPagoSeleccionado, idUsuarioActual);
-
-    // 6. Validar si se guardó con éxito, imprimir ticket y limpiar carrito
-    if (idDocumentoGenerado != -1) {
-
-        // Llamada al método auxiliar para imprimir el ticket de venta
-        cobrarYGenerarTicket(jTable1, null, totalVenta, tipoPagoSeleccionado, pagoEfectivo, cambio, idDocumentoGenerado);
-
-        // Limpiar la tabla del carrito
-        modeloCarrito.setRowCount(0);
-
-        // Miniventana final con el resumen de la venta
-        javax.swing.JOptionPane.showMessageDialog(
-            this,
-            "¡Venta realizada con éxito!\n\n" +
-            "N° Ticket: " + idDocumentoGenerado + "\n" +
-            "Método de Pago: " + tipoPagoSeleccionado + "\n" +
-            "Total: $" + String.format("%.2f", totalVenta) + "\n" +
-            (tipoPagoSeleccionado.equalsIgnoreCase("Efectivo") ?
-                "Efectivo recibido: $" + String.format("%.2f", pagoEfectivo) + "\nSu cambio: $" + String.format("%.2f", cambio)
-                : "Pago con Tarjeta procesado"),
-            "Venta Exitosa",
-            javax.swing.JOptionPane.INFORMATION_MESSAGE
+        // 7. Registrar la venta en la Base de Datos (enviando el idClienteFinal)
+        int idDocumentoGenerado = CONTROLADOR.ControladorVentas.registrarVentaCompleta(
+            jTable1, 
+            totalVenta, 
+            pagoEfectivo, 
+            cambio, 
+            tipoPagoSeleccionado, 
+            idUsuarioActual,
+            idCorteActual,
+            idClienteFinal
         );
-    }
+
+        // 8. Confirmar venta, imprimir ticket y limpiar tabla
+        if (idDocumentoGenerado != -1) {
+            cobrarYGenerarTicket(jTable1, impresion, totalVenta, tipoPagoSeleccionado, pagoEfectivo, cambio, idDocumentoGenerado);
+
+            modeloCarrito.setRowCount(0);
+
+            JOptionPane.showMessageDialog(
+                this,
+                "¡Venta realizada con éxito!\n\n" +
+                "N° Ticket: " + idDocumentoGenerado + "\n" +
+                "Cliente ID: " + idClienteFinal + "\n" +
+                "Método de Pago: " + tipoPagoSeleccionado + "\n" +
+                "Total: $" + String.format("%.2f", totalVenta) + "\n" +
+                (tipoPagoSeleccionado.equalsIgnoreCase("Efectivo") ?
+                    "Efectivo recibido: $" + String.format("%.2f", pagoEfectivo) + "\nSu cambio: $" + String.format("%.2f", cambio)
+                    : "Pago con Tarjeta procesado"),
+                "Venta Exitosa",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+        }
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void txtBuscadorKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscadorKeyPressed
-        // Si presiona ENTER y hay elementos, selecciona el primero automáticamente
-        if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+       if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
             if (popupSugerencias.isVisible() && listaSugerencias.getModel().getSize() > 0) {
                 listaSugerencias.setSelectedIndex(0);
                 seleccionarProductoSugerido();
@@ -405,12 +416,12 @@ public class Punto_Venta extends javax.swing.JPanel {
         javax.swing.DefaultListModel<String> modeloLista = new javax.swing.DefaultListModel<>();
         idsProductosEncontrados.clear();
 
-        try (java.sql.Connection con = MODELO.ConexionBD.conectar();
-            java.sql.PreparedStatement pst = con.prepareStatement(sql)) {
+        try (Connection con = MODELO.ConexionBD.conectar();
+             PreparedStatement pst = con.prepareStatement(sql)) {
 
             pst.setString(1, "%" + textoFiltro + "%");
             pst.setString(2, textoFiltro);
-            java.sql.ResultSet rs = pst.executeQuery();
+            ResultSet rs = pst.executeQuery();
 
             while (rs.next()) {
                 int id = rs.getInt("articulo_id");
@@ -425,7 +436,6 @@ public class Punto_Venta extends javax.swing.JPanel {
             listaSugerencias.setModel(modeloLista);
 
             if (!modeloLista.isEmpty()) {
-                // Muestra el menú debajo del buscador de texto
                 popupSugerencias.show(txtBuscador, 0, txtBuscador.getHeight());
                 popupSugerencias.setPopupSize(txtBuscador.getWidth(), 100);
                 txtBuscador.requestFocusInWindow();
@@ -433,28 +443,20 @@ public class Punto_Venta extends javax.swing.JPanel {
                 popupSugerencias.setVisible(false);
             }
 
-        } catch (java.sql.SQLException e) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Error en la búsqueda: " + e.getMessage());
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error en la búsqueda: " + e.getMessage());
         }
     }//GEN-LAST:event_txtBuscadorKeyPressed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-      try {
-          // Solo reutilizamos la variable que ya estaba arriba (sin repetir java.awt.Window)
-          Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(this);
-        
-        // Abrimos el diálogo pasándole la ventana padre real y haciendo el casting correcto
-        Corte_Caja ventanaCorte = new Corte_Caja((java.awt.Frame) parentWindow, true);
-        
-        // La centramos y la hacemos visible
-        ventanaCorte.setLocationRelativeTo(parentWindow); 
-        ventanaCorte.setVisible(true);
-        
-    } catch (Exception e) {
-        javax.swing.JOptionPane.showMessageDialog(this, "Error al abrir el corte de caja: " + e.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
-    }
-
-
+    try {
+            Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(this);
+            Corte_Caja ventanaCorte = new Corte_Caja((java.awt.Frame) parentWindow, true);
+            ventanaCorte.setLocationRelativeTo(parentWindow); 
+            ventanaCorte.setVisible(true);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al abrir el corte de caja: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void seleccionarProductoSugerido() {
@@ -469,221 +471,323 @@ public class Punto_Venta extends javax.swing.JPanel {
     }
 
     private void agregarArticuloPorId(int idArticulo) {
-       String sql = "SELECT articulo_id, nombre, precio_Venta, stock FROM Articulo WHERE articulo_id = ?";
-    
-    try (java.sql.Connection con = MODELO.ConexionBD.conectar();
-         java.sql.PreparedStatement pst = con.prepareStatement(sql)) {
-        
-        pst.setInt(1, idArticulo);
-        java.sql.ResultSet rs = pst.executeQuery();
+        String sql = "SELECT articulo_id, nombre, precio_Venta, stock FROM Articulo WHERE articulo_id = ?";
 
-        if (rs.next()) {
-            int id = rs.getInt("articulo_id");
-            String nombre = rs.getString("nombre");
-            double precio = rs.getDouble("precio_Venta");
-            double stock = rs.getDouble("stock");
-            double cantidad = 1.0; // Cantidad inicial por defecto
-            double subtotal = precio * cantidad;
+        try (Connection con = MODELO.ConexionBD.conectar();
+             PreparedStatement pst = con.prepareStatement(sql)) {
 
-            javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) jTable1.getModel();
-            
-            // Verificar si el producto ya está en la tabla para solo sumar la cantidad
-            boolean encontrado = false;
-            for (int i = 0; i < modelo.getRowCount(); i++) {
-                Object valId = modelo.getValueAt(i, 0);
-                if (valId != null && Integer.parseInt(valId.toString().trim()) == id) {
-                    double cantActual = Double.parseDouble(modelo.getValueAt(i, 2).toString().trim());
-                    double nuevaCant = cantActual + 1;
-                    modelo.setValueAt(nuevaCant, i, 2);
-                    modelo.setValueAt(nuevaCant * precio, i, 4); // Actualizar subtotal con seguridad
-                    encontrado = true;
-                    break;
+            pst.setInt(1, idArticulo);
+            ResultSet rs = pst.executeQuery();
+
+            if (rs.next()) {
+                int id = rs.getInt("articulo_id");
+                String nombre = rs.getString("nombre");
+                double precio = rs.getDouble("precio_Venta");
+                double cantidad = 1.0;
+                double subtotal = precio * cantidad;
+
+                DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
+
+                // Si el producto ya está en el carrito, sumar la cantidad
+                boolean encontrado = false;
+                for (int i = 0; i < modelo.getRowCount(); i++) {
+                    Object valId = modelo.getValueAt(i, 0);
+                    if (valId != null && Integer.parseInt(valId.toString().trim()) == id) {
+                        double cantActual = Double.parseDouble(modelo.getValueAt(i, 2).toString().trim());
+                        double nuevaCant = cantActual + 1;
+                        modelo.setValueAt(nuevaCant, i, 2);
+                        modelo.setValueAt(nuevaCant * precio, i, 4);
+                        encontrado = true;
+                        break;
+                    }
                 }
+
+                // Agregar fila nueva si no existe en la tabla
+                if (!encontrado) {
+                    modelo.addRow(new Object[]{
+                        id, 
+                        (nombre != null ? nombre : "Sin nombre"), 
+                        cantidad, 
+                        precio, 
+                        subtotal
+                    });
+                }
+
+                popupSugerencias.setVisible(false);
+                txtBuscador.setText("");
+                txtBuscador.requestFocusInWindow();
             }
-
-            // Si no está, se añade una nueva fila asegurando que ningún valor sea nulo
-            if (!encontrado) {
-                modelo.addRow(new Object[]{
-                    id, 
-                    (nombre != null ? nombre : "Sin nombre"), 
-                    cantidad, 
-                    precio, 
-                    subtotal
-                });
-            }
-            
-            popupSugerencias.setVisible(false);
-            txtBuscador.setText("");
-            txtBuscador.requestFocusInWindow();
-        }
-    } catch (java.sql.SQLException e) {
-        javax.swing.JOptionPane.showMessageDialog(this, "Error al agregar el artículo: " + e.getMessage());
-    }
-}
-  
-
-    private void ejecutarGuardadoVentaYStock(javax.swing.table.DefaultTableModel modelo, double total, String tipoPago, double efectivo, double cambio) {
-   String sqlStock = "UPDATE Articulo SET stock = stock - ? WHERE articulo_id = ?";
-    try (java.sql.Connection con = MODELO.ConexionBD.conectar();
-         java.sql.PreparedStatement pstStock = con.prepareStatement(sqlStock)) {
-        
-        int rowCount = modelo.getRowCount();
-        for (int i = 0; i < rowCount; i++) {
-            Object objCant = modelo.getValueAt(i, 2);
-            Object objId   = modelo.getValueAt(i, 0);
-            
-            if (objCant != null && objId != null && !objCant.toString().trim().isEmpty() && !objId.toString().trim().isEmpty()) {
-                pstStock.setDouble(1, Double.parseDouble(objCant.toString().trim()));
-                pstStock.setInt(2, Integer.parseInt(objId.toString().trim()));
-                pstStock.addBatch();
-            }
-        }
-        pstStock.executeBatch();
-        modelo.setRowCount(0); // Limpia la tabla
-    } catch (java.sql.SQLException e) {
-        javax.swing.JOptionPane.showMessageDialog(this, "Error al actualizar stock: " + e.getMessage());
-    }
-}
-
-  private void actualizarVistaPreviaTicket() {
-    if (txtAreaTicketPreview == null) return;
-
-    javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) jTable1.getModel();
-    int rowCount = modelo.getRowCount();
-
-    StringBuilder ticket = new StringBuilder();
-    
-    // Usamos un ancho fijo de 32 caracteres igual que tu ticket real para que coincida el centrado
-    ticket.append(centrarTexto("SISTEMA SOFT-GIRA", 32)).append("\n");
-    ticket.append("--------------------------------\n");
-    ticket.append(String.format("%-16s %4s %8s\n", "Articulo", "Cnt", "Sub"));
-    ticket.append("--------------------------------\n");
-
-    double total = 0.0;
-    for (int i = 0; i < rowCount; i++) {
-        Object descObj = modelo.getValueAt(i, 1);
-        Object cantObj = modelo.getValueAt(i, 2);
-        Object subObj = modelo.getValueAt(i, 4);
-
-        if (descObj != null && cantObj != null && subObj != null) {
-            String desc = descObj.toString();
-            if (desc.length() > 16) desc = desc.substring(0, 16); 
-            try {
-                double cant = Double.parseDouble(cantObj.toString());
-                double sub = Double.parseDouble(subObj.toString());
-                total += sub;
-                ticket.append(String.format("%-16s %4.1f $%7.2f\n", desc, cant, sub));
-            } catch (NumberFormatException e) {}
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al agregar el artículo: " + e.getMessage());
         }
     }
+private void actualizarVistaPreviaTicket() {
+        if (txtAreaTicketPreview == null) return;
 
-    ticket.append("--------------------------------\n");
-    ticket.append(String.format("TOTAL: $%.2f\n", total));
-    ticket.append("--------------------------------\n");
-    ticket.append(centrarTexto("¡Gracias por su compra!", 32)).append("\n");
-
-    txtAreaTicketPreview.setText(ticket.toString());
-}
-
-// Método auxiliar rápido para centrar textos en la vista de ticket
-private String centrarTexto(String texto, int anchoLinea) {
-    if (texto.length() >= anchoLinea) return texto;
-    int padding = (anchoLinea - texto.length()) / 2;
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < padding; i++) sb.append(" ");
-    sb.append(texto);
-    return sb.toString();
-}
-
-private void cobrarYGenerarTicket(javax.swing.JTable jTable1, java.awt.Checkbox chkImprimir, double totalCompra, String tipoPago, double efectivo, double cambio, int idVenta) {
-    try {
-        // Limpiar la cola de CUPS por seguridad ante trabajos atorados
-        try {
-            Runtime.getRuntime().exec("cancel -a Ticketera");
-        } catch (Exception ex) {
-            // Ignorar
-        }
-
-        javax.swing.table.DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
+        DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
         int rowCount = modelo.getRowCount();
 
         StringBuilder ticket = new StringBuilder();
-        
-        // Encabezado exacto del diseño proporcionado (32 caracteres de ancho)
-        ticket.append("\n");
-        ticket.append("================================\n");
-        ticket.append("   LUMMEL SYSTEM INTEGRATION    \n");
-        ticket.append("     PUNTO DE VENTA CAJA        \n");
-        ticket.append("================================\n");
-        ticket.append("Folio: ").append(idVenta).append("\n");
-        ticket.append("Fecha: ").append(java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\n");
-        ticket.append("Cajero: Administrador\n");
+        int anchoTotal = 32;
+
+        ticket.append(centrarTexto("SISTEMA SOFT-GIRA", anchoTotal)).append("\n");
         ticket.append("--------------------------------\n");
-        ticket.append(String.format("%-16s %4s %8s\n", "PRODUCTO", "CANT", "SUBTOTAL"));
+        ticket.append(String.format("%-16s %4s %8s\n", "Articulo", "Cnt", "Sub"));
         ticket.append("--------------------------------\n");
 
+        double total = 0.0;
         for (int i = 0; i < rowCount; i++) {
             Object descObj = modelo.getValueAt(i, 1);
             Object cantObj = modelo.getValueAt(i, 2);
             Object subObj = modelo.getValueAt(i, 4);
 
             if (descObj != null && cantObj != null && subObj != null) {
-                String descripcion = descObj.toString();
-                double cantidad = Double.parseDouble(cantObj.toString().trim());
-                double subtotal = Double.parseDouble(subObj.toString().trim());
-
-                // Recortar descripción a 16 caracteres para mantener la alineación de la tabla
-                if (descripcion.length() > 16) {
-                    descripcion = descripcion.substring(0, 16);
-                }
-
-                ticket.append(String.format("%-16s %4.0f $%7.2f\n", descripcion, cantidad, subtotal));
+                String desc = descObj.toString();
+                if (desc.length() > 16) desc = desc.substring(0, 16); 
+                try {
+                    double cant = Double.parseDouble(cantObj.toString());
+                    double sub = Double.parseDouble(subObj.toString());
+                    total += sub;
+                    ticket.append(String.format("%-16s %4.1f $%7.2f\n", desc, cant, sub));
+                } catch (NumberFormatException e) {}
             }
         }
 
         ticket.append("--------------------------------\n");
-        ticket.append(String.format("TOTAL A PAGAR:     $%7.2f\n", totalCompra));
-        
-        if (tipoPago.equalsIgnoreCase("Efectivo")) {
-            ticket.append(String.format("EFECTIVO RECIBIDO: $%7.2f\n", efectivo));
-            ticket.append(String.format("CAMBIO:            $%7.2f\n", cambio));
-        } else {
-            ticket.append("METODO DE PAGO:    TARJETA\n");
-        }
-        
-        ticket.append("================================\n");
-        ticket.append("    ¡GRACIAS POR SU COMPRA!     \n");
-        
-        // Espacios de cortesía y avance para el corte del papel
-        ticket.append("\n\n\n\n");
+        ticket.append(centrarTexto(String.format("TOTAL: $%.2f", total), anchoTotal)).append("\n");
+        ticket.append("--------------------------------\n");
+        ticket.append(centrarTexto("¡Gracias por su compra!", anchoTotal)).append("\n");
 
-        // Buscar la impresora "Ticketera" en los servicios del sistema
-        javax.print.PrintService[] servicios = javax.print.PrintServiceLookup.lookupPrintServices(null, null);
-        javax.print.PrintService impresoraTicketera = null;
+        txtAreaTicketPreview.setText(ticket.toString());
+    }
 
-        for (javax.print.PrintService servicio : servicios) {
-            if (servicio.getName().equalsIgnoreCase("Ticketera")) {
-                impresoraTicketera = servicio;
-                break;
-            }
-        }
+    private String centrarTexto(String texto, int anchoLinea) {
+        if (texto.length() >= anchoLinea) return texto;
+        int padding = (anchoLinea - texto.length()) / 2;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < padding; i++) sb.append(" ");
+        sb.append(texto);
+        return sb.toString();
+    }
 
-        if (impresoraTicketera == null) {
-            javax.swing.JOptionPane.showMessageDialog(this, "No se encontró la impresora 'Ticketera'.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+    private void cobrarYGenerarTicket(JTable jTable1, java.awt.Checkbox chkImprimir, double totalCompra, String tipoPago, double efectivo, double cambio, int idVenta) {
+        if (chkImprimir != null && !chkImprimir.getState()) {
             return;
         }
 
-        // Envío directo en modo RAW a la impresora
-        javax.print.DocPrintJob trabajo = impresoraTicketera.createPrintJob();
-        byte[] bytesTicket = ticket.toString().getBytes("ISO-8859-1");
-        javax.print.Doc doc = new javax.print.SimpleDoc(bytesTicket, javax.print.DocFlavor.BYTE_ARRAY.AUTOSENSE, null);
-        
-        trabajo.print(doc, null);
+        try {
+            try {
+                Runtime.getRuntime().exec("cancel -a Ticketera");
+            } catch (Exception ex) {
+            }
 
-    } catch (Exception e) {
-        javax.swing.JOptionPane.showMessageDialog(this, "Error al imprimir el ticket: " + e.getMessage(), "Error de Impresión", javax.swing.JOptionPane.ERROR_MESSAGE);
+            DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
+            int rowCount = modelo.getRowCount();
+
+            StringBuilder ticket = new StringBuilder();
+
+            ticket.append("\n");
+            ticket.append("================================\n");
+            ticket.append("   LUMMEL SYSTEM INTEGRATION    \n");
+            ticket.append("     PUNTO DE VENTA CAJA        \n");
+            ticket.append("================================\n");
+            ticket.append("Folio: ").append(idVenta).append("\n");
+            ticket.append("Fecha: ").append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\n");
+            
+            String cajeroActual = (MODELO.SesionActual.usuarioLogueado != null && !MODELO.SesionActual.usuarioLogueado.isEmpty()) 
+                    ? MODELO.SesionActual.usuarioLogueado 
+                    : "Administrador";
+            ticket.append("Cajero: ").append(cajeroActual).append("\n");
+            ticket.append("--------------------------------\n");
+            ticket.append(String.format("%-16s %4s %8s\n", "PRODUCTO", "CANT", "SUBTOTAL"));
+            ticket.append("--------------------------------\n");
+
+            for (int i = 0; i < rowCount; i++) {
+                Object descObj = modelo.getValueAt(i, 1);
+                Object cantObj = modelo.getValueAt(i, 2);
+                Object subObj = modelo.getValueAt(i, 4);
+
+                if (descObj != null && cantObj != null && subObj != null) {
+                    String descripcion = descObj.toString();
+                    double cantidad = Double.parseDouble(cantObj.toString().trim());
+                    double subtotal = Double.parseDouble(subObj.toString().trim());
+
+                    if (descripcion.length() > 16) {
+                        descripcion = descripcion.substring(0, 16);
+                    }
+
+                    ticket.append(String.format("%-16s %4.0f $%7.2f\n", descripcion, cantidad, subtotal));
+                }
+            }
+
+            ticket.append("--------------------------------\n");
+            ticket.append(String.format("TOTAL A PAGAR:     $%7.2f\n", totalCompra));
+
+            if (tipoPago.equalsIgnoreCase("Efectivo")) {
+                ticket.append(String.format("EFECTIVO RECIBIDO: $%7.2f\n", efectivo));
+                ticket.append(String.format("CAMBIO:            $%7.2f\n", cambio));
+            } else {
+                ticket.append("METODO DE PAGO:    TARJETA\n");
+            }
+
+            ticket.append("================================\n");
+            ticket.append("    ¡GRACIAS POR SU COMPRA!     \n");
+            ticket.append("\n\n\n\n");
+
+            javax.print.PrintService[] servicios = javax.print.PrintServiceLookup.lookupPrintServices(null, null);
+            javax.print.PrintService impresoraTicketera = null;
+
+            for (javax.print.PrintService servicio : servicios) {
+                if (servicio.getName().equalsIgnoreCase("Ticketera")) {
+                    impresoraTicketera = servicio;
+                    break;
+                }
+            }
+
+            if (impresoraTicketera == null) {
+                JOptionPane.showMessageDialog(this, "No se encontró la impresora 'Ticketera'.", "Impresora no configurada", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            javax.print.DocPrintJob trabajo = impresoraTicketera.createPrintJob();
+            byte[] bytesTicket = ticket.toString().getBytes("ISO-8859-1");
+            javax.print.Doc doc = new javax.print.SimpleDoc(bytesTicket, javax.print.DocFlavor.BYTE_ARRAY.AUTOSENSE, null);
+
+            trabajo.print(doc, null);
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al imprimir el ticket: " + e.getMessage(), "Error de Impresión", JOptionPane.ERROR_MESSAGE);
+        }
     }
+    
+    private int seleccionarClientePorNombre() {
+    final int[] idClienteSeleccionado = {1}; // 1 = ID predeterminado (Público en General)
+    final boolean[] confirmado = {false};
+
+    // Crear ventana emergente para buscar cliente
+    java.awt.Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(this);
+    javax.swing.JDialog dialog = new javax.swing.JDialog((java.awt.Frame) parentWindow, "Asignar Cliente", true);
+    dialog.setLayout(new java.awt.BorderLayout(10, 10));
+
+    javax.swing.JPanel panelPrincipal = new javax.swing.JPanel(new java.awt.BorderLayout(5, 5));
+    panelPrincipal.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+    javax.swing.JLabel lblInstruccion = new javax.swing.JLabel("Escriba el Nombre del Cliente:");
+    panelPrincipal.add(lblInstruccion, java.awt.BorderLayout.NORTH);
+
+    javax.swing.JTextField txtNombreCliente = new javax.swing.JTextField();
+    panelPrincipal.add(txtNombreCliente, java.awt.BorderLayout.CENTER);
+
+    // Menú flotante (Pop-up) para mostrar las sugerencias de nombres
+    javax.swing.JPopupMenu popupCliente = new javax.swing.JPopupMenu();
+    javax.swing.JList<String> listaClientes = new javax.swing.JList<>();
+    java.util.List<Integer> idsClientes = new java.util.ArrayList<>();
+
+    popupCliente.add(new javax.swing.JScrollPane(listaClientes));
+    popupCliente.setFocusable(false);
+
+    // Evento al escribir en la caja de texto: consulta a la BD por la columna 'Nombre'
+    txtNombreCliente.addKeyListener(new java.awt.event.KeyAdapter() {
+        @Override
+        public void keyReleased(java.awt.event.KeyEvent evt) {
+            // Tecla Enter: selecciona la primera opción del desplegable
+            if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                if (popupCliente.isVisible() && listaClientes.getModel().getSize() > 0) {
+                    listaClientes.setSelectedIndex(0);
+                    int idx = listaClientes.getSelectedIndex();
+                    if (idx >= 0 && idx < idsClientes.size()) {
+                        idClienteSeleccionado[0] = idsClientes.get(idx);
+                        txtNombreCliente.setText(listaClientes.getSelectedValue());
+                    }
+                    popupCliente.setVisible(false);
+                }
+                return;
+            }
+
+            String texto = txtNombreCliente.getText().trim();
+            if (texto.isEmpty()) {
+                popupCliente.setVisible(false);
+                idClienteSeleccionado[0] = 1; // Público en general si se borra
+                return;
+            }
+
+            javax.swing.DefaultListModel<String> model = new javax.swing.DefaultListModel<>();
+            idsClientes.clear();
+
+            // Consulta SQL sobre la tabla 'Cliente' y la columna 'Nombre'
+            String sql = "SELECT id_cliente, Nombre FROM Cliente WHERE Nombre LIKE ?";
+            try (Connection con = MODELO.ConexionBD.conectar();
+                 PreparedStatement pst = con.prepareStatement(sql)) {
+
+                pst.setString(1, "%" + texto + "%");
+                ResultSet rs = pst.executeQuery();
+
+                while (rs.next()) {
+                    idsClientes.add(rs.getInt("id_cliente"));
+                    model.addElement(rs.getString("Nombre"));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            listaClientes.setModel(model);
+
+            // Mostrar el menú desplegable si hay coincidencias
+            if (model.getSize() > 0) {
+                popupCliente.show(txtNombreCliente, 0, txtNombreCliente.getHeight());
+                popupCliente.setPopupSize(txtNombreCliente.getWidth(), 120);
+                txtNombreCliente.requestFocusInWindow();
+            } else {
+                popupCliente.setVisible(false);
+            }
+        }
+    });
+
+    // Seleccionar cliente al hacer clic con el mouse en la lista
+    listaClientes.addMouseListener(new java.awt.event.MouseAdapter() {
+        @Override
+        public void mouseClicked(java.awt.event.MouseEvent evt) {
+            int idx = listaClientes.getSelectedIndex();
+            if (idx >= 0 && idx < idsClientes.size()) {
+                idClienteSeleccionado[0] = idsClientes.get(idx);
+                txtNombreCliente.setText(listaClientes.getSelectedValue());
+                popupCliente.setVisible(false);
+            }
+        }
+    });
+
+    // Botones del diálogo
+    javax.swing.JPanel panelBotones = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+    javax.swing.JButton btnAceptar = new javax.swing.JButton("Aceptar");
+    javax.swing.JButton btnCancelar = new javax.swing.JButton("Cancelar");
+
+    btnAceptar.addActionListener(e -> {
+        confirmado[0] = true;
+        dialog.dispose();
+    });
+
+    btnCancelar.addActionListener(e -> {
+        confirmado[0] = false;
+        dialog.dispose();
+    });
+
+    panelBotones.add(btnAceptar);
+    panelBotones.add(btnCancelar);
+
+    dialog.add(panelPrincipal, java.awt.BorderLayout.CENTER);
+    dialog.add(panelBotones, java.awt.BorderLayout.SOUTH);
+    dialog.pack();
+    dialog.setSize(480, 160);
+    dialog.setLocationRelativeTo(this);
+    dialog.setVisible(true);
+
+    if (!confirmado[0]) {
+        return -1; // Retorna -1 si se cancela la operación
+    }
+
+    return idClienteSeleccionado[0]; // Retorna el id_cliente encontrado
 }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private java.awt.Checkbox impresion;
     private javax.swing.JButton jButton1;
@@ -697,7 +801,6 @@ private void cobrarYGenerarTicket(javax.swing.JTable jTable1, java.awt.Checkbox 
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanelDerechoGlobal;
     private javax.swing.JPanel jPanelEncabezado;
     private javax.swing.JPanel jPanelIzquierdoContenedor;
@@ -707,5 +810,6 @@ private void cobrarYGenerarTicket(javax.swing.JTable jTable1, java.awt.Checkbox 
     private javax.swing.JTable jTable1;
     private javax.swing.JTextArea txtAreaTicketPreview;
     private javax.swing.JTextField txtBuscador;
+    private javax.swing.JLabel usuario;
     // End of variables declaration//GEN-END:variables
 }

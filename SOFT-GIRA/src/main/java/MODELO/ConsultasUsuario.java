@@ -1,15 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package MODELO;
+
 import MODELO.ConexionBD; // Importamos tu clase de conexión
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-    public class ConsultasUsuario {
+public class ConsultasUsuario {
 
     // =========================================================================
     // 1. MÉTODO PARA VALIDAR EL ACCESO EN LA BASE DE DATOS
@@ -37,33 +34,62 @@ import java.sql.SQLException;
             
         } catch (SQLException e) {
             System.err.println("Error en la consulta de autenticación: " + e.getMessage());
-            return false; // Si la base de datos falla (ej. se cae el VPN), negamos el acceso por seguridad
+            return false; // Si la base de datos falla, negamos el acceso por seguridad
         }
     }
-    public boolean actualizarEstadoSesion(String username, int estadoEnLinea) {
-    // Si estadoEnLinea == 1 (Inicia sesión), actualizamos la fecha y hora actual (NOW())
-    String sql = (estadoEnLinea == 1) 
-        ? "UPDATE Usuario SET en_linea = ?, ultimo_acceso = NOW() WHERE username = ?"
-        : "UPDATE Usuario SET en_linea = ? WHERE username = ?";
-        
-    ConexionBD conexion = new ConexionBD();
-    
-    try (Connection con = conexion.conectar();
-         PreparedStatement ps = con.prepareStatement(sql)) {
-         
-        ps.setInt(1, estadoEnLinea);
-        ps.setString(2, username);
-        
-        return ps.executeUpdate() > 0;
-        
-    } catch (SQLException e) {
-        System.err.println("Error al actualizar el estado de sesión: " + e.getMessage());
-        return false;
-    }
-}
 
     // =========================================================================
-    // 2. MÉTODO DE ENCRIPTACIÓN SHA-256 (Mudado desde la Vista)
+    // 2. NUEVO MÉTODO: OBTENER ID DEL USUARIO POR SU USERNAME
+    // =========================================================================
+    public int obtenerIdUsuario(String username) {
+        int idUsuario = -1;
+        String sql = "SELECT id_Usuario FROM Usuario WHERE username = ?";
+        
+        ConexionBD conexion = new ConexionBD();
+        
+        try (Connection con = conexion.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            ps.setString(1, username);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    idUsuario = rs.getInt("id_Usuario");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener ID del usuario: " + e.getMessage());
+        }
+        return idUsuario;
+    }
+
+    // =========================================================================
+    // 3. MÉTODO PARA ACTUALIZAR ESTADO DE SESIÓN (EN LÍNEA)
+    // =========================================================================
+    public boolean actualizarEstadoSesion(String username, int estadoEnLinea) {
+        // Si estadoEnLinea == 1 (Inicia sesión), actualizamos la fecha y hora actual (NOW())
+        String sql = (estadoEnLinea == 1) 
+            ? "UPDATE Usuario SET en_linea = ?, ultimo_acceso = NOW() WHERE username = ?"
+            : "UPDATE Usuario SET en_linea = ? WHERE username = ?";
+            
+        ConexionBD conexion = new ConexionBD();
+        
+        try (Connection con = conexion.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+             
+            ps.setInt(1, estadoEnLinea);
+            ps.setString(2, username);
+            
+            return ps.executeUpdate() > 0;
+            
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar el estado de sesión: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // =========================================================================
+    // 4. MÉTODO DE ENCRIPTACIÓN SHA-256
     // =========================================================================
     private String hashPassword(String password) {
         try {
@@ -85,4 +111,5 @@ import java.sql.SQLException;
         }
     }
 }
+
     

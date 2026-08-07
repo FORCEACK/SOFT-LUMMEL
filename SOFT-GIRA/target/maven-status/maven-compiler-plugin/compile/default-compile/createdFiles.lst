@@ -7,17 +7,16 @@ CONTROLADOR/ControladorCompras.class
 VISTA/FINANZAS$3.class
 VISTA/USUARIO$6.class
 CONTROLADOR/ProductoDAO.class
-VISTA/Punto_Venta$2$2.class
 CONTROLADOR/ControladorNuevoUsuario.class
 CONTROLADOR/ControladorEliminarUsuario.class
 VISTA/PanelControlInventarios$4.class
 VISTA/Corte_Caja$10.class
 VISTA/PRINCIPAL$9.class
 VISTA/COMPRAS$5.class
+CONTROLADOR/CorteCajaDao.class
 VISTA/Punto_Venta$5.class
 VISTA/PanelControlInventarios$2.class
 VISTA/USUARIO$3.class
-CONTROLADOR/ControladorCorte.class
 VISTA/FrmModificarUsuario$3.class
 MODELO/ConsultasCompras.class
 VISTA/PRINCIPAL$6.class
@@ -41,6 +40,7 @@ VISTA/COMPRAS.class
 VISTA/COMPRAS$9.class
 CONTROLADOR/ControladorModificarUsuario.class
 VISTA/COMPRAS$3.class
+VISTA/Punto_Venta$6.class
 VISTA/FrmNuevoUsuario.class
 VISTA/PanelControlInventarios.class
 VISTA/USUARIO$1.class
@@ -49,6 +49,7 @@ VISTA/Corte_Caja$4.class
 VISTA/PanelControlInventarios$SemaforoCellRenderer.class
 VISTA/PRINCIPAL$7.class
 VISTA/PanelControlInventarios$6.class
+VISTA/Punto_Venta$7.class
 VISTA/PRINCIPAL$10.class
 VISTA/PRINCIPAL$1.class
 VISTA/PanelUsuarios$3.class
@@ -79,7 +80,6 @@ MODELO/ConsultasPanelUsuarios.class
 VISTA/FrmNuevoUsuario$2.class
 VISTA/COMPRAS$6.class
 CONTROLADOR/ControladorVentas.class
-VISTA/Punto_Venta$2$1.class
 VISTA/PanelUsuarios$1.class
 VISTA/PanelUsuarios$5.class
 VISTA/PRINCIPAL$3.class
