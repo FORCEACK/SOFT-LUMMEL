@@ -19,7 +19,7 @@ public class ControladorLogin {
         ConsultasUsuario modelo = new ConsultasUsuario();
         boolean accesoConcedido = modelo.autenticarUsuario(username, password);
 
-        // 3. Tomamos una decisión basada en la respuesta del Modelo
+       // 3. Tomamos una decisión basada en la respuesta del Modelo
         if (accesoConcedido) {
             
             // --- GUARDAR LA SESIÓN DE USUARIO (NOMBRE E ID) ---
@@ -32,17 +32,32 @@ public class ControladorLogin {
             // Cambiamos el estado a 1 (Conectado) en la Base de Datos
             modelo.actualizarEstadoSesion(username, 1);
 
+            // ---> INICIO DE LO NUEVO: RECUPERAR ROL Y APLICAR PERMISOS <---
+            
+            // Reutilizamos el método que ya tienes para buscar al usuario y obtener su rol
+            MODELO.ConsultasPanelUsuarios consultasUsuarios = new MODELO.ConsultasPanelUsuarios();
+            String[] datosUsuario = consultasUsuarios.buscarUsuarioPorId(idObtenido);
+            
+            String rolDelUsuario = "Vendedor"; // Rol por defecto por seguridad
+            if (datosUsuario != null && datosUsuario[6] != null) {
+                rolDelUsuario = datosUsuario[6]; // La posición 6 trae el nombre del rol desde tu BD
+            }
+
             // Éxito: Cerramos la vista de login y abrimos el menú principal
             vistaLogin.dispose(); 
             
             PRINCIPAL menu = new PRINCIPAL();
+            
+            // Invocamos el método de los permisos justo ANTES de hacer la ventana visible
+            menu.aplicarPermisos(rolDelUsuario);
+            
+            // ---> FIN DE LO NUEVO <---
+
             menu.setVisible(true);
             menu.setLocationRelativeTo(null);
             
         } else {
             // Error: Mandamos la alerta
             JOptionPane.showMessageDialog(vistaLogin, "ACCESO DENEGADO...", "Acceso Denegado", JOptionPane.ERROR_MESSAGE);
-        }        
-    } // Fin del método procesarLogin
-
-} // Fin de la clase ControladorLogin
+        }
+    }}

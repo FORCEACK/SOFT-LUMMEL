@@ -20,14 +20,17 @@ public class ControladorNuevoUsuario {
         }
 
         // 2. Convertir el texto del ComboBox a su ID numérico correspondiente
-        // OJO: Ajusta las palabras y los números según los IDs que tu compañero puso en la tabla 'Rol'
-        int idRol = 2; // Por defecto, asumimos que es Vendedor (ID 2)
-        if(rolSeleccionado.equalsIgnoreCase("Administrador")) {
+        int idRol = 3; // Por defecto, asumimos que es Vendedor (ID 3)
+        
+        if (rolSeleccionado.equalsIgnoreCase("Administrador")) {
             idRol = 1;
-        } else if (rolSeleccionado.equalsIgnoreCase("Almacen")) { // Ajusta si tienes otros roles
+        } else if (rolSeleccionado.equalsIgnoreCase("Gerente")) {
+            idRol = 2; 
+        } else if (rolSeleccionado.equalsIgnoreCase("Vendedor")) {
             idRol = 3; 
+        } else if (rolSeleccionado.equalsIgnoreCase("Desarrolladores")) {
+            idRol = 4; 
         }
-
         // 3. Encriptar la contraseña ingresada
         String passHash = hashPassword(passPlana);
 

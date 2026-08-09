@@ -130,6 +130,24 @@ public static boolean cajaAbierta = false;
         jPanel1.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
+                
+                // --- NUEVA VALIDACIÓN: VERIFICAR SI LA CAJA ESTÁ ABIERTA ---
+                int idUsuarioActual = MODELO.SesionActual.idUsuarioLogueado;
+                CONTROLADOR.CorteCajaDao corteDao = new CONTROLADOR.CorteCajaDao();
+                int idCorteActual = corteDao.obtenerIdCorteAbierto(idUsuarioActual);
+
+                // Si devuelve un ID mayor a 0, significa que no ha hecho su corte
+                if (idCorteActual > 0) {
+                    javax.swing.JOptionPane.showMessageDialog(null, 
+                        "No puedes cerrar sesión porque tienes un corte de caja abierto.\nPor favor, realiza tu corte de caja antes de salir del sistema.", 
+                        "Corte de Caja Pendiente", 
+                        javax.swing.JOptionPane.WARNING_MESSAGE);
+                    
+                    return; // Detenemos la ejecución aquí, no se cierra la sesión
+                }
+                // --- FIN DE LA VALIDACIÓN ---
+
+                // Si no hay corte abierto (idCorteActual = 0), procede normalmente
                 int confirmacion = javax.swing.JOptionPane.showConfirmDialog(null, 
                         "¿Estás seguro que deseas cerrar sesión?", 
                         "Confirmar Cierre de Sesión", 
@@ -367,6 +385,39 @@ public static boolean cajaAbierta = false;
                 new PRINCIPAL().setVisible(true);
             }
         });
+    }
+    // =========================================================================
+    // MÉTODO PARA CONTROL DE ACCESOS POR ROL
+    // =========================================================================
+    public void aplicarPermisos(String rolUsuario) {
+        
+        // 1. Por defecto, hacemos que TODOS los módulos sean visibles
+        jPanel1.setVisible(true); // Cerrar Sesión
+        jPanel2.setVisible(true); // Punto de Venta
+        jPanel4.setVisible(true); // Control de Inventarios
+        jPanel5.setVisible(true); // Finanzas
+        jPanel6.setVisible(true); // Compras
+        jPanel7.setVisible(true); // Usuarios
+        jPanel8.setVisible(true); // Soporte
+
+        // 2. Aplicamos las restricciones según el rol
+        if (rolUsuario.equalsIgnoreCase("Gerente")) {
+            
+            // El Gerente NO tiene acceso a Compras ni a Usuarios
+            jPanel6.setVisible(false);
+            jPanel7.setVisible(false);
+            
+        } else if (rolUsuario.equalsIgnoreCase("Vendedor")) {
+            
+            // El Vendedor SOLO tiene acceso a Venta, Inventario y Cerrar Sesión
+            jPanel5.setVisible(false); // Finanzas
+            jPanel6.setVisible(false); // Compras
+            jPanel7.setVisible(false); // Usuarios
+            jPanel8.setVisible(false); // Soporte
+            
+        }
+        // Nota: Si el rol es "Administrador" o "Desarrolladores", el código ignora 
+        // los 'if' y deja todo visible (que es exactamente lo que buscas).
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -25,15 +25,19 @@ public class ControladorModificarUsuario {
             return;
         }
 
-        // Convertimos el ID (texto) a número, y el Rol a su ID numérico
+       // Convertimos el ID (texto) a número, y el Rol a su ID numérico
         int idUsuario = Integer.parseInt(idStr);
-        int idRol = 2; // Vendedor por defecto
-        if(rolSeleccionado.equalsIgnoreCase("Administrador")) {
+        int idRol = 3; // Vendedor por defecto
+        
+        if (rolSeleccionado.equalsIgnoreCase("Administrador")) {
             idRol = 1;
-        } else if(rolSeleccionado.equalsIgnoreCase("Almacen")) { // Ajusta si tienes otros roles
-            idRol = 3;
+        } else if (rolSeleccionado.equalsIgnoreCase("Gerente")) {
+            idRol = 2; 
+        } else if (rolSeleccionado.equalsIgnoreCase("Vendedor")) {
+            idRol = 3; 
+        } else if (rolSeleccionado.equalsIgnoreCase("Desarrolladores")) {
+            idRol = 4; 
         }
-
         // Mandamos a actualizar
         ConsultasPanelUsuarios modelo = new ConsultasPanelUsuarios();
         boolean exito = modelo.actualizarUsuario(idUsuario, nombre, app, apm, tel, user, idRol);
