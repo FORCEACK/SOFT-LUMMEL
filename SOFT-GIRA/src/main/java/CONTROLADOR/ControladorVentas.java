@@ -11,7 +11,7 @@ import javax.swing.table.DefaultTableModel;
 
 public class ControladorVentas {
 
-    // Sobrecarga 1: 6 parámetros (mantiene compatibilidad)
+    // Sobrecarga 1: 6 parámetros
     public static int registrarVentaCompleta(
             JTable tabla,
             double total,
@@ -19,10 +19,10 @@ public class ControladorVentas {
             double cambio,
             String tipoPago,
             int idUsuario) {
-        return registrarVentaCompleta(tabla, total, efectivo, cambio, tipoPago, idUsuario, -1, 1);
+        return registrarVentaCompleta(tabla, total, efectivo, cambio, tipoPago, idUsuario, -1, 1, 0.0);
     }
 
-    // Sobrecarga 2: 7 parámetros (mantiene compatibilidad si no se envía cliente)
+    // Sobrecarga 2: 7 parámetros
     public static int registrarVentaCompleta(
             JTable tabla,
             double total,
@@ -31,10 +31,10 @@ public class ControladorVentas {
             String tipoPago,
             int idUsuario,
             int idCorte) {
-        return registrarVentaCompleta(tabla, total, efectivo, cambio, tipoPago, idUsuario, idCorte, 1);
+        return registrarVentaCompleta(tabla, total, efectivo, cambio, tipoPago, idUsuario, idCorte, 1, 0.0);
     }
 
-    // Método principal: 8 parámetros (acepta idCorte e idCliente)
+    // Sobrecarga 3: 8 parámetros
     public static int registrarVentaCompleta(
             JTable tabla,
             double total,
@@ -44,6 +44,20 @@ public class ControladorVentas {
             int idUsuario,
             int idCorte,
             int idCliente) {
+        return registrarVentaCompleta(tabla, total, efectivo, cambio, tipoPago, idUsuario, idCorte, idCliente, 0.0);
+    }
+
+    // Método principal: 9 parámetros (incluye el descuento)
+    public static int registrarVentaCompleta(
+            JTable tabla,
+            double total,
+            double efectivo,
+            double cambio,
+            String tipoPago,
+            int idUsuario,
+            int idCorte,
+            int idCliente,
+            double descuento) {
 
         String sqlVenta = """
             INSERT INTO DocumentoVenta
@@ -56,9 +70,10 @@ public class ControladorVentas {
                 pago_efectivo,
                 pago_tarjeta,
                 efectivo_recibido,
-                cambio
+                cambio,
+                descuento
             )
-            VALUES (?, ?, ?, NOW(), ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?)
             """;
 
         String sqlDetalle = """
@@ -100,10 +115,10 @@ public class ControladorVentas {
                 // ==========================================
                 try (PreparedStatement pstVenta = conexion.prepareStatement(sqlVenta, Statement.RETURN_GENERATED_KEYS)) {
 
-                    pstVenta.setInt(1, idCliente); // Recibe el ID de cliente dinámico
+                    pstVenta.setInt(1, idCliente); 
                     pstVenta.setInt(2, idUsuario);
                     pstVenta.setInt(3, idCorte);
-                    pstVenta.setDouble(4, 0.00); // Iniciamos en 0 para que el Trigger calcule el total real
+                    pstVenta.setDouble(4, total);
 
                     if (tipoPago.equalsIgnoreCase("Efectivo")) {
                         pstVenta.setDouble(5, total);
@@ -116,6 +131,9 @@ public class ControladorVentas {
                         pstVenta.setDouble(7, total);
                         pstVenta.setDouble(8, 0.00);
                     }
+
+                    // Se envía el descuento
+                    pstVenta.setDouble(9, descuento);
 
                     pstVenta.executeUpdate();
 
@@ -162,10 +180,14 @@ public class ControladorVentas {
                 conexion.commit();
 
                 // Actualizar acumuladores en la interfaz principal
-                if (tipoPago.equalsIgnoreCase("Efectivo")) {
-                    VISTA.PRINCIPAL.ventasEfectivoDia += total;
-                } else if (tipoPago.equalsIgnoreCase("Tarjeta") || tipoPago.startsWith("Tarjeta")) {
-                    VISTA.PRINCIPAL.ventasTarjetaDia += total;
+                try {
+                    if (tipoPago.equalsIgnoreCase("Efectivo")) {
+                        VISTA.PRINCIPAL.ventasEfectivoDia += total;
+                    } else if (tipoPago.equalsIgnoreCase("Tarjeta") || tipoPago.startsWith("Tarjeta")) {
+                        VISTA.PRINCIPAL.ventasTarjetaDia += total;
+                    }
+                } catch (Exception ex) {
+                    System.err.println("Aviso: No se pudieron actualizar los acumuladores de la interfaz: " + ex.getMessage());
                 }
 
             } catch (SQLException ex) {

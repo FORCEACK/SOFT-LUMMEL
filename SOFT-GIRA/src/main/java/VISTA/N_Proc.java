@@ -4,6 +4,8 @@
  */
 package VISTA;
 
+import CONTROLADOR.ProductoDAO;
+import java.awt.Container;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -15,13 +17,32 @@ import javax.swing.JOptionPane;
  */
 public class N_Proc extends javax.swing.JPanel {
 
+    // 1. Declárala AQUÍ como atributo de la clase (arriba del constructor)
+    private ProductoDAO productoDAO;
     /**
      * Creates new form N_Proc
      */
     public N_Proc() {
+    
         initComponents();
-    }
+        productoDAO = new ProductoDAO();
+        cargarCombos();
+        configurarAtajosTeclado();
+        // Asignar un ancho visible (número de columnas) a cada campo
+    txtNombre.setColumns(15);
+    txtCosto.setColumns(15);
+    txtPrecio.setColumns(15);
+    txtStock.setColumns(15);
+    txtStockMinimo.setColumns(15);
 
+    productoDAO = new ProductoDAO();
+    cargarCombos();
+    configurarAtajosTeclado();
+    }
+    private void cargarCombos() {
+        productoDAO.cargarUnidadesMedidaCombo(cmbMedida);
+        productoDAO.cargarCategoriasCombo(cmbCategoria);
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -39,12 +60,14 @@ public class N_Proc extends javax.swing.JPanel {
         jLabel6 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
-        jTextField1 = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
-        jTextField3 = new javax.swing.JTextField();
-        jTextField4 = new javax.swing.JTextField();
-        jTextField5 = new javax.swing.JTextField();
-        jTextField6 = new javax.swing.JTextField();
+        txtNombre = new javax.swing.JTextField();
+        txtCosto = new javax.swing.JTextField();
+        txtPrecio = new javax.swing.JTextField();
+        txtStock = new javax.swing.JTextField();
+        txtStockMinimo = new javax.swing.JTextField();
+        cmbMedida = new javax.swing.JComboBox<>();
+        cmbCategoria = new javax.swing.JComboBox<>();
+        jLabel7 = new javax.swing.JLabel();
 
         jLabel1.setText("Nombre Producto");
 
@@ -64,87 +87,92 @@ public class N_Proc extends javax.swing.JPanel {
         jButton2.setText("Salir");
         jButton2.addActionListener(this::jButton2ActionPerformed);
 
-        jTextField1.setText("jTextField1");
+        cmbMedida.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
-        jTextField2.setText("jTextField2");
+        cmbCategoria.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cmbCategoria.addActionListener(this::cmbCategoriaActionPerformed);
 
-        jTextField3.setText("jTextField3");
-
-        jTextField4.setText("jTextField4");
-
-        jTextField5.setText("jTextField5");
-
-        jTextField6.setText("jTextField6");
+        jLabel7.setText("Unidad de medida");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(111, 111, 111)
+                .addComponent(jButton1)
+                .addGap(202, 202, 202)
+                .addComponent(jButton2)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(46, 46, 46)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel3)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel7))
                         .addGap(35, 35, 35)
-                        .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel2)
-                        .addGap(50, 50, 50)
-                        .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addGap(42, 42, 42)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 114, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(cmbMedida, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtCosto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                            .addComponent(jLabel2)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(cmbCategoria, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                            .addComponent(jLabel1)
+                            .addGap(42, 42, 42)
+                            .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 88, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel5)
                     .addComponent(jLabel4)
                     .addComponent(jLabel6))
                 .addGap(40, 40, 40)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(133, 133, 133))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(111, 111, 111)
-                .addComponent(jButton1)
-                .addGap(219, 219, 219)
-                .addComponent(jButton2)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(txtStockMinimo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtPrecio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(143, 143, 143))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(49, 49, 49)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(49, 49, 49)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel5)
+                                    .addComponent(txtPrecio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(40, 40, 40)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel1)
+                                    .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(27, 27, 27)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel2)
+                                    .addComponent(cmbCategoria, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(40, 40, 40)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel4)
+                                    .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGap(26, 26, 26)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel5)
-                            .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(40, 40, 40)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel1)
-                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(27, 27, 27)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel2)
-                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(40, 40, 40)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel4)
-                            .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(26, 26, 26)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(jLabel6)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 40, Short.MAX_VALUE)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel6)
+                            .addComponent(txtCosto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtStockMinimo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(35, 35, 35)
+                        .addComponent(cmbMedida, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 29, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(jButton2))
@@ -153,89 +181,158 @@ public class N_Proc extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-   java.awt.Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(this);
-    try {
-        // Cambia "Menu_Principal()" por el nombre de tu panel principal o anterior
-        java.lang.reflect.Method metodo = parentWindow.getClass().getMethod("mostrarPanel", javax.swing.JPanel.class);
-        metodo.invoke(parentWindow, new PanelControlInventarios()); // o el panel al que debas regresar
-    } catch (Exception e) {
-        this.setVisible(false); // Oculta este panel si falla la reflexión
+  java.awt.Window parentWindow = javax.swing.SwingUtilities.getWindowAncestor(this);
+    if (parentWindow != null) {
+        parentWindow.dispose(); // Cierra la ventana flotante
     }
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-   // 1. Capturar los datos de las cajas de texto
-        String producto = jTextField1.getText().trim();
-        String presentacion = jTextField2.getText().trim();
-        String costoStr = jTextField3.getText().trim();
-        String precioStr = jTextField4.getText().trim();
-        String stockStr = jTextField5.getText().trim();
-        String minimoStr = jTextField6.getText().trim();
+String producto = txtNombre.getText().trim();
+    String medidaNombre = (cmbMedida.getSelectedItem() != null) ? cmbMedida.getSelectedItem().toString() : "";
+    String categoriaNombre = (cmbCategoria.getSelectedItem() != null) ? cmbCategoria.getSelectedItem().toString() : "";
+    String costoStr = txtCosto.getText().trim();
+    String precioStr = txtPrecio.getText().trim();
+    String stockStr = txtStock.getText().trim();
+    String minimoStr = txtStockMinimo.getText().trim();
 
-        // Validar que no estén vacíos
-        if (producto.isEmpty() || costoStr.isEmpty() || precioStr.isEmpty() || stockStr.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Por favor, completa al menos los campos obligatorios.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-            return;
+    if (producto.isEmpty() || costoStr.isEmpty() || precioStr.isEmpty() || stockStr.isEmpty() || medidaNombre.isEmpty() || categoriaNombre.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Por favor, completa todos los campos obligatorios.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    try {
+        double costo = Double.parseDouble(costoStr);
+        double precio = Double.parseDouble(precioStr);
+        int stock = Integer.parseInt(stockStr);
+        int minimo = Integer.parseInt(minimoStr);
+
+        // Se envían los 7 parámetros
+        boolean exito = productoDAO.registrarArticulo(
+            producto, 
+            medidaNombre, 
+            costo, 
+            precio, 
+            stock, 
+            minimo, 
+            categoriaNombre
+        );
+
+        if (exito) {
+            JOptionPane.showMessageDialog(this, "¡Artículo guardado exitosamente!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            
+            // Regresar al panel de inventarios para ver el nuevo registro en la tabla
+            java.awt.Container contenedor = this.getParent();
+            if (contenedor != null) {
+                contenedor.removeAll();
+                contenedor.add(new PanelControlInventarios());
+                contenedor.revalidate();
+                contenedor.repaint();
+            }
         }
 
-        try {
-            // Convertir valores numéricos
-            double costo = Double.parseDouble(costoStr);
-            double precio = Double.parseDouble(precioStr);
-            int stock = Integer.parseInt(stockStr);
-            int minimo = minimoStr.isEmpty() ? 0 : Integer.parseInt(minimoStr);
-
-            // Deshabilitar el botón temporalmente para evitar doble clic
-            jButton1.setEnabled(false);
-
-            // 2. Ejecutar la inserción en segundo plano para que la interfaz NO se congele
-            new Thread(() -> {
-                String sql = "INSERT INTO Articulo (nombre, descripcion, precio_Venta, precio_Origen, stock, stockMinimo, categoria_id, idMedida) VALUES (?, ?, ?, ?, ?, ?, 1, 1)";
-
-                try (Connection con = MODELO.ConexionBD.conectar();
-                     PreparedStatement pst = con.prepareStatement(sql)) {
-
-                    if (con != null) {
-                        pst.setString(1, producto);
-                        pst.setString(2, presentacion);
-                        pst.setDouble(3, precio);
-                        pst.setDouble(4, costo);
-                        pst.setInt(5, stock);
-                        pst.setInt(6, minimo);
-
-                        pst.executeUpdate();
-
-                        // 3. Regresar al hilo principal de Swing para mostrar el mensaje y cambiar de pantalla
-                        javax.swing.SwingUtilities.invokeLater(() -> {
-                            JOptionPane.showMessageDialog(this, "¡Artículo guardado exitosamente en la BD! 🎉", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                            
-                            // Regresar automáticamente al panel de inventario y recargar la tabla
-                            PanelControlInventarios panelTabla = new PanelControlInventarios();
-                            java.awt.Container contenedor = this.getParent();
-                            if (contenedor != null) {
-                                contenedor.removeAll();
-                                contenedor.add(panelTabla);
-                                contenedor.revalidate();
-                                contenedor.repaint();
-                            }
-                        });
-                    }
-
-                } catch (SQLException e) {
-                    javax.swing.SwingUtilities.invokeLater(() -> {
-                        JOptionPane.showMessageDialog(this, "Error al guardar en la Base de Datos: " + e.getMessage(), "Error SQL", JOptionPane.ERROR_MESSAGE);
-                        jButton1.setEnabled(true); // Reactivar botón si hubo error
-                    });
-                }
-            }).start();
-
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Los campos de Costo, Precio, Stock y Mínimo deben ser numéricos.", "Error de formato", JOptionPane.ERROR_MESSAGE);
-        }
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "Ingresa valores numéricos válidos en Costo, Precio, Stock y Mínimo.", "Error de formato", JOptionPane.ERROR_MESSAGE);
+    }
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void cmbCategoriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbCategoriaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cmbCategoriaActionPerformed
 
+    private void regresarAInventario() {
+        Container contenedor = this.getParent();
+        if (contenedor != null) {
+            contenedor.removeAll();
+            contenedor.add(new PanelControlInventarios());
+            contenedor.revalidate();
+            contenedor.repaint();
+        }
+    }
+    // Configuración de los atajos de teclado F6 y F7
+    private void configurarAtajosTeclado() {
+        // Atajo F6 -> Nueva Unidad de Medida
+        this.getInputMap(javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+            javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F6, 0), "accionF6");
+        this.getActionMap().put("accionF6", new javax.swing.AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                crearNuevaUnidadMedida();
+            }
+        });
+
+        // Atajo F7 -> Nueva Categoría
+        this.getInputMap(javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+            javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F7, 0), "accionF7");
+        this.getActionMap().put("accionF7", new javax.swing.AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                crearNuevaCategoria();
+            }
+        });
+    }
+
+    // Pestaña emergente para F6 (Unidad de Medida)
+    private void crearNuevaUnidadMedida() {
+        String nuevaMedida = JOptionPane.showInputDialog(
+            this, 
+            "Ingresa el nombre de la nueva Unidad de Medida:", 
+            "Nueva Unidad de Medida (F6)", 
+            JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (nuevaMedida != null && !nuevaMedida.trim().isEmpty()) {
+            String sql = "INSERT INTO UnidadMedida (nombre) VALUES (?)";
+            try (Connection con = MODELO.ConexionBD.conectar();
+                 PreparedStatement pst = con.prepareStatement(sql)) {
+                
+                pst.setString(1, nuevaMedida.trim());
+                pst.executeUpdate();
+                
+                JOptionPane.showMessageDialog(this, "¡Unidad de medida guardada correctamente!");
+                
+                // Recarga los ComboBoxes y selecciona la nueva unidad agregada
+                cargarCombos();
+                cmbMedida.setSelectedItem(nuevaMedida.trim());
+                
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Error al guardar en la base de datos: " + ex.getMessage(), "Error SQL", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    // Pestaña emergente para F7 (Categoría)
+    private void crearNuevaCategoria() {
+        String nuevaCategoria = JOptionPane.showInputDialog(
+            this, 
+            "Ingresa el nombre de la nueva Categoría:", 
+            "Nueva Categoría (F7)", 
+            JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (nuevaCategoria != null && !nuevaCategoria.trim().isEmpty()) {
+            // Cambia 'descripcion' por el nombre real de tu columna (ej: descripcion, nombreCategoria, nombre_categoria)
+            String sql = "INSERT INTO Categoria (descripcion) VALUES (?)"; 
+            
+            try (Connection con = MODELO.ConexionBD.conectar();
+                 PreparedStatement pst = con.prepareStatement(sql)) {
+                
+                pst.setString(1, nuevaCategoria.trim());
+                pst.executeUpdate();
+                
+                JOptionPane.showMessageDialog(this, "¡Categoría guardada correctamente!");
+                
+                cargarCombos();
+                cmbCategoria.setSelectedItem(nuevaCategoria.trim());
+                
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Error al guardar en la base de datos: " + ex.getMessage(), "Error SQL", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox<String> cmbCategoria;
+    private javax.swing.JComboBox<String> cmbMedida;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
@@ -244,11 +341,11 @@ public class N_Proc extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField jTextField4;
-    private javax.swing.JTextField jTextField5;
-    private javax.swing.JTextField jTextField6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JTextField txtCosto;
+    private javax.swing.JTextField txtNombre;
+    private javax.swing.JTextField txtPrecio;
+    private javax.swing.JTextField txtStock;
+    private javax.swing.JTextField txtStockMinimo;
     // End of variables declaration//GEN-END:variables
 }

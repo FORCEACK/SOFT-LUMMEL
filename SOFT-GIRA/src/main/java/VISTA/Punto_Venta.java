@@ -27,10 +27,12 @@ public class Punto_Venta extends javax.swing.JPanel {
     private javax.swing.JPopupMenu popupSugerencias = new javax.swing.JPopupMenu();
     private javax.swing.JList<String> listaSugerencias = new javax.swing.JList<>();
     private java.util.Vector<Integer> idsProductosEncontrados = new java.util.Vector<>();
+    
 
     public Punto_Venta() {
         initComponents(); // Código generado por NetBeans
-
+        configurarAtajosTecladoPV();
+        estilizarPanelDerecho();
        // --- ASIGNAR USUARIO LOGUEADO AL JLABEL ---
         try {
             if (MODELO.SesionActual.usuarioLogueado != null && !MODELO.SesionActual.usuarioLogueado.isEmpty()) {
@@ -134,7 +136,6 @@ public class Punto_Venta extends javax.swing.JPanel {
         jScrollPane2 = new javax.swing.JScrollPane();
         txtAreaTicketPreview = new javax.swing.JTextArea();
         jPanel3 = new javax.swing.JPanel();
-        jLabel6 = new javax.swing.JLabel();
         jButton2 = new javax.swing.JButton();
         impresion = new java.awt.Checkbox();
 
@@ -235,10 +236,6 @@ public class Punto_Venta extends javax.swing.JPanel {
         jPanel3.setPreferredSize(new java.awt.Dimension(350, 180));
         jPanel3.setLayout(new java.awt.BorderLayout());
 
-        jLabel6.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
-        jLabel6.setText("Aplicacion de Descuento     (f12)");
-        jPanel3.add(jLabel6, java.awt.BorderLayout.CENTER);
-
         jButton2.setBackground(new java.awt.Color(31, 34, 111));
         jButton2.setFont(new java.awt.Font("sansserif", 1, 18)); // NOI18N
         jButton2.setForeground(new java.awt.Color(255, 255, 255));
@@ -254,7 +251,7 @@ public class Punto_Venta extends javax.swing.JPanel {
 
         impresion.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
         impresion.setLabel("Imprimir Ticket al guardar");
-        jPanel3.add(impresion, java.awt.BorderLayout.PAGE_START);
+        jPanel3.add(impresion, java.awt.BorderLayout.CENTER);
 
         jPanelDerechoGlobal.add(jPanel3, java.awt.BorderLayout.SOUTH);
 
@@ -268,133 +265,154 @@ public class Punto_Venta extends javax.swing.JPanel {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
 DefaultTableModel modeloCarrito = (DefaultTableModel) jTable1.getModel();
 
-        // 1. Validar carrito
-        if (modeloCarrito.getRowCount() == 0) {
-            JOptionPane.showMessageDialog(this, "El carrito de compras está vacío.", "Atención", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
+if (modeloCarrito.getRowCount() == 0) {
+    JOptionPane.showMessageDialog(this, "El carrito de compras está vacío.", "Atención", JOptionPane.WARNING_MESSAGE);
+    return;
+}
 
-        // 2. Obtener id de usuario logueado y corte abierto
-        int idUsuarioActual = MODELO.SesionActual.idUsuarioLogueado;
-        CONTROLADOR.CorteCajaDao corteDao = new CONTROLADOR.CorteCajaDao();
-        int idCorteActual = corteDao.obtenerIdCorteAbierto(idUsuarioActual);
+int idUsuarioActual = MODELO.SesionActual.idUsuarioLogueado;
+CONTROLADOR.CorteCajaDao corteDao = new CONTROLADOR.CorteCajaDao();
+int idCorteActual = corteDao.obtenerIdCorteAbierto(idUsuarioActual);
 
-        if (idCorteActual <= 0) {
-            JOptionPane.showMessageDialog(
-                this, 
-                "No hay un corte de caja abierto para este usuario.\nDebe iniciar corte de caja antes de realizar ventas.", 
-                "Caja Cerrada", 
-                JOptionPane.WARNING_MESSAGE
-            );
-            return;
-        }
+if (idCorteActual <= 0) {
+    JOptionPane.showMessageDialog(this, "No hay un corte de caja abierto para este usuario.", "Caja Cerrada", JOptionPane.WARNING_MESSAGE);
+    return;
+}
 
-        // 3. Seleccionar Cliente por Nombre con búsqueda en tiempo real
-        int idClienteFinal = seleccionarClientePorNombre();
+int idClienteFinal = seleccionarClientePorNombre();
+if (idClienteFinal == -1) {
+    return; 
+}
 
-        // Si el usuario presiona "Cancelar" o cierra el diálogo, se aborta el proceso de cobranza
-        if (idClienteFinal == -1) {
-            return; 
-        }
+double totalVenta = 0.0;
+for (int i = 0; i < modeloCarrito.getRowCount(); i++) {
+    Object subVal = modeloCarrito.getValueAt(i, 4);
+    if (subVal != null && !subVal.toString().trim().isEmpty()) {
+        try {
+            String subLimpio = subVal.toString().replaceAll("[^0-9.-]", "").trim();
+            totalVenta += Double.parseDouble(subLimpio);
+        } catch (NumberFormatException e) {}
+    }
+}
 
-        // 4. Calcular el total acumulado
-        double totalVenta = 0.0;
-        for (int i = 0; i < modeloCarrito.getRowCount(); i++) {
-            Object subVal = modeloCarrito.getValueAt(i, 4);
-            if (subVal != null && !subVal.toString().trim().isEmpty()) {
-                try {
-                    String subLimpio = subVal.toString().replaceAll("[^0-9.-]", "").trim();
-                    totalVenta += Double.parseDouble(subLimpio);
-                } catch (NumberFormatException e) {
-                    // Ignorar subtotal inválido
-                }
-            }
-        }
+// Variable para rastrear el descuento
+double descuentoMonto = 0.0;
 
-        // 5. Seleccionar método de pago
-        String[] opcionesPago = {"Efectivo", "Tarjeta"};
-        String tipoPagoSeleccionado = (String) JOptionPane.showInputDialog(
+// Validación de Mayorista
+String tipoCliente = obtenerTipoCliente(idClienteFinal);
+if (tipoCliente.equalsIgnoreCase("Mayorista")) {
+    int resp = JOptionPane.showConfirmDialog(
+        this,
+        "El cliente seleccionado es MAYORISTA.\n¿Desea aplicar un porcentaje de descuento a esta venta?",
+        "Descuento Mayorista",
+        JOptionPane.YES_NO_OPTION,
+        JOptionPane.QUESTION_MESSAGE
+    );
+
+    if (resp == JOptionPane.YES_OPTION) {
+        String inputDescuento = JOptionPane.showInputDialog(
             this,
-            "Total a pagar: $" + String.format("%.2f", totalVenta) + "\nSeleccione el método de pago:",
-            "Método de Pago",
-            JOptionPane.QUESTION_MESSAGE,
-            null,
-            opcionesPago,
-            opcionesPago[0]
+            "Total actual: $" + String.format("%.2f", totalVenta) + "\nIngrese el % de descuento a aplicar:",
+            "Descuento Mayorista",
+            JOptionPane.QUESTION_MESSAGE
         );
 
-        if (tipoPagoSeleccionado == null) {
-            return;
-        }
-
-        double pagoEfectivo = 0.0;
-        double cambio = 0.0;
-
-        // 6. Procesar pago según el método elegido
-        if (tipoPagoSeleccionado.equalsIgnoreCase("Efectivo")) {
-            String inputEfectivo = JOptionPane.showInputDialog(
-                this,
-                "Total a pagar: $" + String.format("%.2f", totalVenta) + "\nIngrese con cuánto paga el cliente:",
-                "Cobrar en Efectivo",
-                JOptionPane.QUESTION_MESSAGE
-            );
-
-            if (inputEfectivo == null) {
-                return;
-            }
-
+        if (inputDescuento != null && !inputDescuento.trim().isEmpty()) {
             try {
-                String textoLimpio = inputEfectivo.replaceAll("[^0-9.-]", "").trim();
-                pagoEfectivo = textoLimpio.isEmpty() ? totalVenta : Double.parseDouble(textoLimpio);
+                double porcentaje = Double.parseDouble(inputDescuento.replaceAll("[^0-9.-]", "").trim());
+                if (porcentaje > 0 && porcentaje <= 100) {
+                    descuentoMonto = totalVenta * (porcentaje / 100.0);
+                    totalVenta -= descuentoMonto;
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Descuento del " + porcentaje + "% aplicado.\nNuevo Total: $" + String.format("%.2f", totalVenta),
+                        "Descuento Aplicado",
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+                }
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Debe ingresar un valor numérico válido.", "Error de formato", JOptionPane.ERROR_MESSAGE);
-                return;
+                JOptionPane.showMessageDialog(this, "Formato incorrecto. Se cobrará total completo.", "Error", JOptionPane.ERROR_MESSAGE);
             }
-
-            if (pagoEfectivo < totalVenta) {
-                JOptionPane.showMessageDialog(this, "El dinero entregado es menor al total de la venta.", "Fondos insuficientes", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            cambio = pagoEfectivo - totalVenta;
-
-        } else {
-            pagoEfectivo = totalVenta;
-            cambio = 0.0;
         }
+    }
+}
 
-        // 7. Registrar la venta en la Base de Datos (enviando el idClienteFinal)
-        int idDocumentoGenerado = CONTROLADOR.ControladorVentas.registrarVentaCompleta(
-            jTable1, 
-            totalVenta, 
-            pagoEfectivo, 
-            cambio, 
-            tipoPagoSeleccionado, 
-            idUsuarioActual,
-            idCorteActual,
-            idClienteFinal
-        );
+String[] opcionesPago = {"Efectivo", "Tarjeta"};
+String tipoPagoSeleccionado = (String) JOptionPane.showInputDialog(
+    this,
+    "Total a pagar: $" + String.format("%.2f", totalVenta) + "\nSeleccione el método de pago:",
+    "Método de Pago",
+    JOptionPane.QUESTION_MESSAGE,
+    null,
+    opcionesPago,
+    opcionesPago[0]
+);
 
-        // 8. Confirmar venta, imprimir ticket y limpiar tabla
-        if (idDocumentoGenerado != -1) {
-            cobrarYGenerarTicket(jTable1, impresion, totalVenta, tipoPagoSeleccionado, pagoEfectivo, cambio, idDocumentoGenerado);
+if (tipoPagoSeleccionado == null) return;
 
-            modeloCarrito.setRowCount(0);
+double pagoEfectivo = 0.0;
+double cambio = 0.0;
 
-            JOptionPane.showMessageDialog(
-                this,
-                "¡Venta realizada con éxito!\n\n" +
-                "N° Ticket: " + idDocumentoGenerado + "\n" +
-                "Cliente ID: " + idClienteFinal + "\n" +
-                "Método de Pago: " + tipoPagoSeleccionado + "\n" +
-                "Total: $" + String.format("%.2f", totalVenta) + "\n" +
-                (tipoPagoSeleccionado.equalsIgnoreCase("Efectivo") ?
-                    "Efectivo recibido: $" + String.format("%.2f", pagoEfectivo) + "\nSu cambio: $" + String.format("%.2f", cambio)
-                    : "Pago con Tarjeta procesado"),
-                "Venta Exitosa",
-                JOptionPane.INFORMATION_MESSAGE
-            );
-        }
+if (tipoPagoSeleccionado.equalsIgnoreCase("Efectivo")) {
+    String inputEfectivo = JOptionPane.showInputDialog(
+        this,
+        "Total a pagar: $" + String.format("%.2f", totalVenta) + "\nIngrese con cuánto paga el cliente:",
+        "Cobrar en Efectivo",
+        JOptionPane.QUESTION_MESSAGE
+    );
+
+    if (inputEfectivo == null) return;
+
+    try {
+        String textoLimpio = inputEfectivo.replaceAll("[^0-9.-]", "").trim();
+        pagoEfectivo = textoLimpio.isEmpty() ? totalVenta : Double.parseDouble(textoLimpio);
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "Debe ingresar un valor numérico válido.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    if (pagoEfectivo < totalVenta) {
+        JOptionPane.showMessageDialog(this, "El dinero entregado es menor al total de la venta.", "Fondos insuficientes", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    cambio = pagoEfectivo - totalVenta;
+} else {
+    pagoEfectivo = totalVenta;
+    cambio = 0.0;
+}
+
+int idDocumentoGenerado = CONTROLADOR.ControladorVentas.registrarVentaCompleta(
+    jTable1, 
+    totalVenta, 
+    pagoEfectivo, 
+    cambio, 
+    tipoPagoSeleccionado, 
+    idUsuarioActual,
+    idCorteActual,
+    idClienteFinal, // <--- SE AGREGÓ LA COMA AQUÍ
+    descuentoMonto
+);
+
+if (idDocumentoGenerado != -1) {
+    // Obtener el nombre del cliente para mandarlo al ticket
+    String nombreCliente = obtenerNombreCliente(idClienteFinal);
+
+    // Llamada actualizada con cliente y descuento
+    cobrarYGenerarTicket(jTable1, impresion, totalVenta, tipoPagoSeleccionado, pagoEfectivo, cambio, idDocumentoGenerado, nombreCliente, descuentoMonto);
+
+    modeloCarrito.setRowCount(0);
+
+    JOptionPane.showMessageDialog(
+        this,
+        "¡Venta realizada con éxito!\n\n" +
+        "N° Ticket: " + idDocumentoGenerado + "\n" +
+        "Cliente: " + nombreCliente + "\n" +
+        "Total: $" + String.format("%.2f", totalVenta),
+        "Venta Exitosa",
+        JOptionPane.INFORMATION_MESSAGE
+    );
+}
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void txtBuscadorKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscadorKeyPressed
@@ -521,45 +539,67 @@ DefaultTableModel modeloCarrito = (DefaultTableModel) jTable1.getModel();
             JOptionPane.showMessageDialog(this, "Error al agregar el artículo: " + e.getMessage());
         }
     }
-private void actualizarVistaPreviaTicket() {
-        if (txtAreaTicketPreview == null) return;
+// Método principal que recibe el cliente y el descuento
+private void actualizarVistaPreviaTicket(String nombreCliente, double descuentoMonto) {
+    if (txtAreaTicketPreview == null) return;
 
-        DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
-        int rowCount = modelo.getRowCount();
+    DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
+    int rowCount = modelo.getRowCount();
 
-        StringBuilder ticket = new StringBuilder();
-        int anchoTotal = 32;
+    StringBuilder ticket = new StringBuilder();
+    int anchoTotal = 40; // Ancho para centrado en el panel derecho
 
-        ticket.append(centrarTexto("SISTEMA SOFT-GIRA", anchoTotal)).append("\n");
-        ticket.append("--------------------------------\n");
-        ticket.append(String.format("%-16s %4s %8s\n", "Articulo", "Cnt", "Sub"));
-        ticket.append("--------------------------------\n");
+    ticket.append(centrarTexto("SISTEMA SOFT-GIRA", anchoTotal)).append("\n");
+    ticket.append("----------------------------------------\n");
+    
+    // Mostrar Cliente
+    String clienteMostrar = (nombreCliente != null && !nombreCliente.trim().isEmpty()) 
+            ? nombreCliente 
+            : "Público en General";
+    ticket.append("Cliente: ").append(clienteMostrar).append("\n");
+    
+    ticket.append("----------------------------------------\n");
+    ticket.append(String.format("%-20s %5s %13s\n", "Articulo", "Cnt", "Sub"));
+    ticket.append("----------------------------------------\n");
 
-        double total = 0.0;
-        for (int i = 0; i < rowCount; i++) {
-            Object descObj = modelo.getValueAt(i, 1);
-            Object cantObj = modelo.getValueAt(i, 2);
-            Object subObj = modelo.getValueAt(i, 4);
+    double subtotalAcumulado = 0.0;
+    for (int i = 0; i < rowCount; i++) {
+        Object descObj = modelo.getValueAt(i, 1);
+        Object cantObj = modelo.getValueAt(i, 2);
+        Object subObj = modelo.getValueAt(i, 4);
 
-            if (descObj != null && cantObj != null && subObj != null) {
-                String desc = descObj.toString();
-                if (desc.length() > 16) desc = desc.substring(0, 16); 
-                try {
-                    double cant = Double.parseDouble(cantObj.toString());
-                    double sub = Double.parseDouble(subObj.toString());
-                    total += sub;
-                    ticket.append(String.format("%-16s %4.1f $%7.2f\n", desc, cant, sub));
-                } catch (NumberFormatException e) {}
-            }
+        if (descObj != null && cantObj != null && subObj != null) {
+            String desc = descObj.toString();
+            if (desc.length() > 20) desc = desc.substring(0, 20); 
+            try {
+                double cant = Double.parseDouble(cantObj.toString());
+                double sub = Double.parseDouble(subObj.toString());
+                subtotalAcumulado += sub;
+                ticket.append(String.format("%-20s %5.1f $%11.2f\n", desc, cant, sub));
+            } catch (NumberFormatException e) {}
         }
-
-        ticket.append("--------------------------------\n");
-        ticket.append(centrarTexto(String.format("TOTAL: $%.2f", total), anchoTotal)).append("\n");
-        ticket.append("--------------------------------\n");
-        ticket.append(centrarTexto("¡Gracias por su compra!", anchoTotal)).append("\n");
-
-        txtAreaTicketPreview.setText(ticket.toString());
     }
+
+    ticket.append("----------------------------------------\n");
+
+    // Desglose si existe descuento
+    if (descuentoMonto > 0) {
+        ticket.append(String.format("%-25s $%12.2f\n", "SUBTOTAL:", subtotalAcumulado));
+        ticket.append(String.format("%-25s-$%12.2f\n", "DESCUENTO:", descuentoMonto));
+    }
+
+    double totalFinal = subtotalAcumulado - descuentoMonto;
+    ticket.append(centrarTexto(String.format("TOTAL: $%.2f", totalFinal), anchoTotal)).append("\n");
+    ticket.append("----------------------------------------\n");
+    ticket.append(centrarTexto("¡Gracias por su compra!", anchoTotal)).append("\n");
+
+    txtAreaTicketPreview.setText(ticket.toString());
+}
+
+// Sobrecarga por defecto (mantiene compatibilidad con llamadas sin parámetros)
+private void actualizarVistaPreviaTicket() {
+    actualizarVistaPreviaTicket("Público en General", 0.0);
+}
 
     private String centrarTexto(String texto, int anchoLinea) {
         if (texto.length() >= anchoLinea) return texto;
@@ -570,28 +610,23 @@ private void actualizarVistaPreviaTicket() {
         return sb.toString();
     }
 
-   private void cobrarYGenerarTicket(JTable jTable1, java.awt.Checkbox chkImprimir, double totalCompra, String tipoPago, double efectivo, double cambio, int idVenta) {
+   private void cobrarYGenerarTicket(JTable jTable1, java.awt.Checkbox chkImprimir, double totalCompra, String tipoPago, double efectivo, double cambio, int idVenta, String nombreCliente, double descuentoMonto) {
     if (chkImprimir != null && !chkImprimir.getState()) {
         return;
     }
 
     try {
-        // 1. Detectar sistema operativo
         String os = System.getProperty("os.name").toLowerCase();
         boolean esWindows = os.contains("win");
 
-        // 2. Ejecutar limpieza de cola de impresión solo si es Linux / Unix
         if (!esWindows) {
             try {
                 Runtime.getRuntime().exec(new String[]{"cancel", "-a", "Ticketera"});
-            } catch (Exception ex) {
-                // Silenciar error si el comando cancel no está disponible
-            }
+            } catch (Exception ex) {}
         }
 
-        // Comandos ESC/POS para la impresora térmica (funcionan igual en Linux y Windows)
-        byte[] initPrinter = new byte[]{0x1B, 0x40};          // Inicializar impresora
-        byte[] cutPaper = new byte[]{0x1D, 0x56, 0x42, 0x00}; // Corte automático de papel
+        byte[] initPrinter = new byte[]{0x1B, 0x40};          
+        byte[] cutPaper = new byte[]{0x1D, 0x56, 0x42, 0x00}; 
 
         DefaultTableModel modelo = (DefaultTableModel) jTable1.getModel();
         int rowCount = modelo.getRowCount();
@@ -603,13 +638,14 @@ private void actualizarVistaPreviaTicket() {
         ticket.append("   LUMMEL SYSTEM INTEGRATION    \n");
         ticket.append("      PUNTO DE VENTA CAJA       \n");
         ticket.append("================================\n");
-        ticket.append("Folio: ").append(idVenta).append("\n");
-        ticket.append("Fecha: ").append(java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\n");
+        ticket.append("Folio:   ").append(idVenta).append("\n");
+        ticket.append("Fecha:   ").append(java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\n");
 
         String cajeroActual = (MODELO.SesionActual.usuarioLogueado != null && !MODELO.SesionActual.usuarioLogueado.isEmpty()) 
                 ? MODELO.SesionActual.usuarioLogueado 
                 : "Administrador";
-        ticket.append("Cajero: ").append(cajeroActual).append("\n");
+        ticket.append("Cajero:  ").append(cajeroActual).append("\n");
+        ticket.append("Cliente: ").append(nombreCliente).append("\n");
         ticket.append("--------------------------------\n");
         ticket.append(String.format("%-16s %4s %8s\n", "PRODUCTO", "CANT", "SUBTOTAL"));
         ticket.append("--------------------------------\n");
@@ -633,6 +669,13 @@ private void actualizarVistaPreviaTicket() {
         }
 
         ticket.append("--------------------------------\n");
+        
+        // Si hubo descuento, mostrar Subtotal y Descuento
+        if (descuentoMonto > 0) {
+            ticket.append(String.format("SUBTOTAL:          $%7.2f\n", totalCompra + descuentoMonto));
+            ticket.append(String.format("DESCUENTO:        -$%7.2f\n", descuentoMonto));
+        }
+
         ticket.append(String.format("TOTAL A PAGAR:     $%7.2f\n", totalCompra));
 
         if (tipoPago.equalsIgnoreCase("Efectivo")) {
@@ -644,13 +687,11 @@ private void actualizarVistaPreviaTicket() {
 
         ticket.append("================================\n");
         ticket.append("    ¡GRACIAS POR SU COMPRA!     \n");
-        ticket.append("\n\n\n\n"); // Margen de avance de papel antes de cortar
+        ticket.append("\n\n\n\n"); 
 
-        // 3. Búsqueda de impresora (Compatibilidad total)
         javax.print.PrintService[] servicios = javax.print.PrintServiceLookup.lookupPrintServices(null, null);
         javax.print.PrintService impresoraTicketera = null;
 
-        // Prioridad 1: Coincidencia exacta o parcial por nombre
         for (javax.print.PrintService servicio : servicios) {
             String nombre = servicio.getName().toLowerCase();
             if (nombre.contains("ticketera") || nombre.contains("pos")) {
@@ -659,7 +700,6 @@ private void actualizarVistaPreviaTicket() {
             }
         }
 
-        // Prioridad 2: Impresora predeterminada del sistema
         if (impresoraTicketera == null) {
             impresoraTicketera = javax.print.PrintServiceLookup.lookupDefaultPrintService();
         }
@@ -669,17 +709,14 @@ private void actualizarVistaPreviaTicket() {
             return;
         }
 
-        // 4. Codificación según el S.O. (CP850 en Windows para acentos y Ñ, ISO-8859-1 en Linux)
         String encoding = esWindows ? "CP850" : "ISO-8859-1";
         byte[] bytesTexto = ticket.toString().getBytes(encoding);
 
-        // Concatenación del flujo binario RAW (Inicio + Texto + Corte)
         java.io.ByteArrayOutputStream streamFinal = new java.io.ByteArrayOutputStream();
         streamFinal.write(initPrinter);
         streamFinal.write(bytesTexto);
         streamFinal.write(cutPaper);
 
-        // Envío directo del trabajo de impresión
         javax.print.DocPrintJob trabajo = impresoraTicketera.createPrintJob();
         javax.print.Doc doc = new javax.print.SimpleDoc(streamFinal.toByteArray(), javax.print.DocFlavor.BYTE_ARRAY.AUTOSENSE, null);
 
@@ -818,6 +855,157 @@ private void actualizarVistaPreviaTicket() {
     return idClienteSeleccionado[0]; // Retorna el id_cliente encontrado
 }
     
+    // --------------------------------------------------------------------------
+// PEGA EL MÉTODO AQUÍ:
+// --------------------------------------------------------------------------
+private String obtenerTipoCliente(int idCliente) {
+    String tipo = "Menudeo";
+    String sql = "SELECT tipo_cliente FROM Cliente WHERE id_cliente = ?";
+    
+    try (Connection con = MODELO.ConexionBD.conectar();
+         PreparedStatement pst = con.prepareStatement(sql)) {
+        
+        pst.setInt(1, idCliente);
+        ResultSet rs = pst.executeQuery();
+        if (rs.next()) {
+            tipo = rs.getString("tipo_cliente");
+        }
+    } catch (SQLException e) {
+        try (Connection con = MODELO.ConexionBD.conectar();
+             PreparedStatement pst = con.prepareStatement("SELECT tipo FROM Cliente WHERE id_cliente = ?")) {
+            pst.setInt(1, idCliente);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                tipo = rs.getString("tipo");
+            }
+        } catch (SQLException ex) {
+            System.err.println("Error al consultar tipo de cliente: " + ex.getMessage());
+        }
+    }
+    return tipo;
+}
+    
+    // Configuración de los atajos de teclado F1 y F2
+private void configurarAtajosTecladoPV() {
+    // Atajo F1 -> Eliminar producto seleccionado de la tabla
+    this.getInputMap(javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+        javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F1, 0), "accionF1");
+    this.getActionMap().put("accionF1", new javax.swing.AbstractAction() {
+        @Override
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+            eliminarProductoSeleccionadoF1();
+        }
+    });
+
+    // Atajo F2 -> Registrar nuevo cliente (Menudeo / Mayorista)
+    this.getInputMap(javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+        javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F2, 0), "accionF2");
+    this.getActionMap().put("accionF2", new javax.swing.AbstractAction() {
+        @Override
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+            registrarClienteF2();
+        }
+    });
+}
+
+// Acción F1: Eliminar fila seleccionada de la tabla de venta
+private void eliminarProductoSeleccionadoF1() {
+    int filaSeleccionada = jTable1.getSelectedRow(); 
+
+    if (filaSeleccionada == -1) {
+        javax.swing.JOptionPane.showMessageDialog(this, 
+            "Selecciona un producto de la lista para eliminarlo.", 
+            "Aviso (F1)", 
+            javax.swing.JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) jTable1.getModel();
+    modelo.removeRow(filaSeleccionada);
+
+    // Actualiza el ticket y el total acumulado en pantalla
+    actualizarVistaPreviaTicket();
+}
+
+// Acción F2: Pestaña emergente para nuevo cliente con ComboBox
+private void registrarClienteF2() {
+    javax.swing.JTextField txtNombreCliente = new javax.swing.JTextField(20);
+    javax.swing.JComboBox<String> cmbTipoCliente = new javax.swing.JComboBox<>(new String[]{"Menudeo", "Mayorista"});
+
+    javax.swing.JPanel panelDialogo = new javax.swing.JPanel(new java.awt.GridLayout(0, 1, 5, 5));
+    panelDialogo.add(new javax.swing.JLabel("Nombre completo del Cliente:"));
+    panelDialogo.add(txtNombreCliente);
+    panelDialogo.add(new javax.swing.JLabel("Tipo de Cliente:"));
+    panelDialogo.add(cmbTipoCliente);
+
+    int opcion = javax.swing.JOptionPane.showConfirmDialog(
+        this, 
+        panelDialogo, 
+        "Registrar Nuevo Cliente (F2)", 
+        javax.swing.JOptionPane.OK_CANCEL_OPTION, 
+        javax.swing.JOptionPane.PLAIN_MESSAGE
+    );
+
+    if (opcion == javax.swing.JOptionPane.OK_OPTION) {
+        String nombre = txtNombreCliente.getText().trim();
+        String tipo = cmbTipoCliente.getSelectedItem().toString();
+
+        if (nombre.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, "El nombre del cliente no puede estar vacío.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Cambia 'tipo_cliente' por el nombre exacto de la columna en tu MySQL
+        String sql = "INSERT INTO Cliente (Nombre, tipo_cliente) VALUES (?, ?)";
+        try (java.sql.Connection con = MODELO.ConexionBD.conectar();
+             java.sql.PreparedStatement pst = con.prepareStatement(sql)) {
+
+            pst.setString(1, nombre);
+            pst.setString(2, tipo);
+            pst.executeUpdate();
+
+            javax.swing.JOptionPane.showMessageDialog(this, "¡Cliente '" + nombre + "' (" + tipo + ") registrado exitosamente!");
+
+        } catch (java.sql.SQLException ex) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Error al registrar cliente: " + ex.getMessage(), "Error SQL", javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}
+private void estilizarPanelDerecho() {
+    // 1. Margen de 35px a la izquierda para centrar el texto en el JTextArea del ticket
+    txtAreaTicketPreview.setMargin(new java.awt.Insets(15, 35, 15, 15));
+    txtAreaTicketPreview.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 13));
+
+    // 2. Configurar jPanel3 solo para 2 filas (Checkbox y Botón Cobrar)
+    jPanel3.removeAll();
+    jPanel3.setLayout(new java.awt.GridLayout(2, 1, 10, 10));
+    jPanel3.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+    // 3. Agregar únicamente los 2 componentes activos
+    jPanel3.add(impresion);
+    jPanel3.add(jButton2);
+
+    jPanel3.revalidate();
+    jPanel3.repaint();
+}
+
+private String obtenerNombreCliente(int idCliente) {
+    String nombre = "Público en General";
+    String sql = "SELECT Nombre FROM Cliente WHERE id_cliente = ?";
+    
+    try (Connection con = MODELO.ConexionBD.conectar();
+         PreparedStatement pst = con.prepareStatement(sql)) {
+        
+        pst.setInt(1, idCliente);
+        ResultSet rs = pst.executeQuery();
+        if (rs.next()) {
+            nombre = rs.getString("Nombre");
+        }
+    } catch (SQLException e) {
+        System.err.println("Error al obtener nombre del cliente: " + e.getMessage());
+    }
+    return nombre;
+}
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private java.awt.Checkbox impresion;
     private javax.swing.JButton jButton1;
@@ -826,7 +1014,6 @@ private void actualizarVistaPreviaTicket() {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;
