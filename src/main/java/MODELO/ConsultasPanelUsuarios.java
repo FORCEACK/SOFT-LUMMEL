@@ -1,0 +1,334 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package MODELO;
+
+import MODELO.ConexionBD;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import javax.swing.table.DefaultTableModel;
+
+public class ConsultasPanelUsuarios {
+
+    public DefaultTableModel cargarTabla() {
+        DefaultTableModel modelo = new DefaultTableModel();
+        modelo.addColumn("ID");
+        modelo.addColumn("NOMBRE COMPLETO");
+        modelo.addColumn("USUARIO");
+        modelo.addColumn("ROL");
+        modelo.addColumn("ESTADO");
+        modelo.addColumn("ULTIMO ACCESO");
+
+        // Obtenemos el usuario de la sesión activa actual
+        String usuarioSesion = MODELO.SesionActual.usuarioLogueado;
+
+        // Seleccionamos también el campo 'ultimo_acceso'
+        String sql = "SELECT u.id_Usuario, "
+                   + "CONCAT(p.Nombre, ' ', p.APP, ' ', p.APM) AS NombreCompleto, "
+                   + "u.username, "
+                   + "IFNULL(r.nombre_rol, 'Sin Asignar') AS Rol, "
+                   + "u.ultimo_acceso "
+                   + "FROM Usuario u "
+                   + "INNER JOIN Persona p ON u.id_Persona = p.id_Persona "
+                   + "LEFT JOIN TIENE t ON u.id_Usuario = t.id_Usuario "
+                   + "LEFT JOIN Rol r ON t.id_Rol = r.id_Rol "
+                   + "ORDER BY u.id_Usuario ASC";
+
+        ConexionBD conexion = new ConexionBD();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        try (Connection con = conexion.conectar();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Object[] fila = new Object[6];
+                String userBD = rs.getString("username");
+
+                fila[0] = rs.getInt("id_Usuario");
+                fila[1] = rs.getString("NombreCompleto");
+                fila[2] = userBD;
+                fila[3] = rs.getString("Rol");
+                
+                // --- LÓGICA DE ESTADO ---
+                // Solo si coincide el usuario registrado con la sesión actual, se muestra Activo
+                if (userBD != null && userBD.equalsIgnoreCase(usuarioSesion)) {
+                    fila[4] = "Activo";
+                } else {
+                    fila[4] = "Inactivo";
+                }
+
+                // --- FECHA Y HORA ÚLTIMO ACCESO ---
+                java.sql.Timestamp fechaAcceso = rs.getTimestamp("ultimo_acceso");
+                if (fechaAcceso != null) {
+                    fila[5] = sdf.format(fechaAcceso);
+                } else {
+                    fila[5] = "Sin Registro";
+                }
+
+                modelo.addRow(fila);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error al cargar la tabla de usuarios: " + e.getMessage());
+        }
+        
+        return modelo;
+    }
+
+    // ... (Mantén tus métodos registrarUsuario, buscarUsuarioPorId, actualizarUsuario, etc. sin cambios)
+ 
+    // =========================================================================
+    // MÉTODO PARA REGISTRAR UN NUEVO USUARIO (TRANSACCIÓN SQL)
+    // =========================================================================
+    public boolean registrarUsuario(String nombre, String app, String apm, String tel,  String user, String passHash, int idRol) {
+        
+        ConexionBD conexion = new ConexionBD();
+        Connection con = conexion.conectar();
+        
+        // Consultas de inserción
+        String sqlPersona = "INSERT INTO Persona (Nombre, APP, APM, Telefono) VALUES (?, ?, ?, ?)";
+        String sqlUsuario = "INSERT INTO Usuario (username, password, estatus, id_Persona) VALUES (?, ?, 1, ?)";
+        String sqlTiene = "INSERT INTO TIENE (id_Usuario, id_Rol) VALUES (?, ?)";
+
+        try {
+            // Apagamos el autoguardado para asegurar que las 3 tablas se inserten juntas
+            con.setAutoCommit(false); 
+
+            // 1. Guardar Persona y recuperar su ID generado
+            int idPersonaGenerado = 0;
+            try (PreparedStatement psPersona = con.prepareStatement(sqlPersona, PreparedStatement.RETURN_GENERATED_KEYS)) {
+                psPersona.setString(1, nombre);
+                psPersona.setString(2, app);
+                psPersona.setString(3, apm);
+                psPersona.setString(4, tel);
+                psPersona.executeUpdate();
+
+                ResultSet rsPersona = psPersona.getGeneratedKeys();
+                if (rsPersona.next()) {
+                    idPersonaGenerado = rsPersona.getInt(1);
+                }
+            }
+
+            // 2. Guardar Usuario usando el ID de la Persona
+            int idUsuarioGenerado = 0;
+            try (PreparedStatement psUsuario = con.prepareStatement(sqlUsuario, PreparedStatement.RETURN_GENERATED_KEYS)) {
+                psUsuario.setString(1, user);
+                psUsuario.setString(2, passHash); // Recibirá la contraseña ya encriptada
+                psUsuario.setInt(3, idPersonaGenerado);
+                psUsuario.executeUpdate();
+                
+                ResultSet rsUsuario = psUsuario.getGeneratedKeys();
+                if (rsUsuario.next()) {
+                    idUsuarioGenerado = rsUsuario.getInt(1);
+                }
+            }
+
+            // 3. Guardar el Rol en la tabla TIENE
+            try (PreparedStatement psTiene = con.prepareStatement(sqlTiene)) {
+                psTiene.setInt(1, idUsuarioGenerado);
+                psTiene.setInt(2, idRol);
+                psTiene.executeUpdate();
+            }
+
+            // Si todo salió bien, confirmamos los cambios en la Base de Datos
+            con.commit();
+            return true;
+
+        } catch (SQLException e) {
+            // Si algo falla, deshacemos todos los cambios para no dejar basura
+            try {
+                con.rollback();
+            } catch (SQLException ex) {
+                System.err.println("Error al deshacer la transacción: " + ex.getMessage());
+            }
+            System.err.println("Error al registrar usuario: " + e.getMessage());
+            return false;
+        } finally {
+            // Cerramos la conexión
+            try {
+                con.setAutoCommit(true);
+                con.close();
+            } catch (SQLException e) {
+                System.err.println("Error al cerrar conexión: " + e.getMessage());
+            }
+        }
+    }
+    // =========================================================================
+    // 1. MÉTODO PARA BUSCAR UN USUARIO POR SU ID
+    // =========================================================================
+    public String[] buscarUsuarioPorId(int idUsuario) {
+        String[] datos = new String[7]; // Arreglo para guardar los datos encontrados
+        
+        String sql = "SELECT u.id_Usuario, p.Nombre, p.APP, p.APM, p.Telefono, u.username, r.nombre_rol "
+                   + "FROM Usuario u "
+                   + "INNER JOIN Persona p ON u.id_Persona = p.id_Persona "
+                   + "LEFT JOIN TIENE t ON u.id_Usuario = t.id_Usuario "
+                   + "LEFT JOIN Rol r ON t.id_Rol = r.id_Rol "
+                   + "WHERE u.id_Usuario = ?";
+                   
+        ConexionBD conexion = new ConexionBD();
+        
+        try (Connection con = conexion.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+             
+            ps.setInt(1, idUsuario);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    datos[0] = rs.getString("id_Usuario");
+                    datos[1] = rs.getString("Nombre");
+                    datos[2] = rs.getString("APP");
+                    datos[3] = rs.getString("APM");
+                    datos[4] = rs.getString("Telefono");
+                    datos[5] = rs.getString("username");
+                    datos[6] = rs.getString("nombre_rol");
+                    return datos; // Regresamos los datos llenos
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al buscar usuario por ID: " + e.getMessage());
+        }
+        return null; // Si no encuentra nada, regresa null
+    }
+
+    // =========================================================================
+    // 2. MÉTODO PARA ACTUALIZAR LOS DATOS DEL USUARIO
+    // =========================================================================
+    public boolean actualizarUsuario(int idUsuario, String nombre, String app, String apm, String tel, String user, int idRol) {
+        ConexionBD conexion = new ConexionBD();
+        Connection con = conexion.conectar();
+        
+        // Consultas UPDATE usando JOIN para llegar a la Persona desde el Usuario
+        String sqlPersona = "UPDATE Persona p INNER JOIN Usuario u ON p.id_Persona = u.id_Persona "
+                          + "SET p.Nombre = ?, p.APP = ?, p.APM = ?, p.Telefono = ? WHERE u.id_Usuario = ?";
+        String sqlUsuario = "UPDATE Usuario SET username = ? WHERE id_Usuario = ?";
+        String sqlTiene = "UPDATE TIENE SET id_Rol = ? WHERE id_Usuario = ?";
+
+        try {
+            con.setAutoCommit(false); // Iniciamos transacción
+
+            // 1. Actualizar Persona
+            try (PreparedStatement psPersona = con.prepareStatement(sqlPersona)) {
+                psPersona.setString(1, nombre);
+                psPersona.setString(2, app);
+                psPersona.setString(3, apm);
+                psPersona.setString(4, tel);
+                psPersona.setInt(5, idUsuario);
+                psPersona.executeUpdate();
+            }
+
+            // 2. Actualizar Usuario
+            try (PreparedStatement psUsuario = con.prepareStatement(sqlUsuario)) {
+                psUsuario.setString(1, user);
+                psUsuario.setInt(2, idUsuario);
+                psUsuario.executeUpdate();
+            }
+
+            // 3. Actualizar Rol
+            try (PreparedStatement psTiene = con.prepareStatement(sqlTiene)) {
+                psTiene.setInt(1, idRol);
+                psTiene.setInt(2, idUsuario);
+                psTiene.executeUpdate();
+            }
+
+            con.commit();
+            return true;
+
+        } catch (SQLException e) {
+            try { con.rollback(); } catch (SQLException ex) {}
+            System.err.println("Error al actualizar usuario: " + e.getMessage());
+            return false;
+        } finally {
+            try { con.setAutoCommit(true); con.close(); } catch (SQLException e) {}
+        }
+    }
+    // =========================================================================
+    // 3. MÉTODO PARA ELIMINAR UN USUARIO POR COMPLETO (TRANSACCIÓN SQL)
+    // =========================================================================
+    public boolean eliminarUsuario(int idUsuario) {
+        ConexionBD conexion = new ConexionBD();
+        Connection con = conexion.conectar();
+        
+        // 1. Primero necesitamos averiguar el id_Persona antes de borrar al usuario
+        String sqlGetPersona = "SELECT id_Persona FROM Usuario WHERE id_Usuario = ?";
+        
+        // 2. Consultas de eliminación (de hijo a padre)
+        String sqlDeleteTiene = "DELETE FROM TIENE WHERE id_Usuario = ?";
+        String sqlDeleteUsuario = "DELETE FROM Usuario WHERE id_Usuario = ?";
+        String sqlDeletePersona = "DELETE FROM Persona WHERE id_Persona = ?";
+
+        try {
+            con.setAutoCommit(false); // Iniciamos transacción
+            
+            // Paso A: Obtener el ID de la Persona
+            int idPersona = 0;
+            try (PreparedStatement psGet = con.prepareStatement(sqlGetPersona)) {
+                psGet.setInt(1, idUsuario);
+                try (ResultSet rs = psGet.executeQuery()) {
+                    if (rs.next()) {
+                        idPersona = rs.getInt("id_Persona");
+                    } else {
+                        return false; // El usuario no existe en la BD
+                    }
+                }
+            }
+
+            // Paso B: Eliminar su Rol en la tabla TIENE
+            try (PreparedStatement psTiene = con.prepareStatement(sqlDeleteTiene)) {
+                psTiene.setInt(1, idUsuario);
+                psTiene.executeUpdate();
+            }
+
+            // Paso C: Eliminar sus credenciales en la tabla Usuario
+            try (PreparedStatement psUsuario = con.prepareStatement(sqlDeleteUsuario)) {
+                psUsuario.setInt(1, idUsuario);
+                psUsuario.executeUpdate();
+            }
+
+            // Paso D: Eliminar sus datos en la tabla Persona
+            if (idPersona != 0) {
+                try (PreparedStatement psPersona = con.prepareStatement(sqlDeletePersona)) {
+                    psPersona.setInt(1, idPersona);
+                    psPersona.executeUpdate();
+                }
+            }
+
+            con.commit(); // Si todo salió bien, guardamos los cambios
+            return true;
+
+        } catch (SQLException e) {
+            try { con.rollback(); } catch (SQLException ex) {} // Deshacemos si hay error
+            System.err.println("Error al eliminar usuario: " + e.getMessage());
+            return false;
+        } finally {
+            try { con.setAutoCommit(true); con.close(); } catch (SQLException e) {}
+        }
+    }
+    // =========================================================================
+    // 4. MÉTODO PARA ACTUALIZAR SOLO LA CONTRASEÑA
+    // =========================================================================
+    public boolean actualizarContrasena(int idUsuario, String nuevaPassHash) {
+        ConexionBD conexion = new ConexionBD();
+        String sql = "UPDATE Usuario SET password = ? WHERE id_Usuario = ?";
+        
+        try (Connection con = conexion.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+             
+            ps.setString(1, nuevaPassHash);
+            ps.setInt(2, idUsuario);
+            
+            // Si executeUpdate es mayor a 0, significa que sí modificó la fila
+            int filasAfectadas = ps.executeUpdate();
+            return filasAfectadas > 0;
+            
+        } catch (SQLException e) {
+            System.err.println("Error al cambiar contraseña: " + e.getMessage());
+            return false;
+        }
+    }
+}
