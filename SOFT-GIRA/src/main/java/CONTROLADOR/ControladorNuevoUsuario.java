@@ -20,7 +20,7 @@ public class ControladorNuevoUsuario {
         }
 
         // 2. Convertir el texto del ComboBox a su ID numérico correspondiente
-        int idRol = 3; // Por defecto, asumimos que es Vendedor (ID 3)
+        int idRol = 3; 
         
         if (rolSeleccionado.equalsIgnoreCase("Administrador")) {
             idRol = 1;

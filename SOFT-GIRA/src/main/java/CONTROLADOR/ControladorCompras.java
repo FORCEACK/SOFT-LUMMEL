@@ -20,7 +20,7 @@ public class ControladorCompras {
     
     // Método para iniciar la vista de compras
     public void iniciarVista() {
-        // Obtenemos el modelo de la tabla que creaste en NetBeans
+        // Obtenemos el modelo de la tabla 
         DefaultTableModel modeloTabla = (DefaultTableModel) vistaCompras.tablaDetalleCompra.getModel();
         
         // Le pedimos al modelo (BD) que llene esa tabla

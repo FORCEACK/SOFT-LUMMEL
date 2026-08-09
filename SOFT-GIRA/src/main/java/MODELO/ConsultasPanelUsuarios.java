@@ -78,10 +78,7 @@ public class ConsultasPanelUsuarios {
         }
         
         return modelo;
-    }
-
-    // ... (Mantén tus métodos registrarUsuario, buscarUsuarioPorId, actualizarUsuario, etc. sin cambios)
- 
+    } 
     // =========================================================================
     // MÉTODO PARA REGISTRAR UN NUEVO USUARIO (TRANSACCIÓN SQL)
     // =========================================================================
@@ -134,13 +131,11 @@ public class ConsultasPanelUsuarios {
                 psTiene.setInt(2, idRol);
                 psTiene.executeUpdate();
             }
-
-            // Si todo salió bien, confirmamos los cambios en la Base de Datos
             con.commit();
             return true;
 
         } catch (SQLException e) {
-            // Si algo falla, deshacemos todos los cambios para no dejar basura
+            // Si algo falla, se deshace todos los cambios para no dejar basura
             try {
                 con.rollback();
             } catch (SQLException ex) {
@@ -253,8 +248,6 @@ public class ConsultasPanelUsuarios {
     public boolean eliminarUsuario(int idUsuario) {
         ConexionBD conexion = new ConexionBD();
         Connection con = conexion.conectar();
-        
-        // 1. Primero necesitamos averiguar el id_Persona antes de borrar al usuario
         String sqlGetPersona = "SELECT id_Persona FROM Usuario WHERE id_Usuario = ?";
         
         // 2. Consultas de eliminación (de hijo a padre)

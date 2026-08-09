@@ -43,7 +43,6 @@ public class ControladorLogin {
 
             // ---> INICIO DE LO NUEVO: RECUPERAR ROL Y APLICAR PERMISOS <---
             
-            // Reutilizamos el método que ya tienes para buscar al usuario y obtener su rol
             MODELO.ConsultasPanelUsuarios consultasUsuarios = new MODELO.ConsultasPanelUsuarios();
             String[] datosUsuario = consultasUsuarios.buscarUsuarioPorId(idObtenido);
             
@@ -51,17 +50,12 @@ public class ControladorLogin {
             if (datosUsuario != null && datosUsuario[6] != null) {
                 rolDelUsuario = datosUsuario[6]; // La posición 6 trae el nombre del rol desde tu BD
             }
-
-            // Éxito: Cerramos la vista de login y abrimos el menú principal
             vistaLogin.dispose(); 
             
             PRINCIPAL menu = new PRINCIPAL();
             
             // Invocamos el método de los permisos justo ANTES de hacer la ventana visible
             menu.aplicarPermisos(rolDelUsuario);
-            
-            // ---> FIN DE LO NUEVO <---
-
             menu.setVisible(true);
             menu.setLocationRelativeTo(null);
             

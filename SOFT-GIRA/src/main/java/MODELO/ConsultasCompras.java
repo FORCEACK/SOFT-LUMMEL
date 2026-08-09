@@ -30,11 +30,7 @@ public class ConsultasCompras extends ConexionBD {
             while(rs.next()){
                 Object[] fila = new Object[5];
                 fila[0] = rs.getString("articulo_id");
-                
-                // NOTA: Si en tu tabla 'articulo' la columna del nombre se llama diferente 
-                // (ej. 'descripcion' o 'nombre_articulo'), cámbialo en la línea de abajo.
                 fila[1] = rs.getString("nombre"); 
-                
                 fila[2] = rs.getInt("cantidad");
                 fila[3] = rs.getDouble("precio");
                 fila[4] = rs.getDouble("subtotal");
@@ -56,7 +52,6 @@ public class ConsultasCompras extends ConexionBD {
         String fechaFormateada = sdf.format(fechaSeleccionada);
 
         // Consulta uniendo las 3 tablas. 
-        // ¡ATENCIÓN! Revisa 'a.id_articulo' y asegúrate de que sea el nombre correcto en tu BD
         String sql = "SELECT d.articulo_id, a.nombre, d.cantidad, d.precio, (d.cantidad * d.precio) AS subtotal " +
              "FROM detallecompra d " +
              "INNER JOIN articulo a ON d.articulo_id = a.articulo_id " + // <- Aquí estaba el error
@@ -92,13 +87,6 @@ public class ConsultasCompras extends ConexionBD {
         try {
             con = MODELO.ConexionBD.conectar();
             con.setAutoCommit(false); // Apagamos el autoguardado para iniciar la transacción
-
-            // 1. (OPCIONAL) Aquí puedes hacer el INSERT a tu tabla de "Compras" generales
-            // String sqlCompra = "INSERT INTO Compras (proveedor, fecha, total) VALUES (?, ?, ?)";
-            // ... (Lógica del insert) ...
-
-            // 2. Preparar el UPDATE para sumar el stock al inventario
-            // Usamos "stock = stock + ?" para que tome el valor actual de la BD y le sume lo nuevo
             String sqlUpdateStock = "UPDATE Articulo SET stock = stock + ? WHERE articulo_id = ?";
             
             try (java.sql.PreparedStatement psStock = con.prepareStatement(sqlUpdateStock)) {
@@ -114,15 +102,13 @@ public class ConsultasCompras extends ConexionBD {
                     
                     // addBatch() agrupa las sentencias para enviarlas todas juntas a la base de datos
                     psStock.addBatch(); 
-                    
-                    // (OPCIONAL) Aquí podrías hacer también un INSERT a tu tabla "DetalleCompra"
                 }
                 
                 // Ejecutamos todas las actualizaciones de stock de un solo golpe
                 psStock.executeBatch(); 
             }
 
-            con.commit(); // Si todo salió bien, guardamos los cambios definitivamente
+            con.commit(); 
             return true;
 
         } catch (Exception e) {
@@ -139,7 +125,7 @@ public class ConsultasCompras extends ConexionBD {
     }
 
     // -------------------------------------------------------------------------
-    // ---> AQUÍ EMPIEZA EL CÓDIGO NUEVO DEL PASO 1 (Buscador de Productos) <---
+    // ---> (Buscador de Productos) <---
     // -------------------------------------------------------------------------
 
     // Método para buscar un artículo por su ID
@@ -151,7 +137,7 @@ public class ConsultasCompras extends ConexionBD {
         String sql = "SELECT articulo_id, nombre, precio_Origen FROM Articulo WHERE articulo_id = ?";
         
         try {
-            // Usamos tu método conectar() para mantener el estándar de tu proyecto
+            // Usamos método conectar() para mantener el estándar de tu proyecto
             Connection con = conectar(); 
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setString(1, idArticulo);
@@ -200,7 +186,6 @@ public class ConsultasCompras extends ConexionBD {
     // MÉTODO PARA REGISTRAR UN NUEVO PROVEEDOR (TRANSACCIÓN SQL)
     // =========================================================================
     public boolean registrarProveedor(String nombre, String app, String apm, String razonSocial, String rfc) {
-       // La consulta con los 5 campos exactos de la nueva tabla de tu compañero
         String sql = "INSERT INTO Proveedor (Razon_Social, nombre, app, apm, RFC) VALUES (?, ?, ?, ?, ?)";
         
         try {

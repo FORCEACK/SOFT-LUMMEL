@@ -12,13 +12,9 @@ public class ControladorCambiarContrasena {
         // Instanciamos tu clase de consultas
         ConsultasPanelUsuarios modelo = new ConsultasPanelUsuarios();
         
-        // ¡IMPORTANTE! 
-        // Si estás encriptando las contraseñas en tu sistema (como sugiere el parámetro 'nuevaPassHash' de tu modelo),
-        // asegúrate de encriptar 'nuevaPass' aquí antes de enviarla.
-        // Ejemplo: String passHash = Seguridad.encriptar(nuevaPass);
         String passHash = nuevaPass; 
         
-        // Llamamos al método que ya tienes en ConsultasPanelUsuarios
+        // Llamamos al método en ConsultasPanelUsuarios
         return modelo.actualizarContrasena(idUsuario, passHash);
     }
 }

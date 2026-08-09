@@ -367,7 +367,7 @@ public class COMPRAS extends javax.swing.JPanel {
                 // Obtenemos el modelo visual de la tabla
                 javax.swing.table.DefaultTableModel modeloTabla = (javax.swing.table.DefaultTableModel) tablaDetalleCompra.getModel();
                 
-                // Llamamos a nuestro modelo de BD para que haga la consulta con la nueva fecha
+                // Llamamos al modelo de BD para que haga la consulta con la nueva fecha
                 MODELO.ConsultasCompras modelo = new MODELO.ConsultasCompras();
                 modelo.mostrarComprasPorFecha(modeloTabla, fechaElegida);
                 
@@ -415,7 +415,7 @@ public class COMPRAS extends javax.swing.JPanel {
         double subtotalGeneral = 0.0;
         double iva = 0.0;
         double total = 0.0;
-        double descuento = 0.0; // Puedes programar esto más adelante si manejas descuentos
+        double descuento = 0.0; 
 
         javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) tablaDetalleCompra.getModel();
         int totalFilas = modelo.getRowCount();
@@ -606,9 +606,7 @@ public class COMPRAS extends javax.swing.JPanel {
                 "Confirmar Compra", 
                 javax.swing.JOptionPane.YES_NO_OPTION);
         
-        if (confirmacion == javax.swing.JOptionPane.YES_OPTION) {
-            // ¡AQUÍ ENTRARÁ EL CÓDIGO DE BASE DE DATOS!
-            
+        if (confirmacion == javax.swing.JOptionPane.YES_OPTION) { 
             // --- INICIO DE LA LÓGICA DE CONEXIÓN ---
         
         // A) Extraemos los datos generales
@@ -717,7 +715,6 @@ public class COMPRAS extends javax.swing.JPanel {
         String apm = txtApm.getText().trim();
         String rfc = txtRfc.getText().trim();
 
-        // Validamos solo los campos que tu compañero marcó como NOT NULL
         if (razon.isEmpty() || nombre.isEmpty() || app.isEmpty()) {
             javax.swing.JOptionPane.showMessageDialog(this, 
                 "La Razón Social, Nombre y Apellido Paterno son obligatorios.", 
