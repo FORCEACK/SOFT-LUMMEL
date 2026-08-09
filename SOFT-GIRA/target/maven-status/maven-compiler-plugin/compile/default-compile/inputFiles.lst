@@ -1,31 +1,31 @@
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/MODELO/ConsultasPanelUsuarios.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/MODELO/ConsultasCompras.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/CONTROLADOR/ControladorCompras.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/CorteCajaDao.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/VISTA/FINANZAS.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/VISTA/PanelUsuarios.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/VISTA/FrmNuevoUsuario.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/CONTROLADOR/ControladorModificarUsuario.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/CONTROLADOR/ControladorNuevoUsuario.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/VISTA/COMPRAS.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/VISTA/PRINCIPAL.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/MODELO/ConexionBD.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/SoftGira/EnviarCorreo.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/MODELO/SesionActual.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/CONTROLADOR/ControladorEliminarUsuario.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/CONTROLADOR/ControladorFinanzas.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/CONTROLADOR/ControladorVentas.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/VISTA/PanelControlInventarios.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/CONTROLADOR/ControladorCambiarContrasena.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/CONTROLADOR/ControladorLogin.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/VISTA/N_Proc.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/MODELO/ConsultasFinanzas.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/VISTA/Soporte.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/VISTA/Punto_Venta.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/VISTA/FrmModificarUsuario.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/MODELO/ConsultasUsuario.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/VISTA/USUARIO.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/VISTA/Corte_Caja.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/CONTROLADOR/ProductoDAO.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/CONTROLADOR/ControladorPanelUsuarios.java
-/home/mendez/Documentos/SOFT-LUMMEL/SOFT-GIRA/src/main/java/CONTROLADOR/CorteCajaDao.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\VISTA\Punto_Venta.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\MODELO\ConsultasPanelUsuarios.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\VISTA\FrmNuevoUsuario.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\VISTA\FINANZAS.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\CONTROLADOR\ControladorCompras.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\MODELO\ConsultasCompras.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\MODELO\ConsultasUsuario.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\VISTA\COMPRAS.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\CONTROLADOR\ControladorLogin.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\CorteCajaDao.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\VISTA\PanelUsuarios.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\CONTROLADOR\ControladorModificarUsuario.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\MODELO\SesionActual.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\CONTROLADOR\ControladorCambiarContrasena.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\CONTROLADOR\ControladorPanelUsuarios.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\CONTROLADOR\ControladorVentas.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\SoftGira\EnviarCorreo.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\VISTA\FrmModificarUsuario.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\CONTROLADOR\ProductoDAO.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\VISTA\USUARIO.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\MODELO\ConexionBD.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\VISTA\PanelControlInventarios.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\CONTROLADOR\ControladorEliminarUsuario.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\CONTROLADOR\ControladorNuevoUsuario.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\VISTA\N_Proc.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\VISTA\PRINCIPAL.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\CONTROLADOR\CorteCajaDao.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\MODELO\ConsultasFinanzas.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\CONTROLADOR\ControladorFinanzas.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\VISTA\Soporte.java
+C:\Users\Luis Angel\Desktop\PROYECTO LUMMEL-SI\SOFT-GIRA\src\main\java\VISTA\Corte_Caja.java

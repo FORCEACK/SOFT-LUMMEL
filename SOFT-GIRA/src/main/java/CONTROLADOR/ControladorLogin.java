@@ -21,6 +21,15 @@ public class ControladorLogin {
 
        // 3. Tomamos una decisión basada en la respuesta del Modelo
         if (accesoConcedido) {
+            if (modelo.estaUsuarioEnLinea(username)) {
+                JOptionPane.showMessageDialog(vistaLogin, 
+                    "El usuario '" + username + "' ya tiene una sesión activa en el sistema.\nPor favor, cierra la sesión actual antes de ingresar en otro equipo.", 
+                    "Sesión Duplicada", 
+                    JOptionPane.WARNING_MESSAGE);
+                    
+                return; // Detenemos la ejecución aquí, NO lo dejamos entrar
+            }
+            // ---> FIN DE LA VALIDACIÓN <---
             
             // --- GUARDAR LA SESIÓN DE USUARIO (NOMBRE E ID) ---
             MODELO.SesionActual.usuarioLogueado = username; 

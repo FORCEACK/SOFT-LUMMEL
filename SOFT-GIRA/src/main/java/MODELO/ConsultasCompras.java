@@ -107,7 +107,7 @@ public class ConsultasCompras extends ConexionBD {
                 for (int i = 0; i < modeloTabla.getRowCount(); i++) {
                     // Extraemos el ID (Columna 0) y la Cantidad comprada (Columna 2)
                     int idArticulo = Integer.parseInt(modeloTabla.getValueAt(i, 0).toString()); 
-                    double cantidadComprada = Double.parseDouble(modeloTabla.getValueAt(i, 2).toString()); 
+                    double cantidadComprada = Double.parseDouble(modeloTabla.getValueAt(i, 3).toString()); 
 
                     psStock.setDouble(1, cantidadComprada);
                     psStock.setInt(2, idArticulo);
@@ -195,5 +195,34 @@ public class ConsultasCompras extends ConexionBD {
         }
         
         return listaProveedores;
+    }
+    // =========================================================================
+    // MÉTODO PARA REGISTRAR UN NUEVO PROVEEDOR (TRANSACCIÓN SQL)
+    // =========================================================================
+    public boolean registrarProveedor(String nombre, String app, String apm, String razonSocial, String rfc) {
+       // La consulta con los 5 campos exactos de la nueva tabla de tu compañero
+        String sql = "INSERT INTO Proveedor (Razon_Social, nombre, app, apm, RFC) VALUES (?, ?, ?, ?, ?)";
+        
+        try {
+            java.sql.Connection con = conectar();
+            java.sql.PreparedStatement ps = con.prepareStatement(sql);
+            
+            ps.setString(1, razonSocial);
+            ps.setString(2, nombre);
+            ps.setString(3, app);
+            
+            // Si el Apellido Materno o RFC vienen vacíos, mandamos un NULL para que MySQL no marque error
+            ps.setString(4, apm.isEmpty() ? null : apm);
+            ps.setString(5, rfc.isEmpty() ? null : rfc);
+            
+            int filasAfectadas = ps.executeUpdate();
+            con.close();
+            
+            return filasAfectadas > 0;
+            
+        } catch (Exception e) {
+            System.err.println("Error al registrar proveedor: " + e.getMessage());
+            return false;
+        }
     }
 }

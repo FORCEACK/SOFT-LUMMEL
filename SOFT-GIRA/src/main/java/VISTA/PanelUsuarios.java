@@ -111,6 +111,7 @@ public class PanelUsuarios extends javax.swing.JPanel {
         jLabel5 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
+        btnDesconectar = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
 
@@ -222,7 +223,17 @@ public class PanelUsuarios extends javax.swing.JPanel {
                 jTextField1KeyReleased(evt);
             }
         });
-        jPanel3.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 10, 220, 40));
+        jPanel3.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 10, 220, 40));
+
+        btnDesconectar.setBackground(new java.awt.Color(255, 102, 102));
+        btnDesconectar.setFont(new java.awt.Font("Roboto", 1, 14)); // NOI18N
+        btnDesconectar.setText("Desbloquear Sesión");
+        btnDesconectar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDesconectarActionPerformed(evt);
+            }
+        });
+        jPanel3.add(btnDesconectar, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 10, -1, 30));
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -247,10 +258,10 @@ public class PanelUsuarios extends javax.swing.JPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 946, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 817, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(0, 0, Short.MAX_VALUE))
             .addComponent(jScrollPane1)
@@ -456,6 +467,61 @@ public class PanelUsuarios extends javax.swing.JPanel {
         jTextField1.setForeground(new java.awt.Color(204, 204, 204)); // Vuelve al color gris
     }
     }//GEN-LAST:event_jTextField1FocusLost
+
+    private void btnDesconectarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDesconectarActionPerformed
+        // TODO add your handling code here:
+        // 1. Obtenemos la fila que el administrador seleccionó en la tabla
+    int filaSeleccionada = jTable1.getSelectedRow();
+
+    if (filaSeleccionada == -1) {
+        javax.swing.JOptionPane.showMessageDialog(this, 
+            "Por favor, selecciona un usuario de la tabla para desconectarlo.", 
+            "Aviso", 
+            javax.swing.JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    // 2. Extraemos el nombre de usuario (Columna 2) y su estado actual (Columna 4)
+    String username = jTable1.getValueAt(filaSeleccionada, 2).toString();
+    String estadoActual = jTable1.getValueAt(filaSeleccionada, 4).toString();
+
+    // Validamos si el usuario ya está desconectado para no hacer consultas innecesarias
+    if (estadoActual.equalsIgnoreCase("Inactivo")) {
+        javax.swing.JOptionPane.showMessageDialog(this, 
+            "El usuario '" + username + "' ya se encuentra inactivo. No es necesario desconectarlo.", 
+            "Aviso", 
+            javax.swing.JOptionPane.INFORMATION_MESSAGE);
+        return;
+    }
+
+    // 3. Pedimos confirmación de seguridad
+    int confirmacion = javax.swing.JOptionPane.showConfirmDialog(this, 
+        "¿Estás seguro de forzar el cierre de sesión del usuario '" + username + "'?\nEsto liberará su cuenta para que pueda volver a entrar.", 
+        "Confirmar Desconexión", 
+        javax.swing.JOptionPane.YES_NO_OPTION,
+        javax.swing.JOptionPane.WARNING_MESSAGE);
+
+    // 4. Si el administrador confirma, ejecutamos la actualización
+    if (confirmacion == javax.swing.JOptionPane.YES_OPTION) {
+        
+        // Reutilizamos tu modelo existente para apagar la sesión (enviar un 0)
+        MODELO.ConsultasUsuario modeloUsuario = new MODELO.ConsultasUsuario();
+        boolean exito = modeloUsuario.actualizarEstadoSesion(username, 0);
+
+        if (exito) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "¡La sesión de '" + username + "' ha sido cerrada exitosamente!");
+                
+            // Recargamos la tabla para que el estado cambie visualmente a "Inactivo"
+            refrescarTabla(); 
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Hubo un error al intentar desconectar al usuario en la base de datos.", 
+                "Error", 
+                javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    }//GEN-LAST:event_btnDesconectarActionPerformed
     // Método para recargar la tabla cuando queramos
     public void refrescarTabla() {
         CONTROLADOR.ControladorPanelUsuarios controlador = new CONTROLADOR.ControladorPanelUsuarios();
@@ -463,6 +529,7 @@ public class PanelUsuarios extends javax.swing.JPanel {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnDesconectar;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

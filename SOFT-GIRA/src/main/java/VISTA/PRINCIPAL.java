@@ -69,13 +69,15 @@ public static boolean cajaAbierta = false;
         jPanel2.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                if (!cajaAbierta) {
-                    mostrarPanel(new Punto_Venta());
-                    Corte_Caja ventanaCorte = new Corte_Caja(PRINCIPAL.this, true);
-                    ventanaCorte.setLocationRelativeTo(PRINCIPAL.this); 
-                    ventanaCorte.setVisible(true);
-                } else {
-                    mostrarPanel(new Punto_Venta());
+                if (jPanel2.isEnabled()) {
+                    if (!cajaAbierta) {
+                        mostrarPanel(new Punto_Venta());
+                        Corte_Caja ventanaCorte = new Corte_Caja(PRINCIPAL.this, true);
+                        ventanaCorte.setLocationRelativeTo(PRINCIPAL.this); 
+                        ventanaCorte.setVisible(true);
+                    } else {
+                        mostrarPanel(new Punto_Venta());
+                    }
                 }
             }
         });
@@ -84,7 +86,9 @@ public static boolean cajaAbierta = false;
         jPanel4.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                mostrarPanel(new PanelControlInventarios());
+                if (jPanel4.isEnabled()) {
+                    mostrarPanel(new PanelControlInventarios());
+                }
             }
         });
 
@@ -92,7 +96,11 @@ public static boolean cajaAbierta = false;
         jPanel8.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-               mostrarPanel(new Soporte());
+               if (jPanel8.isEnabled()) {
+                   mostrarPanel(new Soporte());
+               } else {
+                   javax.swing.JOptionPane.showMessageDialog(null, "Acceso Denegado. Tu rol actual no tiene permisos para entrar a Soporte.", "Permisos Insuficientes", javax.swing.JOptionPane.ERROR_MESSAGE);
+               }
             }
         });
 
@@ -100,11 +108,15 @@ public static boolean cajaAbierta = false;
         jPanel6.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                mostrarPanel(new COMPRAS()); 
-                COMPRAS vista = new COMPRAS();
-                ConsultasCompras modelo = new ConsultasCompras(); 
-                ControladorCompras controlador = new ControladorCompras(vista, modelo);
-                controlador.iniciarVista();
+                if (jPanel6.isEnabled()) {
+                    mostrarPanel(new COMPRAS()); 
+                    COMPRAS vista = new COMPRAS();
+                    ConsultasCompras modelo = new ConsultasCompras(); 
+                    ControladorCompras controlador = new ControladorCompras(vista, modelo);
+                    controlador.iniciarVista();
+                } else {
+                    javax.swing.JOptionPane.showMessageDialog(null, "Acceso Denegado. Tu rol actual no tiene permisos para realizar Compras.", "Permisos Insuficientes", javax.swing.JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
@@ -112,7 +124,11 @@ public static boolean cajaAbierta = false;
         jPanel5.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                mostrarPanel(new FINANZAS()); 
+                if (jPanel5.isEnabled()) {
+                    mostrarPanel(new FINANZAS()); 
+                } else {
+                    javax.swing.JOptionPane.showMessageDialog(null, "Acceso Denegado. Tu rol actual no tiene permisos para ver las Finanzas.", "Permisos Insuficientes", javax.swing.JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
@@ -122,6 +138,8 @@ public static boolean cajaAbierta = false;
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 if (jPanel7.isEnabled()) {
                     mostrarPanel(new PanelUsuarios()); 
+                } else {
+                    javax.swing.JOptionPane.showMessageDialog(null, "Acceso Denegado. Tu rol actual no tiene permisos para Administrar Usuarios.", "Permisos Insuficientes", javax.swing.JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -131,39 +149,38 @@ public static boolean cajaAbierta = false;
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 
-                // --- NUEVA VALIDACIÓN: VERIFICAR SI LA CAJA ESTÁ ABIERTA ---
-                int idUsuarioActual = MODELO.SesionActual.idUsuarioLogueado;
-                CONTROLADOR.CorteCajaDao corteDao = new CONTROLADOR.CorteCajaDao();
-                int idCorteActual = corteDao.obtenerIdCorteAbierto(idUsuarioActual);
+                if (jPanel1.isEnabled()) {
+                    // --- NUEVA VALIDACIÓN: VERIFICAR SI LA CAJA ESTÁ ABIERTA ---
+                    int idUsuarioActual = MODELO.SesionActual.idUsuarioLogueado;
+                    CONTROLADOR.CorteCajaDao corteDao = new CONTROLADOR.CorteCajaDao();
+                    int idCorteActual = corteDao.obtenerIdCorteAbierto(idUsuarioActual);
 
-                // Si devuelve un ID mayor a 0, significa que no ha hecho su corte
-                if (idCorteActual > 0) {
-                    javax.swing.JOptionPane.showMessageDialog(null, 
-                        "No puedes cerrar sesión porque tienes un corte de caja abierto.\nPor favor, realiza tu corte de caja antes de salir del sistema.", 
-                        "Corte de Caja Pendiente", 
-                        javax.swing.JOptionPane.WARNING_MESSAGE);
-                    
-                    return; // Detenemos la ejecución aquí, no se cierra la sesión
-                }
-                // --- FIN DE LA VALIDACIÓN ---
-
-                // Si no hay corte abierto (idCorteActual = 0), procede normalmente
-                int confirmacion = javax.swing.JOptionPane.showConfirmDialog(null, 
-                        "¿Estás seguro que deseas cerrar sesión?", 
-                        "Confirmar Cierre de Sesión", 
-                        javax.swing.JOptionPane.YES_NO_OPTION,
-                        javax.swing.JOptionPane.QUESTION_MESSAGE);
-                
-                if (confirmacion == javax.swing.JOptionPane.YES_OPTION) {
-                    if (!MODELO.SesionActual.usuarioLogueado.isEmpty()) {
-                        MODELO.ConsultasUsuario modeloUsuario = new MODELO.ConsultasUsuario();
-                        modeloUsuario.actualizarEstadoSesion(MODELO.SesionActual.usuarioLogueado, 0);
-                        MODELO.SesionActual.usuarioLogueado = "";
+                    if (idCorteActual > 0) {
+                        javax.swing.JOptionPane.showMessageDialog(null, 
+                            "No puedes cerrar sesión porque tienes un corte de caja abierto.\nPor favor, realiza tu corte de caja antes de salir del sistema.", 
+                            "Corte de Caja Pendiente", 
+                            javax.swing.JOptionPane.WARNING_MESSAGE);
+                        return; 
                     }
-                    dispose(); 
-                    VISTA.USUARIO ventanaLogin = new VISTA.USUARIO();
-                    ventanaLogin.setVisible(true);
-                    ventanaLogin.setLocationRelativeTo(null);
+                    // --- FIN DE LA VALIDACIÓN ---
+
+                    int confirmacion = javax.swing.JOptionPane.showConfirmDialog(null, 
+                            "¿Estás seguro que deseas cerrar sesión?", 
+                            "Confirmar Cierre de Sesión", 
+                            javax.swing.JOptionPane.YES_NO_OPTION,
+                            javax.swing.JOptionPane.QUESTION_MESSAGE);
+                    
+                    if (confirmacion == javax.swing.JOptionPane.YES_OPTION) {
+                        if (!MODELO.SesionActual.usuarioLogueado.isEmpty()) {
+                            MODELO.ConsultasUsuario modeloUsuario = new MODELO.ConsultasUsuario();
+                            modeloUsuario.actualizarEstadoSesion(MODELO.SesionActual.usuarioLogueado, 0);
+                            MODELO.SesionActual.usuarioLogueado = "";
+                        }
+                        dispose(); 
+                        VISTA.USUARIO ventanaLogin = new VISTA.USUARIO();
+                        ventanaLogin.setVisible(true);
+                        ventanaLogin.setLocationRelativeTo(null);
+                    }
                 }
             }
         });
@@ -175,11 +192,16 @@ public static boolean cajaAbierta = false;
         panel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                panel.setBackground(colorHover);
+                // Solo se ilumina si el panel SÍ está habilitado
+                if (panel.isEnabled()) {
+                    panel.setBackground(colorHover);
+                }
             }
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                panel.setBackground(original);
+                if (panel.isEnabled()) {
+                    panel.setBackground(original);
+                }
             }
         });
     }
@@ -391,33 +413,29 @@ public static boolean cajaAbierta = false;
     // =========================================================================
     public void aplicarPermisos(String rolUsuario) {
         
-        // 1. Por defecto, hacemos que TODOS los módulos sean visibles
-        jPanel1.setVisible(true); // Cerrar Sesión
-        jPanel2.setVisible(true); // Punto de Venta
-        jPanel4.setVisible(true); // Control de Inventarios
-        jPanel5.setVisible(true); // Finanzas
-        jPanel6.setVisible(true); // Compras
-        jPanel7.setVisible(true); // Usuarios
-        jPanel8.setVisible(true); // Soporte
+       // 1. Por defecto, hacemos que TODOS los módulos estén HABILITADOS
+        jPanel1.setEnabled(true); // Cerrar Sesión
+        jPanel2.setEnabled(true); // Punto de Venta
+        jPanel4.setEnabled(true); // Control de Inventarios
+        jPanel5.setEnabled(true); // Finanzas
+        jPanel6.setEnabled(true); // Compras
+        jPanel7.setEnabled(true); // Usuarios
+        jPanel8.setEnabled(true); // Soporte
 
-        // 2. Aplicamos las restricciones según el rol
+        // 2. Aplicamos las restricciones según el rol (Apagamos su funcionalidad)
         if (rolUsuario.equalsIgnoreCase("Gerente")) {
             
-            // El Gerente NO tiene acceso a Compras ni a Usuarios
-            jPanel6.setVisible(false);
-            jPanel7.setVisible(false);
+            jPanel6.setEnabled(false); // Compras
+            jPanel7.setEnabled(false); // Usuarios
             
         } else if (rolUsuario.equalsIgnoreCase("Vendedor")) {
             
-            // El Vendedor SOLO tiene acceso a Venta, Inventario y Cerrar Sesión
-            jPanel5.setVisible(false); // Finanzas
-            jPanel6.setVisible(false); // Compras
-            jPanel7.setVisible(false); // Usuarios
-            jPanel8.setVisible(false); // Soporte
+            jPanel5.setEnabled(false); // Finanzas
+            jPanel6.setEnabled(false); // Compras
+            jPanel7.setEnabled(false); // Usuarios
+            jPanel8.setEnabled(false); // Soporte
             
         }
-        // Nota: Si el rol es "Administrador" o "Desarrolladores", el código ignora 
-        // los 'if' y deja todo visible (que es exactamente lo que buscas).
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

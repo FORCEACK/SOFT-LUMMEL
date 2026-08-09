@@ -110,6 +110,30 @@ public class ConsultasUsuario {
             return null;
         }
     }
+    // =========================================================================
+    // MÉTODO PARA VERIFICAR SI EL USUARIO YA ESTÁ EN LÍNEA
+    // =========================================================================
+    public boolean estaUsuarioEnLinea(String username) {
+        String sql = "SELECT en_linea FROM Usuario WHERE username = ?";
+        
+        ConexionBD conexion = new ConexionBD();
+        
+        try (Connection con = conexion.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+             
+            ps.setString(1, username);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int enLinea = rs.getInt("en_linea");
+                    return enLinea == 1; // Retorna true si ya está conectado
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al verificar estado en línea: " + e.getMessage());
+        }
+        return false;
+    }
 }
 
     

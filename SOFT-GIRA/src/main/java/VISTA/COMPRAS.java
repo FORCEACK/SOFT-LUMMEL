@@ -52,8 +52,9 @@ public class COMPRAS extends javax.swing.JPanel {
         jLabel8 = new javax.swing.JLabel();
         jDateChooser1 = new com.toedter.calendar.JDateChooser();
         jLabel9 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        cmbProveedor = new javax.swing.JComboBox<>();
         jButton1 = new javax.swing.JButton();
+        btnAgregarProveedor = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
         txtBuscarProducto = new javax.swing.JTextField();
@@ -64,7 +65,7 @@ public class COMPRAS extends javax.swing.JPanel {
         txtSKU = new javax.swing.JTextField();
         txtDescripcion = new javax.swing.JTextField();
         txtCantidad = new javax.swing.JTextField();
-        txtPrecio = new javax.swing.JTextField();
+        txtPrecioUnitario = new javax.swing.JTextField();
         btnAgregarDetalle = new javax.swing.JButton();
         btnQuitarArticulo = new javax.swing.JButton();
         btnLimpiarCampos = new javax.swing.JButton();
@@ -99,13 +100,13 @@ public class COMPRAS extends javax.swing.JPanel {
 
         tablaDetalleCompra.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
             },
             new String [] {
-                "Codigo", "Producto", "Cantidad", "Precio Unitario", "Subtotal", "Total"
+                "Codigo", "Proveedor", "Producto", "Cantidad", "Precio Unitario", "Subtotal", "Total"
             }
         ));
         tablaDetalleCompra.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -176,8 +177,8 @@ public class COMPRAS extends javax.swing.JPanel {
         jLabel9.setText("Proveedor");
         jPanel5.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 20, -1, -1));
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jPanel5.add(jComboBox1, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 40, 240, 30));
+        cmbProveedor.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jPanel5.add(cmbProveedor, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 40, 240, 30));
 
         jButton1.setBackground(new java.awt.Color(224, 239, 255));
         jButton1.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
@@ -187,7 +188,17 @@ public class COMPRAS extends javax.swing.JPanel {
                 jButton1ActionPerformed(evt);
             }
         });
-        jPanel5.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 40, 180, 30));
+        jPanel5.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 40, 180, 30));
+
+        btnAgregarProveedor.setBackground(new java.awt.Color(224, 239, 255));
+        btnAgregarProveedor.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
+        btnAgregarProveedor.setText("Agregar Proveedor");
+        btnAgregarProveedor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAgregarProveedorActionPerformed(evt);
+            }
+        });
+        jPanel5.add(btnAgregarProveedor, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 40, -1, 30));
 
         jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Buscador de Productos e Ingreso de Datos", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Roboto", 0, 16))); // NOI18N
         jPanel6.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -223,7 +234,7 @@ public class COMPRAS extends javax.swing.JPanel {
         jPanel6.add(txtSKU, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 90, 180, 30));
         jPanel6.add(txtDescripcion, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 90, 180, 30));
         jPanel6.add(txtCantidad, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 90, 150, 30));
-        jPanel6.add(txtPrecio, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 90, 170, 30));
+        jPanel6.add(txtPrecioUnitario, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 90, 170, 30));
 
         btnAgregarDetalle.setBackground(new java.awt.Color(224, 239, 255));
         btnAgregarDetalle.setFont(new java.awt.Font("Roboto", 0, 14)); // NOI18N
@@ -381,7 +392,7 @@ public class COMPRAS extends javax.swing.JPanel {
             if (articuloEncontrado != null) {
                 txtSKU.setText(articuloEncontrado[0]);
                 txtDescripcion.setText(articuloEncontrado[1]);
-                txtPrecio.setText(articuloEncontrado[2]);
+                txtPrecioUnitario.setText(articuloEncontrado[2]);
                 
                 // Pasamos el cursor automáticamente a "Cantidad" para agilizar la compra
                 txtCantidad.requestFocus(); 
@@ -394,7 +405,7 @@ public class COMPRAS extends javax.swing.JPanel {
                 
                 txtSKU.setText("");
                 txtDescripcion.setText("");
-                txtPrecio.setText("");
+                txtPrecioUnitario.setText("");
             }
         }
     }                                                 
@@ -410,10 +421,10 @@ public class COMPRAS extends javax.swing.JPanel {
         int totalFilas = modelo.getRowCount();
 
         for (int i = 0; i < totalFilas; i++) {
-            // Obtenemos el subtotal de cada fila (columna 4)
-            double subtotalFila = Double.parseDouble(modelo.getValueAt(i, 4).toString());
-            subtotalGeneral += subtotalFila;
-        }
+        // Obtenemos el subtotal de cada fila (ahora es la columna 5)
+        double subtotalFila = Double.parseDouble(modelo.getValueAt(i, 5).toString());
+        subtotalGeneral += subtotalFila;
+    }
 
         // Calculamos los impuestos (16% de IVA)
         iva = subtotalGeneral * 0.16;
@@ -433,72 +444,72 @@ public class COMPRAS extends javax.swing.JPanel {
         java.util.ArrayList<String> proveedores = modelo.obtenerProveedores();
         
         // 2. Limpiamos el ComboBox para borrar los "Item 1, Item 2..."
-        jComboBox1.removeAllItems();
+        cmbProveedor.removeAllItems();
         
         // 3. Agregamos una opción por defecto
-        jComboBox1.addItem("Seleccione un proveedor...");
+        cmbProveedor.addItem("Seleccione un proveedor...");
         
         // 4. Llenamos el menú con los datos que llegaron de la base de datos
         for (String proveedor : proveedores) {
-            jComboBox1.addItem(proveedor);
+            cmbProveedor.addItem(proveedor);
         }
     }
     private void btnAgregarDetalleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarDetalleActionPerformed
-      // 1. Validamos que haya un producto cargado y una cantidad escrita
-        if (txtSKU.getText().isEmpty() || txtCantidad.getText().isEmpty()) {
-            javax.swing.JOptionPane.showMessageDialog(this, 
-                "Por favor, busca un producto e ingresa la cantidad a comprar.", 
-                "Faltan datos", 
-                javax.swing.JOptionPane.WARNING_MESSAGE);
-            return;
-        }
+      // 1. Validar que no haya campos vacíos antes de agregar a la tabla
+    if (txtSKU.getText().trim().isEmpty() || txtDescripcion.getText().trim().isEmpty() || 
+        txtCantidad.getText().trim().isEmpty() || txtPrecioUnitario.getText().trim().isEmpty()) {
+        
+        javax.swing.JOptionPane.showMessageDialog(this, 
+            "Por favor llena todos los datos del producto antes de agregarlo.", 
+            "Campos incompletos", 
+            javax.swing.JOptionPane.WARNING_MESSAGE);
+        return;
+    }
 
-        try {
-            // 2. Extraemos los datos de los campos de texto
-            String codigo = txtSKU.getText();
-            String producto = txtDescripcion.getText();
-            int cantidad = Integer.parseInt(txtCantidad.getText());
-            double precioUnitario = Double.parseDouble(txtPrecio.getText());
-            
-            // 3. Calculamos el subtotal de esta fila
-            double subtotal = cantidad * precioUnitario;
-            
-            // Nota: En tu tabla tienes una columna "Total" al final (columna 5). 
-            // Para compras, suele ser igual al subtotal por fila (el IVA va al final).
-            double totalFila = subtotal; 
-
-            // 4. Preparamos la fila para la tabla
-            Object[] filaNueva = new Object[6];
-            filaNueva[0] = codigo;
-            filaNueva[1] = producto;
-            filaNueva[2] = cantidad;
-            filaNueva[3] = precioUnitario;
-            filaNueva[4] = subtotal;
-            filaNueva[5] = totalFila;
-
-            // 5. Agregamos la fila al modelo visual de la tabla
-            javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) tablaDetalleCompra.getModel();
-            modelo.addRow(filaNueva);
-
-            // 6. Actualizamos los totales de la esquina inferior derecha
-            calcularTotales();
-
-            // 7. Limpiamos los campos para buscar el siguiente producto
-            txtBuscarProducto.setText("");
-            txtSKU.setText("");
-            txtDescripcion.setText("");
-            txtCantidad.setText("");
-            txtPrecio.setText("");
-            
-            // Regresamos el cursor al buscador
-            txtBuscarProducto.requestFocus();
-
-        } catch (NumberFormatException e) {
-            javax.swing.JOptionPane.showMessageDialog(this, 
-                "La cantidad y el precio deben ser valores numéricos.", 
-                "Error de formato", 
-                javax.swing.JOptionPane.ERROR_MESSAGE);
-        }
+    try {
+        // 2. Extraer el Proveedor seleccionado directamente del ComboBox
+        String proveedorSeleccionado = cmbProveedor.getSelectedItem().toString();
+        
+        // 3. Extraer los datos de las cajas de texto
+        String codigo = txtSKU.getText().trim();
+        String producto = txtDescripcion.getText().trim();
+        double cantidad = Double.parseDouble(txtCantidad.getText().trim());
+        double precio = Double.parseDouble(txtPrecioUnitario.getText().trim());
+        
+        // 4. Calcular matemáticamente el Subtotal y el Total
+        double subtotal = cantidad * precio;
+        double total = subtotal; // Si más adelante manejas IVA, lo calculas aquí
+        
+        // 5. Agregar la fila al modelo de tu tabla respetando el orden de tus columnas
+        javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) tablaDetalleCompra.getModel();
+        
+        // Orden: Codigo | Proveedor | Producto | Cantidad | Precio Unitario | Subtotal | Total
+        modelo.addRow(new Object[]{
+            codigo, 
+            proveedorSeleccionado, // <- Inyectamos la Razón Social del proveedor
+            producto, 
+            cantidad, 
+            precio, 
+            subtotal, 
+            total
+        });
+        
+        // 6. Limpiar las cajas de texto para escanear el siguiente producto más rápido
+        txtSKU.setText("");
+        txtDescripcion.setText("");
+        txtCantidad.setText("");
+        txtPrecioUnitario.setText("");
+        
+        // Regresamos el cursor al campo del SKU
+        txtSKU.requestFocus();
+        calcularTotales();
+        
+    } catch (NumberFormatException e) {
+        javax.swing.JOptionPane.showMessageDialog(this, 
+            "Asegúrate de ingresar solo números válidos en Cantidad y Precio.", 
+            "Error de formato", 
+            javax.swing.JOptionPane.ERROR_MESSAGE);
+    }
     }//GEN-LAST:event_btnAgregarDetalleActionPerformed
 
     private void btnLimpiarCamposActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarCamposActionPerformed
@@ -508,7 +519,7 @@ public class COMPRAS extends javax.swing.JPanel {
         txtSKU.setText("");
         txtDescripcion.setText("");
         txtCantidad.setText("");
-        txtPrecio.setText("");
+        txtPrecioUnitario.setText("");
         
         // Regresamos el cursor al inicio
         txtBuscarProducto.requestFocus();
@@ -563,7 +574,7 @@ public class COMPRAS extends javax.swing.JPanel {
             txtSKU.setText("");
             txtDescripcion.setText("");
             txtCantidad.setText("");
-            txtPrecio.setText(""); 
+            txtPrecioUnitario.setText(""); 
             // Opcional: Reiniciamos la fecha
             jDateChooser1.setDate(null);
         }
@@ -602,7 +613,7 @@ public class COMPRAS extends javax.swing.JPanel {
         
         // A) Extraemos los datos generales
         java.util.Date fecha = jDateChooser1.getDate();
-        String proveedor = jComboBox1.getSelectedItem().toString();
+        String proveedor = cmbProveedor.getSelectedItem().toString();
         
         // Limpiamos el signo de pesos y comas del total para convertirlo a número
         String textoTotal = lblTotal.getText().replace("$", "").replace(",", "").trim();
@@ -671,6 +682,68 @@ public class COMPRAS extends javax.swing.JPanel {
         }
     }
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void btnAgregarProveedorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarProveedorActionPerformed
+        // 1. Crear los campos de texto
+    javax.swing.JTextField txtRazonSocial = new javax.swing.JTextField();
+    javax.swing.JTextField txtNombre = new javax.swing.JTextField();
+    javax.swing.JTextField txtApp = new javax.swing.JTextField();
+    javax.swing.JTextField txtApm = new javax.swing.JTextField();
+    javax.swing.JTextField txtRfc = new javax.swing.JTextField();
+
+    // 2. Armar el diseño del formulario emergente
+    Object[] formulario = {
+        "Razón Social (*):", txtRazonSocial,
+        "Nombre(s) (*):", txtNombre,
+        "Apellido Paterno (*):", txtApp,
+        "Apellido Materno:", txtApm,
+        "RFC:", txtRfc
+    };
+
+    // 3. Mostrar la ventana al usuario
+    int opcion = javax.swing.JOptionPane.showConfirmDialog(
+        this, 
+        formulario, 
+        "Registrar Nuevo Proveedor", 
+        javax.swing.JOptionPane.OK_CANCEL_OPTION, 
+        javax.swing.JOptionPane.PLAIN_MESSAGE
+    );
+
+    // 4. Procesar los datos si presionó "Aceptar"
+    if (opcion == javax.swing.JOptionPane.OK_OPTION) {
+        String razon = txtRazonSocial.getText().trim();
+        String nombre = txtNombre.getText().trim();
+        String app = txtApp.getText().trim();
+        String apm = txtApm.getText().trim();
+        String rfc = txtRfc.getText().trim();
+
+        // Validamos solo los campos que tu compañero marcó como NOT NULL
+        if (razon.isEmpty() || nombre.isEmpty() || app.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "La Razón Social, Nombre y Apellido Paterno son obligatorios.", 
+                "Campos incompletos", 
+                javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Llamamos al modelo pasándole todos los parámetros
+        MODELO.ConsultasCompras consultas = new MODELO.ConsultasCompras();
+        boolean exito = consultas.registrarProveedor(razon, nombre, app, apm, rfc);
+
+        if (exito) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Proveedor agregado con éxito.");
+            
+            // Agregamos la Razón Social al ComboBox y la dejamos seleccionada
+            cmbProveedor.addItem(razon);
+            cmbProveedor.setSelectedItem(razon);
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Error al guardar el proveedor. Revisa la consola para más detalles.", 
+                "Error", 
+                javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    }//GEN-LAST:event_btnAgregarProveedorActionPerformed
     private void exportarExcel(javax.swing.JTable tabla, java.io.File archivo) {
     try (org.apache.poi.ss.usermodel.Workbook libro = new org.apache.poi.xssf.usermodel.XSSFWorkbook()) {
         org.apache.poi.ss.usermodel.Sheet hoja = libro.createSheet("Compras");
@@ -746,12 +819,13 @@ public class COMPRAS extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAgregarDetalle;
+    private javax.swing.JButton btnAgregarProveedor;
     private javax.swing.JButton btnCancelarCompra;
     private javax.swing.JButton btnConfirmarCompra;
     private javax.swing.JButton btnLimpiarCampos;
     private javax.swing.JButton btnQuitarArticulo;
+    private javax.swing.JComboBox<String> cmbProveedor;
     private javax.swing.JButton jButton1;
-    private javax.swing.JComboBox<String> jComboBox1;
     private com.toedter.calendar.JDateChooser jDateChooser1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
@@ -782,7 +856,7 @@ public class COMPRAS extends javax.swing.JPanel {
     private javax.swing.JTextField txtBuscarProducto;
     private javax.swing.JTextField txtCantidad;
     private javax.swing.JTextField txtDescripcion;
-    private javax.swing.JTextField txtPrecio;
+    private javax.swing.JTextField txtPrecioUnitario;
     private javax.swing.JTextField txtSKU;
     // End of variables declaration//GEN-END:variables
 }
