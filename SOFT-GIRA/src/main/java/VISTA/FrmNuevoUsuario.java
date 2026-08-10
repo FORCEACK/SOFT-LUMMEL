@@ -77,7 +77,7 @@ public class FrmNuevoUsuario extends javax.swing.JFrame {
         });
         jPanel1.add(txtPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 290, 160, 30));
 
-        cmbRol.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Administrador", "Vendedor", "Almacen" }));
+        cmbRol.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Administrador", "Gerente", "Vendedor", "Desarrolladores" }));
         jPanel1.add(cmbRol, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 350, -1, -1));
 
         btnCancelar.setBackground(new java.awt.Color(255, 51, 51));

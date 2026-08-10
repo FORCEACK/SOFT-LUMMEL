@@ -25,19 +25,19 @@ public class ConsultasPanelUsuarios {
 
         // Obtenemos el usuario de la sesión activa actual
         String usuarioSesion = MODELO.SesionActual.usuarioLogueado;
-
         // Seleccionamos también el campo 'ultimo_acceso'
         String sql = "SELECT u.id_Usuario, "
                    + "CONCAT(p.Nombre, ' ', p.APP, ' ', p.APM) AS NombreCompleto, "
                    + "u.username, "
                    + "IFNULL(r.nombre_rol, 'Sin Asignar') AS Rol, "
+                   + "u.estatus, " 
                    + "u.ultimo_acceso "
                    + "FROM Usuario u "
                    + "INNER JOIN Persona p ON u.id_Persona = p.id_Persona "
                    + "LEFT JOIN TIENE t ON u.id_Usuario = t.id_Usuario "
                    + "LEFT JOIN Rol r ON t.id_Rol = r.id_Rol "
+                   + "WHERE u.estatus = 1 " // <--- ESTA ES LA LÍNEA QUE OCULTA A LOS INACTIVOS
                    + "ORDER BY u.id_Usuario ASC";
-
         ConexionBD conexion = new ConexionBD();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -54,9 +54,11 @@ public class ConsultasPanelUsuarios {
                 fila[2] = userBD;
                 fila[3] = rs.getString("Rol");
                 
-                // --- LÓGICA DE ESTADO ---
-                // Solo si coincide el usuario registrado con la sesión actual, se muestra Activo
-                if (userBD != null && userBD.equalsIgnoreCase(usuarioSesion)) {
+               // --- LÓGICA DE ESTADO ---
+                // Leemos el estatus directamente de la base de datos (1 = Activo, 0 = Inactivo)
+                int estatusBD = rs.getInt("estatus");
+                
+                if (estatusBD == 1) {
                     fila[4] = "Activo";
                 } else {
                     fila[4] = "Inactivo";
@@ -247,59 +249,24 @@ public class ConsultasPanelUsuarios {
     // =========================================================================
     public boolean eliminarUsuario(int idUsuario) {
         ConexionBD conexion = new ConexionBD();
-        Connection con = conexion.conectar();
-        String sqlGetPersona = "SELECT id_Persona FROM Usuario WHERE id_Usuario = ?";
         
-        // 2. Consultas de eliminación (de hijo a padre)
-        String sqlDeleteTiene = "DELETE FROM TIENE WHERE id_Usuario = ?";
-        String sqlDeleteUsuario = "DELETE FROM Usuario WHERE id_Usuario = ?";
-        String sqlDeletePersona = "DELETE FROM Persona WHERE id_Persona = ?";
+        // Actualizamos el campo 'estatus' a 0 (Inactivo)
+        String sql = "UPDATE Usuario SET estatus = 0 WHERE id_Usuario = ?";
 
-        try {
-            con.setAutoCommit(false); // Iniciamos transacción
+        try (Connection con = conexion.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idUsuario);
+
+            // executeUpdate devuelve el número de filas afectadas
+            int filasAfectadas = ps.executeUpdate();
             
-            // Paso A: Obtener el ID de la Persona
-            int idPersona = 0;
-            try (PreparedStatement psGet = con.prepareStatement(sqlGetPersona)) {
-                psGet.setInt(1, idUsuario);
-                try (ResultSet rs = psGet.executeQuery()) {
-                    if (rs.next()) {
-                        idPersona = rs.getInt("id_Persona");
-                    } else {
-                        return false; // El usuario no existe en la BD
-                    }
-                }
-            }
-
-            // Paso B: Eliminar su Rol en la tabla TIENE
-            try (PreparedStatement psTiene = con.prepareStatement(sqlDeleteTiene)) {
-                psTiene.setInt(1, idUsuario);
-                psTiene.executeUpdate();
-            }
-
-            // Paso C: Eliminar sus credenciales en la tabla Usuario
-            try (PreparedStatement psUsuario = con.prepareStatement(sqlDeleteUsuario)) {
-                psUsuario.setInt(1, idUsuario);
-                psUsuario.executeUpdate();
-            }
-
-            // Paso D: Eliminar sus datos en la tabla Persona
-            if (idPersona != 0) {
-                try (PreparedStatement psPersona = con.prepareStatement(sqlDeletePersona)) {
-                    psPersona.setInt(1, idPersona);
-                    psPersona.executeUpdate();
-                }
-            }
-
-            con.commit(); // Si todo salió bien, guardamos los cambios
-            return true;
+            // Si modificó al menos una fila, retorna true
+            return filasAfectadas > 0;
 
         } catch (SQLException e) {
-            try { con.rollback(); } catch (SQLException ex) {} // Deshacemos si hay error
-            System.err.println("Error al eliminar usuario: " + e.getMessage());
+            System.err.println("Error al desactivar usuario: " + e.getMessage());
             return false;
-        } finally {
-            try { con.setAutoCommit(true); con.close(); } catch (SQLException e) {}
         }
     }
     // =========================================================================
@@ -321,6 +288,28 @@ public class ConsultasPanelUsuarios {
             
         } catch (SQLException e) {
             System.err.println("Error al cambiar contraseña: " + e.getMessage());
+            return false;
+        }
+    }
+    // =========================================================================
+    // 5. MÉTODO PARA REACTIVAR UN USUARIO INACTIVO
+    // =========================================================================
+    public boolean reactivarUsuario(String username) {
+        ConexionBD conexion = new ConexionBD();
+        
+        // Cambiamos el estatus a 1 (Activo) buscando por su nombre de usuario
+        String sql = "UPDATE Usuario SET estatus = 1 WHERE username = ?";
+
+        try (Connection con = conexion.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+
+            int filasAfectadas = ps.executeUpdate();
+            return filasAfectadas > 0; // Retorna true si encontró al usuario y lo actualizó
+
+        } catch (SQLException e) {
+            System.err.println("Error al reactivar usuario: " + e.getMessage());
             return false;
         }
     }

@@ -33,6 +33,7 @@ VISTA\PanelUsuarios$1.class
 VISTA\PanelControlInventarios$3.class
 VISTA\Corte_Caja$3.class
 VISTA\USUARIO$4.class
+CONTROLADOR\ControladorReactivarUsuario.class
 VISTA\PRINCIPAL$8.class
 VISTA\Punto_Venta$7.class
 VISTA\PRINCIPAL$1.class
@@ -71,6 +72,7 @@ CONTROLADOR\ControladorCompras.class
 VISTA\PanelUsuarios$12.class
 VISTA\FrmNuevoUsuario$5.class
 VISTA\Corte_Caja$6.class
+VISTA\PanelUsuarios$15.class
 VISTA\USUARIO$1.class
 VISTA\FrmNuevoUsuario$2.class
 VISTA\Punto_Venta$1.class

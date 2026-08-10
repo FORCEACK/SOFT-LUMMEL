@@ -112,6 +112,7 @@ public class PanelUsuarios extends javax.swing.JPanel {
         jLabel9 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         btnDesconectar = new javax.swing.JButton();
+        btnReactivar = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
 
@@ -235,6 +236,16 @@ public class PanelUsuarios extends javax.swing.JPanel {
         });
         jPanel3.add(btnDesconectar, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 10, -1, 30));
 
+        btnReactivar.setBackground(new java.awt.Color(153, 255, 153));
+        btnReactivar.setFont(new java.awt.Font("Roboto", 1, 14)); // NOI18N
+        btnReactivar.setText("Reactivar");
+        btnReactivar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReactivarActionPerformed(evt);
+            }
+        });
+        jPanel3.add(btnReactivar, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 50, 170, 30));
+
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null},
@@ -271,12 +282,12 @@ public class PanelUsuarios extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
-                .addGap(235, 235, 235))
+                .addGap(32, 32, 32)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 261, Short.MAX_VALUE)
+                .addGap(215, 215, 215))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -522,6 +533,19 @@ public class PanelUsuarios extends javax.swing.JPanel {
         }
     }
     }//GEN-LAST:event_btnDesconectarActionPerformed
+
+    private void btnReactivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReactivarActionPerformed
+        // TODO add your handling code here:
+        // Este código va dentro del evento de tu nuevo botón "Reactivar"
+    CONTROLADOR.ControladorReactivarUsuario controlador = new CONTROLADOR.ControladorReactivarUsuario();
+    
+    // Llamamos al proceso. Si nos devuelve true (se reactivó), refrescamos la tabla
+    boolean seReactivo = controlador.procesarReactivacion(this);
+    
+    if (seReactivo) {
+        refrescarTabla(); // Asumiendo que así se llama tu método para recargar la tabla
+    }
+    }//GEN-LAST:event_btnReactivarActionPerformed
     // Método para recargar la tabla cuando queramos
     public void refrescarTabla() {
         CONTROLADOR.ControladorPanelUsuarios controlador = new CONTROLADOR.ControladorPanelUsuarios();
@@ -530,6 +554,7 @@ public class PanelUsuarios extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDesconectar;
+    private javax.swing.JButton btnReactivar;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

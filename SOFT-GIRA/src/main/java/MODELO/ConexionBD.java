@@ -8,7 +8,8 @@ import javax.swing.JOptionPane;
 public class ConexionBD {
 
     // Centralizamos las credenciales aquí (Variables globales, privadas y estáticas)
-    private static final String url = "jdbc:mysql://192.168.0.11:3306/lummel_db";
+    //private static final String url = "jdbc:mysql://192.168.0.11:3306/lummel_db";
+    private static final String url = "jdbc:mysql://26.91.85.79:3306/lummel_db";
     private static final String user = "robot";
     private static final String pass = "basededatos12345"; 
 
