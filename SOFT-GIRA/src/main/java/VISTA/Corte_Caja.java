@@ -594,14 +594,12 @@ try {
         VISTA.PRINCIPAL.cajaAbierta = true;
 
         jTextField1.setEnabled(false);
-        jButton1.setEnabled(false);
+        if (jButton1 != null) jButton1.setEnabled(false);
 
-        JOptionPane.showMessageDialog(this, "Corte de caja iniciado correctamente.");
-        calcularTotalesCorte();
+        // Notificación al usuario
+        JOptionPane.showMessageDialog(this, "Corte de caja iniciado correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
-        // =========================================================================
-        // 5. MSTRAR PUNTO DE VENTA EN LA VENTANA PRINCIPAL
-        // =========================================================================
+        // 5. MOSTRAR PUNTO DE VENTA EN LA VENTANA PRINCIPAL
         for (java.awt.Frame frame : java.awt.Frame.getFrames()) {
             if (frame instanceof VISTA.PRINCIPAL) {
                 ((VISTA.PRINCIPAL) frame).mostrarPanel(new VISTA.Punto_Venta());
@@ -610,13 +608,26 @@ try {
         }
 
         // =========================================================================
-        // 6. OCULTAR Y CERRAR LA VENTANA EMERGENTE (JDialog de Corte)
+        // 6. CERRAR DE FORMA DEFINITIVA LA VENTANA O DIÁLOGO DE CORTE
         // =========================================================================
-        java.awt.Window ventanaFlotante = javax.swing.SwingUtilities.getWindowAncestor(this);
-
-        if (ventanaFlotante != null && !(ventanaFlotante instanceof VISTA.PRINCIPAL)) {
-            ventanaFlotante.setVisible(false); // Ocualta la ventana emergente de inmediato
-            ventanaFlotante.dispose();        // Libera los recursos de la ventana
+        
+        // Caso A: Si la clase actual es directamente el JDialog
+        if (this instanceof javax.swing.JDialog) {
+            ((javax.swing.JDialog) this).dispose();
+        } 
+        else {
+            // Caso B: Si es un JPanel contenido dentro de un JDialog o JFrame secundario
+            java.awt.Window ventanaPadre = javax.swing.SwingUtilities.getWindowAncestor(this);
+            if (ventanaPadre != null && !(ventanaPadre instanceof VISTA.PRINCIPAL)) {
+                ventanaPadre.setVisible(false);
+                ventanaPadre.dispose();
+            } else {
+                // Caso C: Si está contenido dentro de un JInternalFrame
+                javax.swing.JInternalFrame internalFrame = (javax.swing.JInternalFrame) javax.swing.SwingUtilities.getAncestorOfClass(javax.swing.JInternalFrame.class, this);
+                if (internalFrame != null) {
+                    internalFrame.dispose();
+                }
+            }
         }
 
     } else {
@@ -675,12 +686,21 @@ try {
     );
 
     // 4. LIMPIAR PANTALLA Y REINICIAR CAJA
+    jTextField1.setEnabled(true);
+    jTextField1.setEditable(true);
     jTextField1.setText("0");
+
     txtRetiros.setText("0");
-    // ... (tus limpiezas de textfields adicionales) ...
+    lblVentasEfectivo.setText("$0.00");
+    lblVentasTarjetas.setText("$0.00");
+    lblTotalContado.setText("$0.00");
+
+
 
     VISTA.PRINCIPAL.cajaAbierta = false;
     VISTA.PRINCIPAL.fondoInicialGuardado = 0.0;
+
+    jTextField1.requestFocus();
 
 } catch (Exception e) {
     JOptionPane.showMessageDialog(this, "Error al finalizar el corte:\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

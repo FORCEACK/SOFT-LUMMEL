@@ -22,6 +22,13 @@ public class PanelControlInventarios extends javax.swing.JPanel {
     public PanelControlInventarios() {
         initComponents();
         cargarTablaProductos();
+        // =========================================================================
+    // PEGA ESTA LÍNEA AQUÍ PARA BLOQUEAR LA EDICIÓN:
+    // =========================================================================
+        tablaInventario.setDefaultEditor(Object.class, null); 
+
+    // Opcional: Evita que el usuario arrastre y desordene los encabezados de columna
+        tablaInventario.getTableHeader().setReorderingAllowed(false);
         tablaInventario.getColumnModel().getColumn(8).setCellRenderer(new SemaforoCellRenderer());
     }
 
@@ -368,116 +375,282 @@ int filaSeleccionada = tablaInventario.getSelectedRow();
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-  int filaSeleccionada = tablaInventario.getSelectedRow();
+ int filaSeleccionada = tablaInventario.getSelectedRow();
+
+if (filaSeleccionada == -1) {
+    javax.swing.JOptionPane.showMessageDialog(this, "Por favor, selecciona un producto de la tabla.", "Advertencia", javax.swing.JOptionPane.WARNING_MESSAGE);
+    return;
+}
+
+try {
+    // 1. LECTURA DE VALORES DE LA FILA SELECCIONADA
+    int idArticulo = Integer.parseInt(tablaInventario.getValueAt(filaSeleccionada, 0).toString().trim());
+    String nombreActual = tablaInventario.getValueAt(filaSeleccionada, 1).toString();
+    String presentacionActual = tablaInventario.getValueAt(filaSeleccionada, 2).toString();
+    String unidadActual = tablaInventario.getValueAt(filaSeleccionada, 3).toString();
+    
+    double costoActual = Double.parseDouble(tablaInventario.getValueAt(filaSeleccionada, 4).toString().replace("$", "").replaceAll(",", "").trim());
+    double precioActual = Double.parseDouble(tablaInventario.getValueAt(filaSeleccionada, 5).toString().replace("$", "").replaceAll(",", "").trim());
+    double stockActual = Double.parseDouble(tablaInventario.getValueAt(filaSeleccionada, 6).toString().trim());
+    double minimoActual = Double.parseDouble(tablaInventario.getValueAt(filaSeleccionada, 7).toString().trim());
+
+    // 2. CREACIÓN DE COMBOBOXES Y CARGA CON LAS COLUMNAS CORRECTAS DE LA BD
+    javax.swing.JComboBox<String> cbPresentacion = new javax.swing.JComboBox<>();
+    cbPresentacion.setEditable(true);
+
+    javax.swing.JComboBox<String> cbUnidad = new javax.swing.JComboBox<>();
+
+    try (java.sql.Connection con = MODELO.ConexionBD.conectar()) {
         
-        if (filaSeleccionada == -1) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Por favor, selecciona un producto de la tabla.", "Advertencia", javax.swing.JOptionPane.WARNING_MESSAGE);
+        // A) Cargar presentaciones (columna 'descripcion' en la tabla Articulo)
+        String sqlPresentacion = "SELECT DISTINCT descripcion FROM Articulo WHERE descripcion IS NOT NULL AND descripcion != '' ORDER BY descripcion ASC";
+        try (java.sql.PreparedStatement pstP = con.prepareStatement(sqlPresentacion);
+             java.sql.ResultSet rsP = pstP.executeQuery()) {
+            while (rsP.next()) {
+                cbPresentacion.addItem(rsP.getString("descripcion"));
+            }
+        }
+        
+        // B) Cargar Unidades de Medida desde la tabla 'UnidadMedida' (columna 'nombre')
+        String sqlUnidad = "SELECT nombre FROM UnidadMedida ORDER BY idMedida ASC";
+        try (java.sql.PreparedStatement pstU = con.prepareStatement(sqlUnidad);
+             java.sql.ResultSet rsU = pstU.executeQuery()) {
+            while (rsU.next()) {
+                cbUnidad.addItem(rsU.getString("nombre"));
+            }
+        }
+
+    } catch (java.sql.SQLException e) {
+        javax.swing.JOptionPane.showMessageDialog(this, "Error al consultar la BD: " + e.getMessage(), "Error SQL", javax.swing.JOptionPane.ERROR_MESSAGE);
+    }
+
+    // Seleccionar por defecto lo que ya tiene el producto seleccionado
+    if (((javax.swing.DefaultComboBoxModel<String>) cbPresentacion.getModel()).getIndexOf(presentacionActual) == -1 && !presentacionActual.isEmpty()) {
+        cbPresentacion.addItem(presentacionActual);
+    }
+    cbPresentacion.setSelectedItem(presentacionActual);
+
+    if (((javax.swing.DefaultComboBoxModel<String>) cbUnidad.getModel()).getIndexOf(unidadActual) == -1 && !unidadActual.isEmpty()) {
+        cbUnidad.addItem(unidadActual);
+    }
+    cbUnidad.setSelectedItem(unidadActual);
+
+    // 3. CAMPOS RESTANTES DEL FORMULARIO
+    javax.swing.JTextField txtNombre = new javax.swing.JTextField(nombreActual, 20);
+    javax.swing.JTextField txtCosto = new javax.swing.JTextField(String.valueOf(costoActual), 10);
+    javax.swing.JTextField txtPrecio = new javax.swing.JTextField(String.valueOf(precioActual), 10);
+    javax.swing.JTextField txtStock = new javax.swing.JTextField(String.valueOf(stockActual), 10);
+    javax.swing.JTextField txtMinimo = new javax.swing.JTextField(String.valueOf(minimoActual), 10);
+
+    // 4. MAQUETACIÓN EN EL PANEL
+    javax.swing.JPanel panelEdicion = new javax.swing.JPanel(new java.awt.GridLayout(0, 2, 10, 10));
+    panelEdicion.add(new javax.swing.JLabel("Nombre:"));
+    panelEdicion.add(txtNombre);
+    panelEdicion.add(new javax.swing.JLabel("Presentación:"));
+    panelEdicion.add(cbPresentacion);
+    panelEdicion.add(new javax.swing.JLabel("Unidad de Medida:"));
+    panelEdicion.add(cbUnidad);
+    panelEdicion.add(new javax.swing.JLabel("Precio Origen / Costo ($):"));
+    panelEdicion.add(txtCosto);
+    panelEdicion.add(new javax.swing.JLabel("Precio Venta ($):"));
+    panelEdicion.add(txtPrecio);
+    panelEdicion.add(new javax.swing.JLabel("Stock actual:"));
+    panelEdicion.add(txtStock);
+    panelEdicion.add(new javax.swing.JLabel("Stock Mínimo:"));
+    panelEdicion.add(txtMinimo);
+
+    // 5. MOSTRAR DIÁLOGO
+    int resultado = javax.swing.JOptionPane.showConfirmDialog(
+        this, panelEdicion, "Modificar / Editar Producto (ID: " + idArticulo + ")",
+        javax.swing.JOptionPane.OK_CANCEL_OPTION, javax.swing.JOptionPane.PLAIN_MESSAGE
+    );
+
+    // 6. GUARDAR CAMBIOS CON SUBCONSULTA PARA idMedida
+    if (resultado == javax.swing.JOptionPane.OK_OPTION) {
+        String nuevoNombre = txtNombre.getText().trim();
+        String nuevaPresentacion = cbPresentacion.getSelectedItem() != null ? cbPresentacion.getSelectedItem().toString().trim() : "";
+        String nuevaUnidad = cbUnidad.getSelectedItem() != null ? cbUnidad.getSelectedItem().toString().trim() : "";
+
+        if (nuevoNombre.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, "El nombre no puede estar vacío.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        try {
-            int idArticulo = Integer.parseInt(tablaInventario.getValueAt(filaSeleccionada, 0).toString());
-            String nombreActual = tablaInventario.getValueAt(filaSeleccionada, 1).toString();
-            double costoActual = Double.parseDouble(tablaInventario.getValueAt(filaSeleccionada, 3).toString().replace("$", "").trim());
-            double precioActual = Double.parseDouble(tablaInventario.getValueAt(filaSeleccionada, 4).toString().replace("$", "").trim());
-            double stockActual = Double.parseDouble(tablaInventario.getValueAt(filaSeleccionada, 5).toString());
-            double minimoActual = Double.parseDouble(tablaInventario.getValueAt(filaSeleccionada, 6).toString());
+        double nuevoCosto = Double.parseDouble(txtCosto.getText().replace("$", "").trim());
+        double nuevoPrecio = Double.parseDouble(txtPrecio.getText().replace("$", "").trim());
+        int nuevoStock = (int) Double.parseDouble(txtStock.getText().trim());
+        int nuevoMinimo = (int) Double.parseDouble(txtMinimo.getText().trim());
 
-            javax.swing.JTextField txtNombre = new javax.swing.JTextField(nombreActual, 20);
-            javax.swing.JTextField txtCosto = new javax.swing.JTextField(String.valueOf(costoActual), 10);
-            javax.swing.JTextField txtPrecio = new javax.swing.JTextField(String.valueOf(precioActual), 10);
-            javax.swing.JTextField txtStock = new javax.swing.JTextField(String.valueOf(stockActual), 10);
-            javax.swing.JTextField txtMinimo = new javax.swing.JTextField(String.valueOf(minimoActual), 10);
+        // UPDATE adaptado a la estructura de tu BD (usando descripcion e idMedida)
+        String sqlUpdate = """
+            UPDATE Articulo SET 
+                nombre = ?, 
+                descripcion = ?, 
+                idMedida = (SELECT idMedida FROM UnidadMedida WHERE nombre = ?), 
+                precio_Origen = ?, 
+                precio_Venta = ?, 
+                stock = ?, 
+                stockMinimo = ? 
+            WHERE articulo_id = ?
+            """;
+        
+        try (java.sql.Connection con = MODELO.ConexionBD.conectar();
+             java.sql.PreparedStatement pst = con.prepareStatement(sqlUpdate)) {
+            
+            pst.setString(1, nuevoNombre);
+            pst.setString(2, nuevaPresentacion);
+            pst.setString(3, nuevaUnidad);
+            pst.setDouble(4, nuevoCosto);
+            pst.setDouble(5, nuevoPrecio);
+            pst.setInt(6, nuevoStock);
+            pst.setInt(7, nuevoMinimo);
+            pst.setInt(8, idArticulo);
+            
+            pst.executeUpdate();
 
-            javax.swing.JPanel panelEdicion = new javax.swing.JPanel(new java.awt.GridLayout(0, 2, 10, 10));
-            panelEdicion.add(new javax.swing.JLabel("Nombre:"));
-            panelEdicion.add(txtNombre);
-            panelEdicion.add(new javax.swing.JLabel("Precio Origen ($):"));
-            panelEdicion.add(txtCosto);
-            panelEdicion.add(new javax.swing.JLabel("Precio Venta ($):"));
-            panelEdicion.add(txtPrecio);
-            panelEdicion.add(new javax.swing.JLabel("Stock actual:"));
-            panelEdicion.add(txtStock);
-            panelEdicion.add(new javax.swing.JLabel("Stock Mínimo:"));
-            panelEdicion.add(txtMinimo);
+            javax.swing.JOptionPane.showMessageDialog(this, "¡Producto modificado correctamente!");
+            
+            // Recargar la tabla usando tu ProductoDAO
+            new CONTROLADOR.ProductoDAO().listarProductosEnTabla(tablaInventario);
 
-            int resultado = javax.swing.JOptionPane.showConfirmDialog(
-                this, panelEdicion, "Modificar / Editar Producto (ID: " + idArticulo + ")",
-                javax.swing.JOptionPane.OK_CANCEL_OPTION, javax.swing.JOptionPane.PLAIN_MESSAGE
-            );
-
-            if (resultado == javax.swing.JOptionPane.OK_OPTION) {
-                String nuevoNombre = txtNombre.getText().trim();
-                double nuevoCosto = Double.parseDouble(txtCosto.getText().trim());
-                double nuevoPrecio = Double.parseDouble(txtPrecio.getText().trim());
-                double nuevoStock = Double.parseDouble(txtStock.getText().trim());
-                double nuevoMinimo = Double.parseDouble(txtMinimo.getText().trim());
-
-                if (nuevoNombre.isEmpty()) {
-                    javax.swing.JOptionPane.showMessageDialog(this, "El nombre no puede estar vacío.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                String sql = "UPDATE Articulo SET nombre = ?, precio_Origen = ?, precio_Venta = ?, stock = ?, stockMinimo = ? WHERE articulo_id = ?";
-                try (java.sql.Connection con = MODELO.ConexionBD.conectar();
-                     java.sql.PreparedStatement pst = con.prepareStatement(sql)) {
-                    
-                    pst.setString(1, nuevoNombre);
-                    pst.setDouble(2, nuevoCosto);
-                    pst.setDouble(3, nuevoPrecio);
-                    pst.setDouble(4, nuevoStock);
-                    pst.setDouble(5, nuevoMinimo);
-                    pst.setInt(6, idArticulo);
-                    
-                    pst.executeUpdate();
-
-                    javax.swing.JOptionPane.showMessageDialog(this, "¡Producto modificado correctamente!");
-                    cargarTablaInventario();
-
-                } catch (java.sql.SQLException e) {
-                    javax.swing.JOptionPane.showMessageDialog(this, "Error al actualizar la base de datos: " + e.getMessage(), "Error SQL", javax.swing.JOptionPane.ERROR_MESSAGE);
-                }
-            }
-
-        } catch (NumberFormatException e) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Por favor, ingresa valores numéricos válidos.", "Error de formato", javax.swing.JOptionPane.ERROR_MESSAGE);
+        } catch (java.sql.SQLException e) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Error al actualizar la base de datos: " + e.getMessage(), "Error SQL", javax.swing.JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+} catch (NumberFormatException e) {
+    javax.swing.JOptionPane.showMessageDialog(this, "Por favor, ingresa valores numéricos válidos en los campos de costo, precio y stock.", "Error de formato", javax.swing.JOptionPane.ERROR_MESSAGE);
+}
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-      javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
-        fileChooser.setDialogTitle("Guardar reporte de inventario como...");
-        fileChooser.setSelectedFile(new java.io.File("Inventario_SoftGira.csv"));
+if (tablaInventario.getRowCount() == 0) {
+        javax.swing.JOptionPane.showMessageDialog(this, "La tabla de inventario está vacía. No hay datos para exportar.", "Advertencia", javax.swing.JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+    fileChooser.setDialogTitle("Guardar reporte de inventario...");
+    fileChooser.setSelectedFile(new java.io.File("Reporte_Inventario.xls"));
+
+    int userSelection = fileChooser.showSaveDialog(this);
+
+    if (userSelection == javax.swing.JFileChooser.APPROVE_OPTION) {
+        java.io.File archivoToSave = fileChooser.getSelectedFile();
         
-        int userSelection = fileChooser.showSaveDialog(this);
-        
-        if (userSelection == javax.swing.JFileChooser.APPROVE_OPTION) {
-            java.io.File archivoToSave = fileChooser.getSelectedFile();
-            
-            try (java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(archivoToSave))) {
-                DefaultTableModel modelo = (DefaultTableModel) tablaInventario.getModel();
-                int numCols = modelo.getColumnCount();
-                int numRows = modelo.getRowCount();
-                
-                for (int i = 0; i < numCols; i++) {
-                    pw.print(modelo.getColumnName(i) + (i == numCols - 1 ? "" : ","));
-                }
-                pw.println();
-                
-                for (int i = 0; i < numRows; i++) {
-                    for (int j = 0; j < numCols; j++) {
-                        Object valor = modelo.getValueAt(i, j);
-                        pw.print((valor != null ? valor.toString() : "") + (j == numCols - 1 ? "" : ","));
-                    }
-                    pw.println();
-                }
-                
-                javax.swing.JOptionPane.showMessageDialog(this, "¡Inventario exportado exitosamente! 📊");
-                
-            } catch (java.io.IOException e) {
-                javax.swing.JOptionPane.showMessageDialog(this, "Error al exportar el archivo: " + e.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
-            }
+        String ruta = archivoToSave.getAbsolutePath();
+        if (!ruta.endsWith(".xls") && !ruta.endsWith(".xlsx")) {
+            archivoToSave = new java.io.File(ruta + ".xls");
         }
+
+        try (java.io.PrintWriter pw = new java.io.PrintWriter(
+                new java.io.OutputStreamWriter(
+                    new java.io.FileOutputStream(archivoToSave), java.nio.charset.StandardCharsets.UTF_8))) {
+
+            javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) tablaInventario.getModel();
+            int numCols = modelo.getColumnCount();
+            int numRows = modelo.getRowCount();
+
+            pw.println("<!DOCTYPE html>");
+            pw.println("<html><head><meta charset='UTF-8'></head><body>");
+            pw.println("<table border='1' style='border-collapse: collapse; font-family: Arial, sans-serif;'>");
+            
+            // 1. TÍTULO GIGANTE Y CENTRADO
+            pw.println("<tr height='55'>");
+            pw.println("  <td colspan='" + numCols + "' align='center' bgcolor='#1e1e38' style='background-color: #1e1e38; color: #ffffff; font-size: 20pt; font-weight: bold; vertical-align: middle;'>");
+            pw.println("    PANEL DE INVENTARIO - REPORTE GENERAL");
+            pw.println("  </td>");
+            pw.println("</tr>");
+
+            // 2. ENCABEZADOS CON ANCHO PERSONALIZADO PARA CADA COLUMNA
+            pw.println("<tr height='35'>");
+            for (int i = 0; i < numCols; i++) {
+                String colName = modelo.getColumnName(i);
+                String ancho = getAnchoColumna(colName);
+                pw.println("  <th width='" + ancho + "' bgcolor='#334155' style='background-color: #334155; color: #ffffff; font-size: 11pt; font-weight: bold; text-align: center; vertical-align: middle; width: " + ancho + "px;'>");
+                pw.println("    " + colName);
+                pw.println("  </th>");
+            }
+            pw.println("</tr>");
+
+            // 3. FILAS DE DATOS CON FORMATO Y SEMÁFORO DIRECTO
+            for (int i = 0; i < numRows; i++) {
+                String bgFila = (i % 2 == 0) ? "#ffffff" : "#f8fafc";
+                pw.println("<tr height='28'>");
+
+                for (int j = 0; j < numCols; j++) {
+                    String colName = modelo.getColumnName(j).toLowerCase();
+                    Object val = modelo.getValueAt(i, j);
+                    String texto = (val != null) ? val.toString().trim() : "";
+
+                    // COLUMNA DE ESTADO (SEMÁFORO)
+                    if (colName.contains("estado")) {
+                        String colorBg = "#e0e0e0";
+                        String colorTexto = "#000000";
+
+                        if (texto.equalsIgnoreCase("Disponible")) {
+                            colorBg = "#2e7d32"; // Verde
+                            colorTexto = "#ffffff";
+                        } else if (texto.equalsIgnoreCase("Por Agotarse") || texto.equalsIgnoreCase("Bajo Stock")) {
+                            colorBg = "#f57f17"; // Amarillo / Naranja
+                            colorTexto = "#ffffff";
+                        } else if (texto.equalsIgnoreCase("Agotado")) {
+                            colorBg = "#c62828"; // Rojo
+                            colorTexto = "#ffffff";
+                        }
+
+                        pw.println("  <td align='center' bgcolor='" + colorBg + "' style='background-color: " + colorBg + "; color: " + colorTexto + "; font-weight: bold; text-align: center; vertical-align: middle;'>");
+                        pw.println("    " + texto);
+                        pw.println("  </td>");
+
+                    } else if (colName.contains("costo") || colName.contains("venta") || colName.contains("precio")) { 
+                        // Formato de moneda alineado a la derecha
+                        double valorNum = 0;
+                        try {
+                            valorNum = Double.parseDouble(texto.replace("$", "").replaceAll(",", ""));
+                        } catch (Exception e) {}
+                        pw.println("  <td align='right' bgcolor='" + bgFila + "' style='background-color: " + bgFila + "; text-align: right; vertical-align: middle;'>");
+                        pw.println("    $" + String.format("%.2f", valorNum));
+                        pw.println("  </td>");
+
+                    } else if (colName.contains("código") || colName.contains("codigo") || colName.contains("unidad") || colName.contains("stock") || colName.contains("mínimo") || colName.contains("minimo")) { 
+                        // Celdas centradas
+                        pw.println("  <td align='center' bgcolor='" + bgFila + "' style='background-color: " + bgFila + "; text-align: center; vertical-align: middle;'>");
+                        pw.println("    " + texto);
+                        pw.println("  </td>");
+
+                    } else {
+                        // Producto y Presentación alineados a la izquierda
+                        pw.println("  <td align='left' bgcolor='" + bgFila + "' style='background-color: " + bgFila + "; text-align: left; vertical-align: middle;'>");
+                        pw.println("    " + texto);
+                        pw.println("  </td>");
+                    }
+                }
+                pw.println("</tr>");
+            }
+
+            pw.println("</table></body></html>");
+
+            javax.swing.JOptionPane.showMessageDialog(this, "¡Inventario exportado exitosamente con formato profesional! 📊");
+
+        } catch (java.io.IOException e) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Error al exportar el archivo: " + e.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}
+
+// MÉTODO AUXILIAR PARA DETERMINAR EL ANCHO DE CADA COLUMNA EN LIBREOFFICE
+private String getAnchoColumna(String nombreColumna) {
+    String col = nombreColumna.toLowerCase();
+    if (col.contains("código") || col.contains("codigo")) return "70";
+    if (col.contains("producto")) return "230";
+    if (col.contains("presentación") || col.contains("presentacion")) return "170";
+    if (col.contains("unidad")) return "90";
+    if (col.contains("costo") || col.contains("venta") || col.contains("precio")) return "100";
+    if (col.contains("stock") || col.contains("mínimo") || col.contains("minimo")) return "80";
+    if (col.contains("estado")) return "130";
+    return "120";
+
     }//GEN-LAST:event_jButton4ActionPerformed
 
     /**
@@ -492,10 +665,21 @@ int filaSeleccionada = tablaInventario.getSelectedRow();
        
     }
 
-    private void cargarTablaInventario() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+   private void cargarTablaInventario() {
+    // Definimos el modelo bloqueando celdas
+    DefaultTableModel modelo = new DefaultTableModel(
+        new Object[]{"Código", "Producto", "Presentación", "Unidad", "Costo", "P. Venta", "Stock", "Mínimo", "Estado"}, 0
+    ) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false; // Ninguna celda se podrá editar haciendo doble clic
+        }
+    };
 
+    // ... aquí haces tu consulta SQL y llenas las filas con modelo.addRow(...)
+
+    tablaInventario.setModel(modelo); // Asignas el modelo a la tabla
+}
  
   // Clase para renderizar los colores de semáforo en la columna de Estado
     public class SemaforoCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
