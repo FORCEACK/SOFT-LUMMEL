@@ -433,7 +433,7 @@ public static boolean cajaAbierta = false;
             jPanel5.setEnabled(false); // Finanzas
             jPanel6.setEnabled(false); // Compras
             jPanel7.setEnabled(false); // Usuarios
-            jPanel8.setEnabled(false); // Soporte
+           
             
         }
     }

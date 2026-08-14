@@ -9,10 +9,14 @@ public class ConexionBD {
 
     // Centralizamos las credenciales aquí (Variables globales, privadas y estáticas)
     //private static final String url = "jdbc:mysql://192.168.0.11:3306/lummel_db";
-    private static final String url = "jdbc:mysql://26.91.85.79:3306/lummel_db";
-    private static final String user = "robot";
-    private static final String pass = "basededatos12345"; 
+//    private static final String url = "jdbc:mysql://26.91.85.79:3306/lummel_db";
+//    private static final String user = "robot";
+//    private static final String pass = "basededatos12345"; 
 
+    private static final String url = "jdbc:mysql://localhost:3306/lummel_db";
+private static final String user = "root"; 
+private static final String pass = "";
+    
     // Método ESTÁTICO que permite ser llamado directamente como ConexionBD.conectar()
     public static Connection conectar() {
         Connection con = null;

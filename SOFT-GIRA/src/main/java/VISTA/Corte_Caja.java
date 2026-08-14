@@ -178,11 +178,6 @@ public Corte_Caja(java.awt.Frame parent, boolean modal) {
                 .addGap(25, 25, 25)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblTotalVentaDia, javax.swing.GroupLayout.DEFAULT_SIZE, 241, Short.MAX_VALUE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLabel4)
@@ -196,13 +191,18 @@ public Corte_Caja(java.awt.Frame parent, boolean modal) {
                                 .addComponent(jLabel3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                        .addGap(0, 108, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblVentasTarjetas, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(19, 19, 19)
                 .addComponent(jLabel7)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblVentasTarjetas, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(71, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblTotalVentaDia, javax.swing.GroupLayout.DEFAULT_SIZE, 241, Short.MAX_VALUE)
+                .addGap(4, 4, 4))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -219,15 +219,15 @@ public Corte_Caja(java.awt.Frame parent, boolean modal) {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(txtRetiros, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(76, 76, 76)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel6)
-                    .addComponent(lblTotalVentaDia, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(12, 12, 12)
+                .addGap(72, 72, 72)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel7)
+                    .addComponent(jLabel6)
                     .addComponent(lblVentasTarjetas, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(16, 16, 16)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(lblTotalVentaDia, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(61, Short.MAX_VALUE))
         );
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, 440, 390));
@@ -747,10 +747,14 @@ try {
     // =========================================================================
     // 3. CONSTRUCCIÓN DEL TICKET E IMPRESIÓN
     // =========================================================================
-    try {
-        Runtime.getRuntime().exec("cancel -a Ticketera");
-    } catch (Exception ex) {
-        // Ignorar si no existe el comando en el SO
+    // Limpieza de cola solo si se ejecuta en sistemas Linux/Unix (evita error en Windows)
+    String os = System.getProperty("os.name").toLowerCase();
+    if (os.contains("nix") || os.contains("nux") || os.contains("aix")) {
+        try {
+            Runtime.getRuntime().exec("cancel -a Ticketera");
+        } catch (Exception ex) {
+            // Ignorar si no existe el comando en el SO
+        }
     }
 
     StringBuilder ticket = new StringBuilder();
@@ -763,15 +767,15 @@ try {
     ticket.append("Cajero ID: ").append(idUsuario).append("\n");
     ticket.append("--------------------------------\n");
     
-    ticket.append(String.format("Fondo Inicial:     $%10.2f\n", fondoInicial));
-    ticket.append(String.format("Ventas Efectivo:   $%10.2f\n", ventasEfectivo));
-    ticket.append(String.format("Ventas Tarjeta:    $%10.2f\n", ventasTarjeta));
-    ticket.append(String.format("Retiros / Entregas:$%10.2f\n", retiros));
+    ticket.append(String.format("Fondo Inicial:      $%10.2f\n", fondoInicial));
+    ticket.append(String.format("Ventas Efectivo:    $%10.2f\n", ventasEfectivo));
+    ticket.append(String.format("Ventas Tarjeta:     $%10.2f\n", ventasTarjeta));
+    ticket.append(String.format("Retiros / Entregas: $%10.2f\n", retiros));
     ticket.append("--------------------------------\n");
-    ticket.append(String.format("Total Esperado:    $%10.2f\n", totalEsperado));
-    ticket.append(String.format("Total Contado:     $%10.2f\n", totalContado));
+    ticket.append(String.format("Total Esperado:     $%10.2f\n", totalEsperado));
+    ticket.append(String.format("Total Contado:      $%10.2f\n", totalContado));
     ticket.append("--------------------------------\n");
-    ticket.append(String.format("Diferencia:        $%10.2f\n", diferencia));
+    ticket.append(String.format("Diferencia:         $%10.2f\n", diferencia));
     ticket.append("================================\n");
     ticket.append("   ¡CORTE GENERADO CON ÉXITO!   \n");
     ticket.append("\n\n\n\n");
@@ -791,7 +795,15 @@ try {
 
     if (impresoraTicketera != null) {
         javax.print.DocPrintJob trabajo = impresoraTicketera.createPrintJob();
-        byte[] bytesTicket = ticket.toString().getBytes("ISO-8859-1");
+        
+        // Asignación de codificación CP850 para mejor manejo de acentos/caracteres en Windows
+        byte[] bytesTicket;
+        try {
+            bytesTicket = ticket.toString().getBytes("CP850");
+        } catch (java.io.UnsupportedEncodingException ex) {
+            bytesTicket = ticket.toString().getBytes("ISO-8859-1");
+        }
+
         javax.print.Doc doc = new javax.print.SimpleDoc(bytesTicket, javax.print.DocFlavor.BYTE_ARRAY.AUTOSENSE, null);
         trabajo.print(doc, null);
     } else {
@@ -862,6 +874,9 @@ try {
         "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
 }
     }
+// =========================================================================
+// MÉTODOS AUXILIARES DE LA CLASE
+// =========================================================================
 private double parsearDobleSafe(String texto) {
     if (texto == null) return 0.0;
     String limpio = texto.replaceAll("[^0-9.-]", "").trim();
@@ -871,6 +886,8 @@ private double parsearDobleSafe(String texto) {
     } catch (NumberFormatException e) {
         return 0.0;
     }
+
+
 
     }//GEN-LAST:event_jButton2ActionPerformed
 // --- MÉTODO PARA ESCUCHAR CUANDO EL USUARIO ESCRIBE ---

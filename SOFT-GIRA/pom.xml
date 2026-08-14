@@ -8,12 +8,59 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-  <build>
+    <build>
         <plugins>
+            <!-- Plugin del compilador -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
+            </plugin>
+
+            <!-- Configuración del MANIFEST para la carpeta lib/ -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>SoftGira.SOFTGIRA</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <!-- Plugin para generar SOFT-GIRA.exe -->
+            <plugin>
+                <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                <artifactId>launch4j-maven-plugin</artifactId>
+                <version>2.4.1</version>
+                <executions>
+                    <execution>
+                        <id>l4j-gui</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>launch4j</goal>
+                        </goals>
+                        <configuration>
+                            <headerType>gui</headerType>
+                            <outfile>target/SOFT-GIRA.exe</outfile>
+                            <jar>target/SOFT-GIRA-1.0-SNAPSHOT.jar</jar>
+                            <errTitle>Error al iniciar SOFT-GIRA</errTitle>
+                            <classPath>
+                                <mainClass>SoftGira.SOFTGIRA</mainClass>
+                                <addDependencies>true</addDependencies>
+                                <preclasspath>lib/</preclasspath>
+                            </classPath>
+                            <jre>
+                                <minVersion>21.0.0</minVersion>
+                            </jre>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -50,18 +97,19 @@
             <artifactId>jcalendar</artifactId>
             <version>1.4</version>
         </dependency>
-        <!-- Librería para crear Excel -->
-<dependency>
-    <groupId>org.apache.poi</groupId>
-    <artifactId>poi-ooxml</artifactId>
-    <version>5.2.3</version>
-</dependency>
 
-<!-- Librería para crear PDF -->
-<dependency>
-    <groupId>com.itextpdf</groupId>
-    <artifactId>itextpdf</artifactId>
-    <version>5.5.13.3</version>
-</dependency>
+        <!-- Librería para crear Excel -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.3</version>
+        </dependency>
+
+        <!-- Librería para crear PDF -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itextpdf</artifactId>
+            <version>5.5.13.3</version>
+        </dependency>
     </dependencies>
 </project>
